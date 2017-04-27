@@ -1,0 +1,2 @@
+# -*- mode: cmake -*-
+git_subproject(manco git@gitlab.gmrv.es:retrieval/manco.git syncXml)
