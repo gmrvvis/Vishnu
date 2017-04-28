@@ -3,6 +3,7 @@
 
 #include <QPushButton>
 #include <QProcess>
+#include <manco/manco.h>
 
 namespace vishnu
 {
@@ -10,6 +11,7 @@ namespace vishnu
     {
     public:
         Application( std::string appName, std::string appPath);
+        //Application( manco::ApplicationType appName, std::string appPath);
         ~Application( );
         std::string getLauncherCmd( );
         QPushButton* getPushButton( );

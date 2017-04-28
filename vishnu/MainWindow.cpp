@@ -21,8 +21,8 @@ namespace vishnu
       connect( ui->buttonLoadXml, SIGNAL( clicked( bool ) ), this, SLOT( buttonLoadXml_clicked( ) ) );
 
       addAppToMap( APICOLAT, "gnome-terminal" );
-      addAppToMap( CLINT, "libreoffice" );
-      addAppToMap( SPINERET, "gedit" );
+      addAppToMap( CLINT, "/home/gbayo/dev/ClintExplorer/build/bin/ClintExplorer" );
+      addAppToMap( SPINERET, "/home/gbayo/dev/spineret/build/bin/CellExplorer" );
 
       for ( const auto& app : _loadedApps )
       {
@@ -151,7 +151,8 @@ namespace vishnu
         std::cout << "Opening... " << appButton->objectName().toStdString() << std::endl;
 
         QString program = QString::fromStdString( _loadedApps.at( appName )->getLauncherCmd() );
-        QStringList arguments; //arguments << "-f" << "";
+        QStringList arguments;
+        arguments << "-x" << ui->xmlFilename->text();
 
         appButton->setEnabled( false );
 
@@ -168,7 +169,7 @@ namespace vishnu
           connect( _loadedApps.at( appName ), SIGNAL( finished ( int , QProcess::ExitStatus ) ),
             this, SLOT( app_closed( int , QProcess::ExitStatus ) ) );
 
-            addGroupToGrid( "testName", appName ); //TESTING
+            //addGroupToGrid( "testName", appName ); //TESTING
           }
           else
           {
@@ -194,7 +195,7 @@ namespace vishnu
     QLabel* ownerNameLabel = new QLabel( QString::fromStdString( owner ) );
     QPushButton* closeButton = new QPushButton(/*QString( "Close" )*/);
 
-    QPixmap pixmap( QString("../vishnu/iconClose.png") );
+    QPixmap pixmap( QString("/home/gbayo/dev/vishnu/vishnu/iconClose.png") );
     QIcon icon( pixmap );
     closeButton->setIcon( icon );
     closeButton->setIconSize( QSize ( 24, 24 ) );
