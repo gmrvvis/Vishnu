@@ -5,6 +5,7 @@
 #include <QPushButton>
 #include <QProcess>
 #include "Application.h"
+#include "SyncGroup.h"
 
 #define APICOLAT "APICOLAT"
 #define CLINT "CLINT"
@@ -33,8 +34,10 @@ namespace vishnu
       explicit MainWindow( QWidget *parent = 0 );
       ~MainWindow();
 
+
   protected:
       void closeEvent( QCloseEvent *event ) override;
+
 
   private slots:
       void buttonLoadXml_clicked( );
@@ -42,12 +45,18 @@ namespace vishnu
       void app_closed( int exitCode, QProcess::ExitStatus exitStatus );
       void checkAppsOK( );
       void closeGroup_clicked( );
+      void addGroupToGrid( QString groupName, QString owner );
 
   private:
       vishnu::Ui::MainWindow *ui;
       std::map< std::string, Application* > _loadedApps;
       void addAppToMap( std::string appName, std::string appPath );
-      void addGroupToGrid( std::string groupName, std::string owner );
+
+      void receivedSyncGroup( zeroeq::gmrv::ConstSyncGroupPtr o );
+      std::vector<SyncGroup*> _syncGroups;
+
+  signals:
+    void signalCreateGroup( QString, QString );
   };
 
 }

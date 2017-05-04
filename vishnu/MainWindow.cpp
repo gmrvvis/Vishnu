@@ -11,28 +11,91 @@
 
 namespace vishnu
 {
+  std::vector<std::string> split( const std::string& str, const std::string& delimiter )
+  {
+    std::string s = str;
+    std::vector< std::string > v;
+    size_t pos = 0;
+    std::string token;
+    while ( ( pos = s.find( delimiter ) ) != std::string::npos )
+    {
+      token = s.substr( 0, pos );
+      v.push_back( token );
+      s.erase( 0, pos + delimiter.length( ) );
+    }
+    v.push_back(s);
+    return v;
+  }
+
+  void MainWindow::receivedSyncGroup( zeroeq::gmrv::ConstSyncGroupPtr o )
+  {
+    std::vector<unsigned int> color = o->getColorVector( );
+    std::cout << "Received SyncGroup (" <<
+                 "\n\tkey: " << o->getKeyString( ) <<
+                 "\n\tname: " << o->getNameString( ) <<
+                 "\n\towner: " << o->getOwnerString( ) <<
+                 "\n\tcolor: (" << color[0] << ", " << color[1] << ", "  << color[2] << ")" <<
+                 "\n\tids: "; //<< o->getIdsString( ) << ")";
+    std::vector< std::string > vectorIds = split( o->getIdsString( ), DELIMITER );
+    for ( auto it = vectorIds.begin(); it != vectorIds.end(); ++it )
+    {
+      std::cout << *it << ' ';
+    }
+    std::cout << ")" << std::endl;
+
+
+    SyncGroup* syncGroup = new SyncGroup( o->getKeyString( ),
+            o->getNameString( ),
+            o->getOwnerString( ),
+            vectorIds,
+            color[0],
+            color[1],
+            color[2]
+    );
+
+    _syncGroups.push_back( syncGroup );
+    emit signalCreateGroup(
+                QString::fromStdString(syncGroup->getName( ) ),
+                QString::fromStdString( syncGroup->getOwner( ) ) );
+  }
 
   MainWindow::MainWindow( QWidget *parent )
       : QMainWindow( parent )
       , ui( new Ui::MainWindow )
   {
-      ui->setupUi( this );     
+    ui->setupUi( this );
 
-      connect( ui->buttonLoadXml, SIGNAL( clicked( bool ) ), this, SLOT( buttonLoadXml_clicked( ) ) );
+    connect( ui->buttonLoadXml, SIGNAL( clicked( bool ) ), this, SLOT( buttonLoadXml_clicked( ) ) );
 
-      addAppToMap( APICOLAT, "gnome-terminal" );
-      addAppToMap( CLINT, "/home/gbayo/dev/ClintExplorer/build/bin/ClintExplorer" );
-      addAppToMap( SPINERET, "/home/gbayo/dev/spineret/build/bin/CellExplorer" );
+    addAppToMap( APICOLAT, "../../../apicolat/build/bin/apicolat" );
+    addAppToMap( CLINT,    "../../../ClintExplorer/build/bin/ClintExplorer" );
+    addAppToMap( SPINERET, "../../../spineret/build/bin/CellExplorer" );
 
-      for ( const auto& app : _loadedApps )
-      {
-          ui->verticalLayout_2->addWidget( app.second->getPushButton( ) );
-          connect( app.second->getPushButton( ), SIGNAL( clicked( bool ) ), this, SLOT( pushButtonApp_clicked( ) ) );
-      }
+    for ( const auto& app : _loadedApps )
+    {
+      ui->verticalLayout_2->addWidget( app.second->getPushButton( ) );
+      connect( app.second->getPushButton( ), SIGNAL( clicked( bool ) ), this, SLOT( pushButtonApp_clicked( ) ) );
+    }
 
-      setMaximumHeight(height());
+    //setMaximumHeight(height());
+    setFixedHeight(500);
 
-      //ui->gridLayout_3->setColumnStretch(2, 20);
+    //ui->gridLayout_3->setColumnStretch(2, 20);
+
+    connect(this, SIGNAL(signalCreateGroup( QString, QString )),
+            SLOT(addGroupToGrid(QString, QString)), Qt::QueuedConnection);
+
+    manco::ZeqManager::instance().init( "hbp://" );
+    std::this_thread::sleep_for( std::chrono::milliseconds(2500) );
+    //manco::ZeqManager::instance( ).setReceivedSyncXmlCallback( receivedSyncXml );
+    //manco::ZeqManager::instance( ).setReceivedDestroyGroupCallback( receivedDestroyGroup );
+    //manco::ZeqManager::instance( ).setReceivedChangeNameGroupUpdateCallback( receivedChangeNameGroup );
+    //manco::ZeqManager::instance( ).setReceivedSyncGroupCallback( receivedSyncGroup );
+    manco::ZeqManager::instance( ).setReceivedSyncGroupCallback(
+      std::bind( &MainWindow::receivedSyncGroup, this, std::placeholders::_1 ) );
+    //manco::ZeqManager::instance( ).setReceivedChangeColorUpdateCallback( receivedChangeColor );
+
+
   }
 
   MainWindow::~MainWindow( )
@@ -189,15 +252,14 @@ namespace vishnu
     _loadedApps[ appName ] = newApp;
   }
 
-  void MainWindow::addGroupToGrid( std::string groupName, std::string owner )
+  void MainWindow::addGroupToGrid( QString groupName, QString owner )
   {
-    QLabel* groupNameLabel = new QLabel( QString::fromStdString( groupName ) );
-    QLabel* ownerNameLabel = new QLabel( QString::fromStdString( owner ) );
+    QLabel* groupNameLabel = new QLabel( groupName );
+    QLabel* ownerNameLabel = new QLabel(  owner );
     QPushButton* closeButton = new QPushButton(/*QString( "Close" )*/);
 
-    QPixmap pixmap( QString("/home/gbayo/dev/vishnu/vishnu/iconClose.png") );
-    QIcon icon( pixmap );
-    closeButton->setIcon( icon );
+    QPixmap image( ":/icons/iconClose.png" );
+    closeButton->setIcon( QIcon( image ) );
     closeButton->setIconSize( QSize ( 24, 24 ) );
    // closeButton->setIconSize( pixmap.rect( ).size( ) );
     //closeButton->setFixedSize( pixmap.rect( ).size( ) );

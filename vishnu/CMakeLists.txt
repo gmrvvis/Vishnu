@@ -18,12 +18,14 @@ set(VISHNU_SOURCES
   MainWindow.cpp
   main.cpp
   Application.cpp
+  SyncGroup.cpp
 )
 set(VISHNU_HEADERS
   ${PROJECT_BINARY_DIR}/include/vishnu/version.h
   MainWindow.ui
   MainWindow.h
   Application.h
+  SyncGroup.h
 )
 
 set(VISHNU_LINK_LIBRARIES

@@ -1,11 +1,17 @@
-#include "MainWindow.h"
 #include <QApplication>
+#include <QResource>
+
+#include "MainWindow.h"
 
 int main( int argc, char *argv[] )
 {
-    QApplication a( argc, argv );
-    vishnu::MainWindow w;
-    w.show( );
+  QApplication a( argc, argv );
+  vishnu::MainWindow w;
 
-    return a.exec( );
+  QResource::registerResource( "resources.rcc" );
+  w.setWindowTitle( QString::fromStdString( "Vishnu launcher" ) );
+
+  w.show( );
+
+  return a.exec( );
 }
