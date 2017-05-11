@@ -19,13 +19,17 @@ set(VISHNU_SOURCES
   main.cpp
   Application.cpp
   SyncGroup.cpp
+  WidgetsGroup.cpp
 )
 set(VISHNU_HEADERS
   ${PROJECT_BINARY_DIR}/include/vishnu/version.h
   MainWindow.ui
   MainWindow.h
-  Application.h
-  SyncGroup.h
+  Application.hpp
+  SyncGroup.hpp
+  resources.qrc
+  WidgetsGroup.hpp
+  utils/Auxiliars.hpp
 )
 
 set(VISHNU_LINK_LIBRARIES

@@ -1,4 +1,4 @@
-#include "SyncGroup.h"
+#include "SyncGroup.hpp"
 
 namespace vishnu
 {
