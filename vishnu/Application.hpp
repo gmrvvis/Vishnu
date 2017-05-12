@@ -10,16 +10,15 @@ namespace vishnu
     class Application : public QProcess
     {
     public:
-        Application( std::string appName, std::string appPath);
-        //Application( manco::ApplicationType appName, std::string appPath);
+        Application( const std::string& appName, const std::string& shellExecPath );
         ~Application( );
-        std::string getLauncherCmd( );
-        QPushButton* getPushButton( );
+        std::string getShellExecPath( ) const;
+        QPushButton* getPushButton( ) const;
 
     private:
-        std::string _launcherCmd;
+        std::string _shellExecPath;
         QPushButton* _pushButton;
-        QString capitalize( const QString &string );
+        QString capitalize( const QString &string ) const;
     };
 }
 

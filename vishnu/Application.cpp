@@ -2,17 +2,17 @@
 
 namespace vishnu
 {
-    Application::Application( std::string appName, std::string appPath )
+    Application::Application( const std::string& appName, const std::string& shellExecPath )
     {
-        QString qName = QString::fromStdString( appName.c_str( ) );
-        _launcherCmd = appPath;
+        QString qName = QString::fromStdString( appName );
+        _shellExecPath = shellExecPath;
 
         #ifdef defined(_WIN32) || defined(WIN32)
             _launcherCmd += ".exe";
         #endif
 
       _pushButton = new QPushButton( capitalize( qName ) );
-      _pushButton->setObjectName( qName );
+      //_pushButton->setObjectName( qName );
       _pushButton->setEnabled( false );
 
     }
@@ -22,17 +22,17 @@ namespace vishnu
 
     }
 
-    std::string Application::getLauncherCmd( )
+    std::string Application::getShellExecPath( ) const
     {
-        return _launcherCmd;
+        return _shellExecPath;
     }
 
-    QPushButton* Application::getPushButton( )
+    QPushButton* Application::getPushButton( ) const
     {
         return _pushButton;
     }
 
-    QString Application::capitalize( const QString &string )
+    QString Application::capitalize( const QString &string ) const
     {
         QString tmp = string;
         tmp = tmp.toLower( );

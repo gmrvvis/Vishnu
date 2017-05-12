@@ -13,6 +13,7 @@
 #define SPINERET "SPINERET"
 
 #define DELIMITER "|&|"
+#define DEFAULT_ZEQ_SESSION "hbp://"
 
 namespace vishnu
 {
@@ -20,12 +21,6 @@ namespace vishnu
   {
     class MainWindow;
   }
-
-  struct AppProperty
-  {
-    std::string launcherCmd;
-    QPushButton* pushButton;
-  };
 
   class MainWindow : public QMainWindow
   {
@@ -42,27 +37,29 @@ namespace vishnu
     void buttonLoadXml_clicked( );
     void pushButtonApp_clicked( );
     void app_closed( int exitCode, QProcess::ExitStatus exitStatus );
-    void checkAppsOK( );
+    void checkApps( );
     void closeGroup_clicked( );
-    void addGroupToGrid( QString key );
-        void changeGroupName(QString qKey, QString qNewName );
+    void addGroup( const QString& qKey );
+    void changeGroupName( const QString& qKey, const QString& qNewName );
+    void removeGroup( const QString& qKey, const bool& askFirst = false );
 
   private:
-    vishnu::Ui::MainWindow *ui;
-    std::map< std::string, Application* > _loadedApps;
-    std::map<std::string, SyncGroup*> _syncGroups;
-    std::map<std::string, WidgetsGroup*> _widgetsGroups;
+    vishnu::Ui::MainWindow *_ui;
+    std::string _zeqSession;
+    std::map<std::string, Application*> _apps; //appName, Application
+    std::map<std::string, SyncGroup*> _syncGroups; //key, SyncGroup
+    std::map<std::string, WidgetsGroup*> _widgetsGroups; //key, WidgetsGroup
 
-    void addAppToMap( const std::string& appName, const std::string& appPath );
-    void removeRowGroup( const std::string& key, const bool& askFirst = false );
-
+    void addApp( const std::string& appName, const std::string& appPath );
     void receivedSyncGroup( zeroeq::gmrv::ConstSyncGroupPtr o );
-    void receivedChangeNameGroupUpdate( zeroeq::gmrv::ConstChangeNameGroupPtr o);
-    void receivedDestroyGroup( zeroeq::gmrv::ConstDestroyGroupPtr o);
+    void receivedChangeNameGroupUpdate( zeroeq::gmrv::ConstChangeNameGroupPtr o );
+    void receivedDestroyGroup( zeroeq::gmrv::ConstDestroyGroupPtr o );
 
   signals:
-    void signalCreateGroup( QString );
-    void signalChangeGroupName( QString, QString );
+    void signalCreateGroup( const QString& );
+    void signalChangeGroupName( const QString&, const QString& );
+    void signalRemoveGroup( const QString&, const bool& );
+
   };
 
 }
