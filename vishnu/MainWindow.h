@@ -12,8 +12,7 @@
 #define CLINT "CLINT"
 #define SPINERET "SPINERET"
 
-#define DELIMITER "|&|"
-#define DEFAULT_ZEQ_SESSION "hbp://"
+#define DEFAULT_ZEQ_SESSION "hbp://333"
 
 namespace vishnu
 {
@@ -38,10 +37,10 @@ namespace vishnu
     void pushButtonApp_clicked( );
     void app_closed( int exitCode, QProcess::ExitStatus exitStatus );
     void checkApps( );
-    void closeGroup_clicked( );
-    void addGroup( const QString& qKey );
+    void removeGroup_clicked( );
+    void createGroup( const QString& qKey );
     void changeGroupName( const QString& qKey, const QString& qNewName );
-    void removeGroup( const QString& qKey, const bool& askFirst = false );
+    void destroyGroup(const QString& qKey);
 
   private:
     vishnu::Ui::MainWindow *_ui;
@@ -50,6 +49,7 @@ namespace vishnu
     std::map<std::string, SyncGroup*> _syncGroups; //key, SyncGroup
     std::map<std::string, WidgetsGroup*> _widgetsGroups; //key, WidgetsGroup
 
+    void initZeqSession( );
     void addApp( const std::string& appName, const std::string& appPath );
     void receivedSyncGroup( zeroeq::gmrv::ConstSyncGroupPtr o );
     void receivedChangeNameGroupUpdate( zeroeq::gmrv::ConstChangeNameGroupPtr o );
@@ -58,7 +58,7 @@ namespace vishnu
   signals:
     void signalCreateGroup( const QString& );
     void signalChangeGroupName( const QString&, const QString& );
-    void signalRemoveGroup( const QString&, const bool& );
+    void signalDestroyGroup( const QString& );
 
   };
 

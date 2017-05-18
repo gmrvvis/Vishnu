@@ -15,6 +15,7 @@
 
 namespace vishnu
 {
+
   MainWindow::MainWindow( QWidget *parent )
     : QMainWindow( parent )
     , _ui( new Ui::MainWindow )
@@ -34,31 +35,21 @@ namespace vishnu
       connect( app.second->getPushButton( ), SIGNAL( clicked( bool ) ), this, SLOT( pushButtonApp_clicked( ) ) );
     }
 
-    //TODO:
+    //TODO: fix height
     //setMaximumHeight( height( ) );
     setFixedHeight( 500 );
 
     connect( this, SIGNAL( signalCreateGroup( const QString& ) ),
-      SLOT( addGroup( const QString& ) ), Qt::QueuedConnection );
+      SLOT( createGroup( const QString& ) ), Qt::QueuedConnection );
 
     connect( this, SIGNAL( signalChangeGroupName( const QString&, const QString& ) ),
       SLOT( changeGroupName( const QString&, const QString& ) ), Qt::QueuedConnection );
 
-    connect( this, SIGNAL( signalRemoveGroup( const QString&, const bool& ) ),
-      SLOT( removeGroup( const QString&, const bool& ) ), Qt::QueuedConnection );
+    connect( this, SIGNAL( signalDestroyGroup( const QString& ) ),
+      SLOT( destroyGroup( const QString& ) ), Qt::QueuedConnection );
 
-    //Zeq
-    manco::ZeqManager::instance( ).init( _zeqSession );
-    std::this_thread::sleep_for( std::chrono::milliseconds(2500) );
-
-    manco::ZeqManager::instance( ).setReceivedSyncGroupCallback(
-      std::bind( &MainWindow::receivedSyncGroup, this, std::placeholders::_1 ) );
-
-    manco::ZeqManager::instance( ).setReceivedChangeNameGroupUpdateCallback(
-      std::bind( &MainWindow::receivedChangeNameGroupUpdate, this, std::placeholders::_1 ) );
-
-    manco::ZeqManager::instance( ).setReceivedDestroyGroupCallback(
-      std::bind( &MainWindow::receivedDestroyGroup, this, std::placeholders::_1 ) );
+    //ZeqSession
+    initZeqSession( );
   }
 
   MainWindow::~MainWindow( )
@@ -146,13 +137,11 @@ namespace vishnu
   void MainWindow::pushButtonApp_clicked( )
   {
     QPushButton* appButton = qobject_cast< QPushButton* >( sender( ) );
-
     if ( !appButton )
     {
       std::cerr << "Error: App not found!" << std::endl;
       return;
     }
-
     std::string appName;
     Application* app;
     std::map< std::string, Application* >::iterator it;
@@ -165,13 +154,11 @@ namespace vishnu
         break;
       }
     }
-
     if ( appName == "" )
     {
       std::cerr << "Error: App not found!" << std::endl;
       return;
     }
-
     std::cout << "Opening " << appName << std::endl;
 
     QString program = QString::fromStdString( app->getShellExecPath( ) );
@@ -200,29 +187,7 @@ namespace vishnu
     }
   }
 
-  void MainWindow::addGroup(const QString &qKey )
-  {
-
-    std::string key = qKey.toStdString( );
-    auto syncGroup = _syncGroups.at( key );
-
-    //Add group to widgets groups
-    QLabel* nameLabel = new QLabel( QString::fromStdString( syncGroup->getName( ) ) );
-    QLabel* ownerLabel = new QLabel( QString::fromStdString( syncGroup->getOwner( ) ) );
-    QPushButton* closePushButton = new QPushButton( );
-    closePushButton->setIcon( QIcon( ":/icons/iconClose.png" ) );
-    _widgetsGroups[ key ] = new WidgetsGroup( nameLabel, ownerLabel, closePushButton );
-
-    //Add group to grid layout
-    _ui->groupsGridLayout->addWidget( nameLabel );
-    _ui->groupsGridLayout->addWidget( ownerLabel );
-    _ui->groupsGridLayout->addWidget( closePushButton );
-
-    //Add close push button event
-    connect( closePushButton, SIGNAL( clicked( bool ) ), this, SLOT( closeGroup_clicked( ) ) );
-  }
-
-  void MainWindow::closeGroup_clicked( )
+  void MainWindow::removeGroup_clicked( )
   {
     // Checks for XML loaded
     if ( _ui->xmlFilename->text( ) == QString( "" ) )
@@ -267,9 +232,37 @@ namespace vishnu
       return;
     }
 
-    // If XML loaded && owner app closed
-    // true asks for remove row group confirmation
-    removeGroup( QString::fromStdString( key ), true );
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::warning(this, "Remove group", "Do you want to remove '" +
+      QString::fromStdString( key ) + "'' group?", QMessageBox::Yes|QMessageBox::No);
+    if ( reply == QMessageBox::Yes )
+    {
+      destroyGroup( QString::fromStdString( key ) );
+      manco::ZeqManager::instance( ).publishDestroyGroup( key );
+    }
+
+  }
+
+  void MainWindow::createGroup( const QString &qKey )
+  {
+    std::string key = qKey.toStdString( );
+    auto syncGroup = _syncGroups.at( key );   
+
+    //Add group to widgets groups
+    QLabel* nameLabel = new QLabel( QString::fromStdString( syncGroup->getName( ) ) );
+    QLabel* ownerLabel = new QLabel( QString::fromStdString( syncGroup->getOwner( ) ) );
+    QPushButton* closePushButton = new QPushButton( );
+    closePushButton->setIcon( QIcon( ":/icons/iconClose.png" ) );
+
+    _widgetsGroups[ key ] = new WidgetsGroup( nameLabel, ownerLabel, closePushButton );
+
+    //Add group to grid layout
+    _ui->groupsGridLayout->addWidget( nameLabel );
+    _ui->groupsGridLayout->addWidget( ownerLabel );
+    _ui->groupsGridLayout->addWidget( closePushButton );
+
+    //Add close push button event
+    connect( closePushButton, SIGNAL( clicked( bool ) ), this, SLOT( removeGroup_clicked( ) ) );
   }
 
   void MainWindow::changeGroupName( const QString& qKey, const QString& qNewName )
@@ -288,27 +281,13 @@ namespace vishnu
     nameLabel->setText( qNewName );
 
     std::cout << "Group: " << key << ". Changed group name '" << name <<
-      "'' to '" << newName << "' succesfully." << std::endl;
+      "'' to '" << newName << "' successfully." << std::endl;
   }
 
-  void MainWindow::removeGroup( const QString& qKey, const bool& askFirst )
+  void MainWindow::destroyGroup( const QString& qKey )
   {
-
-    if ( askFirst )
-    {
-      QMessageBox::StandardButton reply;
-      reply = QMessageBox::warning(this, "Remove group", "Do you want to remove '" +
-        qKey + "'' group?", QMessageBox::Yes|QMessageBox::No);
-      if ( reply != QMessageBox::Yes )
-      {
-        return;
-      }
-    }
-
     std::string key = qKey.toStdString( );
-
     auto widget = _widgetsGroups.at( key )->getNameLabel( );
-
     int index = _ui->groupsGridLayout->indexOf( widget );
     auto gp = qMakePair( -1, -1 );
     int rs, cs;
@@ -324,10 +303,19 @@ namespace vishnu
     // Remove group from map
     _syncGroups.erase( key );
 
-    //Send publish destroy group event
-    manco::ZeqManager::instance( ).publishDestroyGroup( key );
-
     std::cout << "Group: " << key << " removed successfully." << std::endl;
+  }
+
+  void MainWindow::initZeqSession( )
+  {
+    std::cout << "Init ZeqSession ( " << _zeqSession << " )" << std::endl;
+    manco::ZeqManager::instance( ).init( _zeqSession );
+    manco::ZeqManager::instance( ).setReceivedSyncGroupCallback(
+      std::bind( &MainWindow::receivedSyncGroup, this, std::placeholders::_1 ) );
+    manco::ZeqManager::instance( ).setReceivedChangeNameGroupUpdateCallback(
+      std::bind( &MainWindow::receivedChangeNameGroupUpdate, this, std::placeholders::_1 ) );
+    manco::ZeqManager::instance( ).setReceivedDestroyGroupCallback(
+      std::bind( &MainWindow::receivedDestroyGroup, this, std::placeholders::_1 ) );
   }
 
   void MainWindow::addApp( const std::string& appName, const std::string& appPath )
@@ -347,37 +335,63 @@ namespace vishnu
   void MainWindow::receivedSyncGroup( zeroeq::gmrv::ConstSyncGroupPtr o )
   {
     std::vector<unsigned int> color = o->getColorVector( );
-    std::cout << "Received SyncGroup (" <<
+    std::vector< std::string > vectorIds = manco::ZeqManager::split( o->getIdsString( ), DELIMITER );
+    /*std::cout << "DEBUG: Received SyncGroup ( " <<
       "\n\tkey: " << o->getKeyString( ) <<
       "\n\tname: " << o->getNameString( ) <<
       "\n\towner: " << o->getOwnerString( ) <<
       "\n\tcolor: (" << color[0] << ", " << color[1] << ", "  << color[2] << ")" <<
-      "\n\tids: ";
-    std::vector< std::string > vectorIds = manco::ZeqManager::split( o->getIdsString( ), DELIMITER );
+      "\n\tids: (... commented ...)";
+    */
+    /*"\n\tids: ";
     for ( auto it = vectorIds.begin( ); it != vectorIds.end( ); ++it )
     {
       std::cout << *it << ' ';
-    }
-    std::cout << ")" << std::endl;
+    }*/
+    //std::cout << ")" << std::endl;
 
-    SyncGroup* syncGroup = new SyncGroup( o->getKeyString( ), o->getNameString( ),
+    std::string key = o->getKeyString( );
+    SyncGroup* syncGroup = new SyncGroup( key, o->getNameString( ),
       o->getOwnerString( ), vectorIds, color[0], color[1], color[2] );
 
-    //Add group to sync groups
-    _syncGroups[ o->getKeyString( ) ]= syncGroup;
-    emit signalCreateGroup( QString::fromStdString( syncGroup->getKey( ) ) );
+    //Add or set group to sync groups
+
+    std::map<std::string, SyncGroup*>::iterator it;
+    it = _syncGroups.find( key );
+    if ( it != _syncGroups.end( ) )
+    {
+      //Found -> Set group
+      _syncGroups[ key ]= syncGroup;
+
+      //Set widgets group     
+      emit signalChangeGroupName( QString::fromStdString( syncGroup->getKey( ) ),
+        QString::fromStdString( o->getNameString( ) ) );
+
+      std::cout << "Group: " << key << " changed successfully." << std::endl;
+    }
+    else
+    {
+      //Not found -> Create new group
+      _syncGroups[ o->getKeyString( ) ]= syncGroup;
+
+      //Add widgets group
+      emit signalCreateGroup( QString::fromStdString( syncGroup->getKey( ) ) );
+
+      std::cout << "Group: " << key << " created successfully." << std::endl;
+    }
   }
 
   void MainWindow::receivedChangeNameGroupUpdate( zeroeq::gmrv::ConstChangeNameGroupPtr o )
   {
     std::string key = o->getKeyString( );
-    std::cout << "Received ChangeNameGroup (" << key << ")" << std::endl;
-    auto syncGroup = _syncGroups.at( key );
+    //std::cout << "DEBUG: Received ChangeNameGroupUpdate, key: " << key << std::endl;
+    auto syncGroup = _syncGroups[ key ];
     if ( syncGroup == nullptr )
     {
       std::cerr << "Info: " << key << " group doesn't exist, ignoring change name group callback." << std::endl;
       return;
     }
+
     emit signalChangeGroupName( QString::fromStdString( syncGroup->getKey( ) ),
       QString::fromStdString( o->getNameString( ) ) );
   }
@@ -385,14 +399,15 @@ namespace vishnu
   void MainWindow::receivedDestroyGroup( zeroeq::gmrv::ConstDestroyGroupPtr o )
   {
     std::string key = o->getKeyString( );
-    std::cout << "Received DestroyGroup (" << key << ")" << std::endl;
-    auto syncGroup = _syncGroups.at( key );
+    //std::cout << "DEBUG: Received DestroyGroup, key: " << key << std::endl;
+    auto syncGroup = _syncGroups[ key ];
     if ( syncGroup == nullptr )
     {
       std::cerr << "Info: " << key << " group doesn't exist, ignoring destroy group callback." << std::endl;
       return;
     }
-    emit signalRemoveGroup( QString::fromStdString( key ), false );
+    emit signalDestroyGroup( QString::fromStdString( key ) );
   }
+
 }
 
