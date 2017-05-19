@@ -16,12 +16,18 @@
 namespace vishnu
 {
 
-  MainWindow::MainWindow( QWidget *parent )
+  MainWindow::MainWindow( std::string zeqSession, std::string xmlFilename,
+    QWidget *parent )
     : QMainWindow( parent )
     , _ui( new Ui::MainWindow )
-    , _zeqSession( DEFAULT_ZEQ_SESSION )
+    , _zeqSession( zeqSession )
   {
-    _ui->setupUi( this );   
+    _ui->setupUi( this );
+
+    if ( xmlFilename != "" )
+    {
+        _ui->xmlFilename->setText( QString::fromStdString( xmlFilename ) );
+    }
 
     connect( _ui->buttonLoadXml, SIGNAL( clicked( bool ) ), this, SLOT( buttonLoadXml_clicked( ) ) );
 

@@ -12,8 +12,6 @@
 #define CLINT "CLINT"
 #define SPINERET "SPINERET"
 
-#define DEFAULT_ZEQ_SESSION "hbp://333"
-
 namespace vishnu
 {
   namespace Ui
@@ -26,7 +24,8 @@ namespace vishnu
     Q_OBJECT
 
   public:
-    explicit MainWindow( QWidget *parent = 0 );
+    explicit MainWindow( std::string zeqSession, std::string xmlFilename,
+      QWidget *parent = 0 );
     ~MainWindow();
 
   protected:

@@ -5,6 +5,11 @@
 #include <QSystemSemaphore>
 
 #include "MainWindow.h"
+#include "utils/Auxiliars.hpp"
+
+#include <fstream>
+
+#define DEFAULT_ZEQ_SESSION "hbp://"
 
 int main( int argc, char *argv[] )
 {
@@ -48,7 +53,33 @@ int main( int argc, char *argv[] )
     return 1;
   }
 
-  vishnu::MainWindow window;
+  std::map<std::string, std::string> args = Auxiliars::splitArgs( argc, argv );
+  std::string zeqSession = DEFAULT_ZEQ_SESSION;
+  std::string xmlFilename = "";
+
+   //ZeqSession
+  auto it = args.find("-z");
+  if ( it != args.end( ) )
+  {
+    zeqSession = it->second;
+  }
+
+  //XML filename
+  it = args.find("-f");
+  if ( it != args.end( ) )
+  {
+    std::ifstream fileExists( it->second );
+    if ( fileExists )
+    {
+        xmlFilename = it->second;
+    }
+    else
+    {
+        std::cerr << "Info: Filename '" << it->second << "'' not found!" << std::endl;
+    }
+  }
+
+  vishnu::MainWindow window( zeqSession, xmlFilename);
   QResource::registerResource( "resources.rcc" );
   window.setWindowTitle( QApplication::applicationName( ) );
   window.show( );

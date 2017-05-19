@@ -4,6 +4,8 @@
 #include <QLayoutItem>
 #include <QGridLayout>
 
+#define DASH '-'
+
 class Auxiliars
 {
 public:
@@ -48,6 +50,51 @@ public:
     remove(layout, row, -1, deleteWidgets);
     layout->setRowMinimumHeight(row, 0);
     layout->setRowStretch(row, 0);
+  }
+
+  /**
+    Split arguments: -arg0 arg1, -arg0, arg1
+  */
+  static std::map<std::string, std::string> splitArgs( int argc, char *argv[] )
+  {
+    std::map<std::string, std::string> args;
+    int count = 1; //skip program name
+    while ( count < argc )
+    {
+      if ( argv[count][0] == DASH )
+      {
+        //Type
+        if ( count + 1 < argc )
+        {
+          //Maybe pair arguments
+          if ( argv[count + 1][0] == DASH )
+          {
+            //Single argument
+            args[argv[count]] = std::string( );
+            count+=1;
+          }
+          else
+          {
+            //Pair arguments
+            args[argv[count]] = argv[count + 1];
+            count+=2;
+          }
+        }
+        else
+        {
+          //Single argument
+          args[argv[count]] = std::string( );
+          count+=1;
+        }
+      }
+      else
+      {
+        //Single argument without dash
+        args[argv[count]] = std::string( );
+        count+=1;
+      }
+    }
+    return args;
   }
 
 };
