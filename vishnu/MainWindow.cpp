@@ -16,24 +16,41 @@
 namespace vishnu
 {
 
-  MainWindow::MainWindow( std::string zeqSession, std::string xmlFilename,
+  MainWindow::MainWindow( std::map<std::string, std::string> args,
     QWidget *parent )
     : QMainWindow( parent )
     , _ui( new Ui::MainWindow )
-    , _zeqSession( zeqSession )
+    , _zeqSession( args["-z"] )
   {
     _ui->setupUi( this );
 
-    if ( xmlFilename != "" )
+    auto it = args.find("-f");
+    if ( it != args.end( ) )
     {
-        _ui->xmlFilename->setText( QString::fromStdString( xmlFilename ) );
+      _ui->xmlFilename->setText( QString::fromStdString( args["-f"] ) );
+      checkApps( );
     }
 
     connect( _ui->buttonLoadXml, SIGNAL( clicked( bool ) ), this, SLOT( buttonLoadXml_clicked( ) ) );
 
-    addApp( APICOLAT, "../../../apicolat/build/bin/apicolat" );
-    addApp( CLINT,    "../../../Clint/build/bin/ClintExplorer" );
-    addApp( SPINERET, "../../../spineret/build/bin/CellExplorer" );
+    Application* apicolatApp = new Application( APICOLAT );
+    QStringList apicolatArgs;
+    apicolatArgs << QString( "12345" );
+    apicolatApp->addProcess( "../../../weco_gmrvvissp/build/bin/WeCo", apicolatArgs );
+    _apps[APICOLAT] = apicolatApp;
+
+    Application* clintApp = new Application( CLINT );
+    QStringList clintArgs;
+    clintApp->addProcess( "../../../Clint/build/bin/ClintExplorer", clintArgs );
+    _apps[CLINT] = clintApp;
+
+    Application* spineretApp = new Application( SPINERET );
+    QStringList spineretArgs;
+    spineretArgs << QString( "-z" ) << QString::fromStdString( _zeqSession );
+
+    spineretApp->addProcess( "../../../spineret/build/bin/CellExplorer", spineretArgs );
+    _apps[SPINERET] = spineretApp;
+
 
     for ( const auto& app : _apps )
     {
@@ -63,9 +80,12 @@ namespace vishnu
     delete _ui;
     for ( const auto& app : _apps )
     {
-      if ( app.second->isOpen( ) )
+      for( const auto& process : app.second->getProcesses( ) )
       {
-        app.second->terminate( );
+        if ( process->isOpen( ) )
+        {
+          process->terminate( );
+        }
       }
     }
   }
@@ -113,29 +133,31 @@ namespace vishnu
 
   void MainWindow::app_closed( int exitCode, QProcess::ExitStatus exitStatus )
   {
-    QProcess* process = qobject_cast< QProcess* >( sender( ) );
+    QProcess* qProcess = qobject_cast< QProcess* >( sender( ) );
     if ( exitStatus == QProcess::CrashExit )
     {
-      std::cerr << "Error: " << process->program( ).toStdString( ) << " crashed!" << std::endl;
+      std::cerr << "Error: " << qProcess->program( ).toStdString( ) << " crashed!" << std::endl;
     }
     else if ( exitCode != 0 )
     {
-      std::cerr << "Error: " << process->program( ).toStdString( ) << " failed!" << std::endl;
+      std::cerr << "Error: " << qProcess->program( ).toStdString( ) << " failed!" << std::endl;
     }
     else
     {
-      std::cout <<  process->program( ).toStdString( ) << " closed successfully." << std::endl;
+      std::cout << qProcess->program( ).toStdString( ) << " closed successfully." << std::endl;
     }
 
     //Anyway button should be enabled again
-    std::map< std::string, Application* >::iterator it;
+    std::map<std::string, Application*>::iterator it;
     for ( it = _apps.begin( ); it != _apps.end( ); ++it )
-    {
-      if ( it->second->program( ) == process->program( ) )
+    { 
+      for ( auto process : it->second->getProcesses( ) )
       {
-        it->second->setProgram( QString( ) );
-        it->second->getPushButton( )->setEnabled( true );
-        break;
+        if( process->program( ) == qProcess->program( ) )
+        {
+          process->setProgram( QString( ) );
+          it->second->getPushButton( )->setEnabled( true );
+        }
       }
     }
   }
@@ -167,29 +189,34 @@ namespace vishnu
     }
     std::cout << "Opening " << appName << std::endl;
 
-    QString program = QString::fromStdString( app->getShellExecPath( ) );
-    QStringList arguments;
-    arguments << "-z" << QString::fromStdString(_zeqSession );
-    arguments << "-f" << _ui->xmlFilename->text( );
-
     app->getPushButton( )->setEnabled( false );
 
-    app->setReadChannel( QProcess::StandardOutput );
-    app->waitForReadyRead( );
-    app->readAllStandardOutput( );
-    app->start( program, arguments );
+    for (const auto& process : app->getProcesses( ) )
+    {
+      process->setReadChannel( QProcess::StandardOutput );
+      process->waitForReadyRead( );
+      process->readAllStandardOutput( );
 
-    if ( app->waitForStarted( 2000 ) )
-    {
-      QByteArray out_data = app->readAllStandardOutput( );
-      QString out_string( out_data );
-      std::cout << out_string.toStdString( ).c_str( ) << std::endl;
-      connect( app, SIGNAL( finished ( int , QProcess::ExitStatus ) ),
-        this, SLOT( app_closed( int , QProcess::ExitStatus ) ) );
-    }
-    else
-    {
-      std::cout << "Error: App not start in time!" << std::endl;
+      QStringList arguments;
+      arguments << "-f" << _ui->xmlFilename->text( );
+      arguments << process->getArguments( );
+
+      process->start(
+        QString::fromStdString( process->getShellCommand( ) ),
+        arguments
+      );
+      if ( process->waitForStarted( 2000 ) )
+      {
+         QByteArray out_data = process->readAllStandardOutput( );
+         QString out_string( out_data );
+         std::cout << out_string.toStdString( ).c_str( ) << std::endl;
+         connect( process, SIGNAL( finished ( int , QProcess::ExitStatus ) ),
+           this, SLOT( app_closed( int , QProcess::ExitStatus ) ) );
+      }
+      else
+      {
+        std::cout << "Error: App not start in time!" << std::endl;
+      }
     }
   }
 
@@ -324,20 +351,6 @@ namespace vishnu
       std::bind( &MainWindow::receivedDestroyGroup, this, std::placeholders::_1 ) );
   }
 
-  void MainWindow::addApp( const std::string& appName, const std::string& appPath )
-  {
-    std::pair<std::map<std::string, Application*>::iterator, bool> res =
-      _apps.insert(std::make_pair( appName, new Application( appName, appPath ) ) );
-    if ( !res.second )
-    {
-      std::cerr << "Error adding app: " << appName << " already exists!" << std::endl;
-    }
-    else
-    {
-      std::cout << appName << " added successfully." << std::endl;
-    }
-  }
-
   void MainWindow::receivedSyncGroup( zeroeq::gmrv::ConstSyncGroupPtr o )
   {
     std::vector<unsigned int> color = o->getColorVector( );
@@ -406,8 +419,8 @@ namespace vishnu
   {
     std::string key = o->getKeyString( );
     //std::cout << "DEBUG: Received DestroyGroup, key: " << key << std::endl;
-    auto syncGroup = _syncGroups[ key ];
-    if ( syncGroup == nullptr )
+    auto syncGroup = _syncGroups.find( key );
+    if ( syncGroup == _syncGroups.end( ) )
     {
       std::cerr << "Info: " << key << " group doesn't exist, ignoring destroy group callback." << std::endl;
       return;

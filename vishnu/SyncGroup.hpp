@@ -3,6 +3,7 @@
 
 #include <QColor>
 #include <string>
+#include <vector>
 
 namespace vishnu
 {
@@ -25,7 +26,6 @@ namespace vishnu
     void setOwner( const std::string& owner );
     void setIds( const std::vector<std::string>& ids );
     void setColor( const QColor& color );
-
 
   private:
     std::string _key;

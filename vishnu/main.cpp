@@ -54,14 +54,12 @@ int main( int argc, char *argv[] )
   }
 
   std::map<std::string, std::string> args = Auxiliars::splitArgs( argc, argv );
-  std::string zeqSession = DEFAULT_ZEQ_SESSION;
-  std::string xmlFilename = "";
 
    //ZeqSession
   auto it = args.find("-z");
-  if ( it != args.end( ) )
+  if ( it == args.end( ) )
   {
-    zeqSession = it->second;
+    args["-z"] = DEFAULT_ZEQ_SESSION;
   }
 
   //XML filename
@@ -69,17 +67,14 @@ int main( int argc, char *argv[] )
   if ( it != args.end( ) )
   {
     std::ifstream fileExists( it->second );
-    if ( fileExists )
+    if ( !fileExists )
     {
-        xmlFilename = it->second;
-    }
-    else
-    {
-        std::cerr << "Info: Filename '" << it->second << "'' not found!" << std::endl;
+      args.erase( it );
+      std::cerr << "Info: Filename '" << it->second << "'' not found!" << std::endl;
     }
   }
 
-  vishnu::MainWindow window( zeqSession, xmlFilename);
+  vishnu::MainWindow window( args );
   QResource::registerResource( "resources.rcc" );
   window.setWindowTitle( QApplication::applicationName( ) );
   window.show( );

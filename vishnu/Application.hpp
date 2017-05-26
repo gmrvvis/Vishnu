@@ -2,21 +2,24 @@
 #define APPLICATION_H
 
 #include <QPushButton>
-#include <QProcess>
+#include <QStringList>
 #include <manco/manco.h>
+#include "Process.hpp"
 
 namespace vishnu
 {
-    class Application : public QProcess
+    class Application
     {
     public:
-        Application( const std::string& appName, const std::string& shellExecPath );
+        Application(const std::string& appName );
         ~Application( );
-        std::string getShellExecPath( ) const;
+        std::vector<Process*> getProcesses( ) const;
+        void addProcess(const std::string& shellCommand ,
+          const QStringList& arguments );
         QPushButton* getPushButton( ) const;
 
     private:
-        std::string _shellExecPath;
+        std::vector<Process*> _processes;
         QPushButton* _pushButton;
         QString capitalize( const QString &string ) const;
     };

@@ -24,7 +24,7 @@ namespace vishnu
     Q_OBJECT
 
   public:
-    explicit MainWindow( std::string zeqSession, std::string xmlFilename,
+    explicit MainWindow(std::map<std::string, std::string> args,
       QWidget *parent = 0 );
     ~MainWindow();
 
@@ -49,7 +49,6 @@ namespace vishnu
     std::map<std::string, WidgetsGroup*> _widgetsGroups; //key, WidgetsGroup
 
     void initZeqSession( );
-    void addApp( const std::string& appName, const std::string& appPath );
     void receivedSyncGroup( zeroeq::gmrv::ConstSyncGroupPtr o );
     void receivedChangeNameGroupUpdate( zeroeq::gmrv::ConstChangeNameGroupPtr o );
     void receivedDestroyGroup( zeroeq::gmrv::ConstDestroyGroupPtr o );

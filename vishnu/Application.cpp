@@ -2,41 +2,38 @@
 
 namespace vishnu
 {
-    Application::Application( const std::string& appName, const std::string& shellExecPath )
-    {
-        QString qName = QString::fromStdString( appName );
-        _shellExecPath = shellExecPath;
+  Application::Application( const std::string& appName )
+  {
+    _pushButton = new QPushButton( capitalize( QString::fromStdString( appName ) ) );
+    _pushButton->setEnabled( false );
+  }
 
-        #ifdef defined(_WIN32) || defined(WIN32)
-            _launcherCmd += ".exe";
-        #endif
+  Application::~Application( )
+  {
 
-      _pushButton = new QPushButton( capitalize( qName ) );
-      //_pushButton->setObjectName( qName );
-      _pushButton->setEnabled( false );
+  }
 
-    }
+  std::vector<Process*> Application::getProcesses( ) const
+  {
+    return _processes;
+  }
 
-    Application::~Application( )
-    {
+  QPushButton* Application::getPushButton( ) const
+  {
+    return _pushButton;
+  }
 
-    }
-
-    std::string Application::getShellExecPath( ) const
-    {
-        return _shellExecPath;
-    }
-
-    QPushButton* Application::getPushButton( ) const
-    {
-        return _pushButton;
-    }
-
-    QString Application::capitalize( const QString &string ) const
-    {
-        QString tmp = string;
-        tmp = tmp.toLower( );
-        tmp[0] = string[0].toUpper( );
-        return tmp;
-    }
+  void Application::addProcess( const std::string& shellCommand,
+    const QStringList& arguments )
+  {
+    _processes.push_back( new Process( shellCommand, arguments ) );
+  }
+    
+  QString Application::capitalize( const QString &string ) const
+  {
+    QString tmp = string;
+    tmp = tmp.toLower( );
+    tmp[0] = string[0].toUpper( );
+    return tmp;
+  }
 }
