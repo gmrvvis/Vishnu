@@ -53,7 +53,10 @@ public:
   }
 
   /**
-    Split arguments: -arg0 arg1, -arg0, arg1
+    SplitArgs:
+      case -type value: map[-type]=value,
+      case -type: map[-type]="",
+      case value: map[value]=""
   */
   static std::map<std::string, std::string> splitArgs( int argc, char *argv[] )
   {

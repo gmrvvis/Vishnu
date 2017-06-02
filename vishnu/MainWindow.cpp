@@ -33,24 +33,48 @@ namespace vishnu
 
     connect( _ui->buttonLoadXml, SIGNAL( clicked( bool ) ), this, SLOT( buttonLoadXml_clicked( ) ) );
 
+    //Apicolat
     Application* apicolatApp = new Application( APICOLAT );
+    /*QStringList dockerRmArgs;
+    dockerRmArgs << QString( "rm apicolat" );
+    apicolatApp->addProcess( "../../../apicolat/sudo docker", dockerRmArgs );
+    QStringList dockerBuildArgs;
+    dockerBuildArgs << QString( "build" ) << QString( "-t" ) << QString( "\"igarciag/apicolat\"" );
+    apicolatApp->addProcess( "../../../apicolat/sudo docker", dockerBuildArgs );
+    QStringList dockerRunArgs;
+    dockerRunArgs << QString( "run" ) << QString( "--rm" ) << QString( "--name=\"apicolat\"" )
+      << QString( "-e" ) << QString( "NODE_PATH=\"/app/apicolat/web/dcexplorer/node_modules" )
+      << QString( "-v" ) << QString( "$(pwd)/data:/app/data" ) << QString( "-p" )
+      << QString( "8888:8888" ) << QString( "-p" ) << QString( "19000:19000" ) << QString( "-p" )
+      << QString( "19001:19001" ) << QString( "-it" ) << QString( "igarciag/apicolat" );
+    apicolatApp->addProcess( "../../../apicolat/sudo docker", dockerRunArgs);
+*/
     QStringList apicolatArgs;
-    apicolatArgs << QString( "12345" );
-    apicolatApp->addProcess( "../../../weco_gmrvvissp/build/bin/WeCo", apicolatArgs );
+    apicolatArgs << QString( "../../../apicolat/launch.sh" );
+    apicolatApp->addProcess( "/bin/sh/Shell.sh", apicolatArgs );
+
+    QStringList wecoArgs;
+    wecoArgs << QString( "-p" ) << QString( "12346" )
+             << QString( "-z" ) << QString::fromStdString( _zeqSession );
+    apicolatApp->addProcess( "../../../weco_gmrvvissp/build/bin/WeCo", wecoArgs );
     _apps[APICOLAT] = apicolatApp;
 
+    //Clint
     Application* clintApp = new Application( CLINT );
+    QStringList clintExplorerArgs;
+    clintExplorerArgs << QString::fromStdString( _zeqSession ); //TODO: send -z first
+    clintApp->addProcess( "../../../ClintExplorer/build/bin/ClintExplorer", clintExplorerArgs );
     QStringList clintArgs;
-    clintApp->addProcess( "../../../Clint/build/bin/ClintExplorer", clintArgs );
+    clintArgs << QString( "-e \"shiny::runApp('CLINTv4.R')\"" );
+    clintApp->addProcess( "../../../Clint/R", clintArgs );
     _apps[CLINT] = clintApp;
 
+    //Spineret
     Application* spineretApp = new Application( SPINERET );
     QStringList spineretArgs;
     spineretArgs << QString( "-z" ) << QString::fromStdString( _zeqSession );
-
     spineretApp->addProcess( "../../../spineret/build/bin/CellExplorer", spineretArgs );
     _apps[SPINERET] = spineretApp;
-
 
     for ( const auto& app : _apps )
     {
@@ -255,7 +279,10 @@ namespace vishnu
     {
       if ( !app->second->getPushButton( )->isEnabled( ) )
       {
-        std::cout << "Error closing group: " << syncGroup->getOwner( ) << " is not closed." << std::endl;
+        std::cout << "Error destroying group: " << syncGroup->getOwner( ) << " is not closed." << std::endl;
+        QMessageBox::StandardButton reply = QMessageBox::warning(this, "Error destroying group",
+          "Error destroying group: " + QString::fromStdString( syncGroup->getOwner( ) ) +
+          " is not closed.", QMessageBox::Ok);
         return;
       }
     }
@@ -273,7 +300,6 @@ namespace vishnu
       destroyGroup( QString::fromStdString( key ) );
       manco::ZeqManager::instance( ).publishDestroyGroup( key );
     }
-
   }
 
   void MainWindow::createGroup( const QString &qKey )
