@@ -4,8 +4,8 @@ stages:
 Win7-VS12-x64-subproject:
   stage: build
   script:
-  - call %ENVFILESDIR%\Boost-1.56-vs12-x64.bat
-  - call %ENVFILESDIR%\Qt-5.4.bat
+  - call %ENVFILESDIR%\Boost-1.64-vs12-x64.bat
+  - call %ENVFILESDIR%\Qt-5.9.bat
   - call %ENVFILESDIR%\OpenSceneGraph-3.4.0-vs12-x64.bat
   - call %ENVFILESDIR%\zeromq-4.0.4.bat
   - set PATH=%PATH%;"c:\Program Files (x86)\Git\bin"
@@ -19,7 +19,7 @@ Win7-VS12-x64-subproject:
 Ubuntu-subproject:
   stage: build
   script:
-  - module load Qt-5.8
+  - module load Qt-5.5
   - module load OpenSceneGraph-3.4.0-Qt5.5-16.04
   - bash .gitlab-ci.sh
   tags:

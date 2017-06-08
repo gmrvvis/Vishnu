@@ -61,18 +61,19 @@ namespace vishnu
 
     //Clint
     Application* clintApp = new Application( CLINT );
-    QStringList clintExplorerArgs;
-    clintExplorerArgs << QString::fromStdString( _zeqSession ); //TODO: send -z first
-    clintApp->addProcess( "../../../ClintExplorer/build/bin/ClintExplorer", clintExplorerArgs );
+    //QStringList clintExplorerArgs;
+    //clintExplorerArgs << QString::fromStdString( _zeqSession ); //TODO: send -z first
+    //clintApp->addProcess( "../../../ClintExplorer/build/bin/ClintExplorer", clintExplorerArgs );
     QStringList clintArgs;
-    clintArgs << QString( "-e \"shiny::runApp('CLINTv4.R')\"" );
-    clintApp->addProcess( "../../../Clint/R", clintArgs );
+    clintArgs << QString( "-e") << QString( "\"shiny::runApp('../../../Clint/CLINTv4.R')\"" );
+    clintApp->addProcess( "R", clintArgs );
     _apps[CLINT] = clintApp;
 
     //Spineret
     Application* spineretApp = new Application( SPINERET );
     QStringList spineretArgs;
     spineretArgs << QString( "-z" ) << QString::fromStdString( _zeqSession );
+    spineretArgs << QString( "-f" ) << _ui->xmlFilename->text( );
     spineretApp->addProcess( "../../../spineret/build/bin/CellExplorer", spineretArgs );
     _apps[SPINERET] = spineretApp;
 
@@ -171,8 +172,37 @@ namespace vishnu
       std::cout << qProcess->program( ).toStdString( ) << " closed successfully." << std::endl;
     }
 
-    //Anyway button should be enabled again
-    std::map<std::string, Application*>::iterator it;
+    //Look for running app
+    Application* foundApp = nullptr;
+    for ( const auto& app : _apps )
+    {
+      for (const auto& process : app.second->getProcesses( ) )
+      {
+        if ( process->program( ) == qProcess->program( ) )
+        {
+            foundApp = app.second;
+            //process->setProgram( QString( ) );
+            //app.second->getPushButton( )->setEnabled( true );
+        }
+      }
+    }
+
+    //Force close rest of processes of same app
+    if (foundApp != nullptr)
+    {
+      for (const auto& process : foundApp->getProcesses( ) )
+      {
+        if ( process->isOpen( ) )
+        {
+          process->terminate( );
+        }
+      }
+    }
+
+    //Finally, re-enabled app button
+    foundApp->getPushButton( )->setEnabled( true );
+
+    /*std::map<std::string, Application*>::iterator it;
     for ( it = _apps.begin( ); it != _apps.end( ); ++it )
     { 
       for ( auto process : it->second->getProcesses( ) )
@@ -183,7 +213,7 @@ namespace vishnu
           it->second->getPushButton( )->setEnabled( true );
         }
       }
-    }
+    }*/
   }
 
   void MainWindow::pushButtonApp_clicked( )
@@ -222,7 +252,6 @@ namespace vishnu
       process->readAllStandardOutput( );
 
       QStringList arguments;
-      arguments << "-f" << _ui->xmlFilename->text( );
       arguments << process->getArguments( );
 
       process->start(
