@@ -3,7 +3,8 @@
 namespace vishnu
 {
     Process::Process(const std::string& shellCommand ,
-      const QStringList& arguments)
+      const std::map<std::string, std::string>& arguments,
+      const std::string& workingDirectory)
     {
       _shellCommand = shellCommand;
 
@@ -11,9 +12,12 @@ namespace vishnu
         _shellCommand += ".exe";
       #endif
 
-      if( !arguments.empty( ) )
-      {
-          _arguments = arguments;
+      _arguments = arguments;
+
+      _workingDirectory = workingDirectory;
+      if ( workingDirectory != "" )
+      {          
+        this->setWorkingDirectory( QString::fromStdString( workingDirectory ) );
       }
     }
 
@@ -27,19 +31,18 @@ namespace vishnu
       return _shellCommand;
     }
 
-    QStringList Process::getArguments( ) const
+    std::map<std::string, std::string> Process::getArguments( ) const
     {
       return _arguments;
     }
 
-    void Process::setArguments( const QStringList& arguments )
+    void Process::setArguments( const std::map<std::string, std::string>& arguments )
     {
       _arguments = arguments;
     }
 
-    void Process::addArgument( const std::string& argument )
+    void Process::setArgument( const std::string& type, const std::string& value)
     {
-        _arguments << QString::fromStdString( argument );
+      _arguments[type] = value;
     }
-
 }

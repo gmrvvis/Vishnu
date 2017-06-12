@@ -11,16 +11,18 @@ namespace vishnu
     {
     public:
         Process( const std::string& shellCommand,
-          const QStringList& arguments );
+          const std::map<std::string, std::string>& arguments,
+          const std::string& workingDirectory);
         ~Process( );
         std::string getShellCommand( ) const;
-        QStringList getArguments( ) const;
-        void setArguments( const QStringList& arguments );
-        void addArgument( const std::string& argument );
+        std::map<std::string, std::string> getArguments( ) const;
+        void setArguments( const std::map<std::string, std::string>& arguments );
+        void setArgument( const std::string& type, const std::string& value);
 
     private:
         std::string _shellCommand;
-        QStringList _arguments;
+        std::map<std::string, std::string> _arguments;
+        std::string _workingDirectory;
     };
 }
 

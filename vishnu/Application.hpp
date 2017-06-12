@@ -15,7 +15,8 @@ namespace vishnu
         ~Application( );
         std::vector<Process*> getProcesses( ) const;
         void addProcess(const std::string& shellCommand ,
-          const QStringList& arguments );
+          const std::map<std::string, std::string>& arguments = std::map<std::string, std::string>( ),
+          const std::string& workingDirectory = std::string( ) );
         QPushButton* getPushButton( ) const;
 
     private:

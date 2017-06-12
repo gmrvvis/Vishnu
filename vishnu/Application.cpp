@@ -24,9 +24,10 @@ namespace vishnu
   }
 
   void Application::addProcess( const std::string& shellCommand,
-    const QStringList& arguments )
+    const std::map<std::string, std::string>& arguments,
+    const std::string& workingDirectory )
   {
-    _processes.push_back( new Process( shellCommand, arguments ) );
+    _processes.push_back( new Process( shellCommand, arguments, workingDirectory ) );
   }
     
   QString Application::capitalize( const QString &string ) const

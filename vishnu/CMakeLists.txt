@@ -31,6 +31,7 @@ set(VISHNU_HEADERS
   SyncGroup.hpp
   resources.qrc
   WidgetsGroup.hpp
+  Definitions.hpp
   utils/Auxiliars.hpp
 )
 

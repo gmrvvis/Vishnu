@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QProcess>
+#include <mutex>
 #include "Application.hpp"
 #include "SyncGroup.hpp"
 #include "WidgetsGroup.hpp"
@@ -35,6 +36,9 @@ namespace vishnu
     void buttonLoadXml_clicked( );
     void pushButtonApp_clicked( );
     void app_closed( int exitCode, QProcess::ExitStatus exitStatus );
+    void loadApicolat();
+    void loadClint();
+    void loadSpineret();
     void checkApps( );
     void removeGroup_clicked( );
     void createGroup( const QString& qKey );
@@ -44,6 +48,7 @@ namespace vishnu
   private:
     vishnu::Ui::MainWindow *_ui;
     std::string _zeqSession;
+    bool _closingProcesses;
     std::map<std::string, Application*> _apps; //appName, Application
     std::map<std::string, SyncGroup*> _syncGroups; //key, SyncGroup
     std::map<std::string, WidgetsGroup*> _widgetsGroups; //key, WidgetsGroup

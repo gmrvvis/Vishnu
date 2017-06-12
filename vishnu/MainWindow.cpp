@@ -11,6 +11,7 @@
 #include <iostream>
 #include <stdio.h>
 
+#include "Definitions.hpp"
 #include "utils/Auxiliars.hpp"
 
 namespace vishnu
@@ -21,6 +22,7 @@ namespace vishnu
     : QMainWindow( parent )
     , _ui( new Ui::MainWindow )
     , _zeqSession( args["-z"] )
+    , _closingProcesses( false )
   {
     _ui->setupUi( this );
 
@@ -33,49 +35,9 @@ namespace vishnu
 
     connect( _ui->buttonLoadXml, SIGNAL( clicked( bool ) ), this, SLOT( buttonLoadXml_clicked( ) ) );
 
-    //Apicolat
-    Application* apicolatApp = new Application( APICOLAT );
-    /*QStringList dockerRmArgs;
-    dockerRmArgs << QString( "rm apicolat" );
-    apicolatApp->addProcess( "../../../apicolat/sudo docker", dockerRmArgs );
-    QStringList dockerBuildArgs;
-    dockerBuildArgs << QString( "build" ) << QString( "-t" ) << QString( "\"igarciag/apicolat\"" );
-    apicolatApp->addProcess( "../../../apicolat/sudo docker", dockerBuildArgs );
-    QStringList dockerRunArgs;
-    dockerRunArgs << QString( "run" ) << QString( "--rm" ) << QString( "--name=\"apicolat\"" )
-      << QString( "-e" ) << QString( "NODE_PATH=\"/app/apicolat/web/dcexplorer/node_modules" )
-      << QString( "-v" ) << QString( "$(pwd)/data:/app/data" ) << QString( "-p" )
-      << QString( "8888:8888" ) << QString( "-p" ) << QString( "19000:19000" ) << QString( "-p" )
-      << QString( "19001:19001" ) << QString( "-it" ) << QString( "igarciag/apicolat" );
-    apicolatApp->addProcess( "../../../apicolat/sudo docker", dockerRunArgs);
-*/
-    QStringList apicolatArgs;
-    apicolatArgs << QString( "../../../apicolat/launch.sh" );
-    apicolatApp->addProcess( "/bin/sh/Shell.sh", apicolatArgs );
-
-    QStringList wecoArgs;
-    wecoArgs << QString( "-p" ) << QString( "12346" )
-             << QString( "-z" ) << QString::fromStdString( _zeqSession );
-    apicolatApp->addProcess( "../../../weco_gmrvvissp/build/bin/WeCo", wecoArgs );
-    _apps[APICOLAT] = apicolatApp;
-
-    //Clint
-    Application* clintApp = new Application( CLINT );
-    //QStringList clintExplorerArgs;
-    //clintExplorerArgs << QString::fromStdString( _zeqSession ); //TODO: send -z first
-    //clintApp->addProcess( "../../../ClintExplorer/build/bin/ClintExplorer", clintExplorerArgs );
-    QStringList clintArgs;
-    clintArgs << QString( "-e") << QString( "\"shiny::runApp('../../../Clint/CLINTv4.R')\"" );
-    clintApp->addProcess( "R", clintArgs );
-    _apps[CLINT] = clintApp;
-
-    //Spineret
-    Application* spineretApp = new Application( SPINERET );
-    QStringList spineretArgs;
-    spineretArgs << QString( "-z" ) << QString::fromStdString( _zeqSession );
-    spineretArgs << QString( "-f" ) << _ui->xmlFilename->text( );
-    spineretApp->addProcess( "../../../spineret/build/bin/CellExplorer", spineretArgs );
-    _apps[SPINERET] = spineretApp;
+    loadApicolat();
+    loadClint();
+    loadSpineret();
 
     for ( const auto& app : _apps )
     {
@@ -144,18 +106,6 @@ namespace vishnu
     }
   }
 
-  void MainWindow::checkApps( )
-  {
-    if ( !_ui->xmlFilename->text( ).isEmpty( ) )
-    {
-      for ( const auto& app : _apps )
-      {
-        //TODO: parse XML in order to enable buttons instead of enabling all of them
-        app.second->getPushButton( )->setEnabled( true );
-      }
-    }
-  }
-
   void MainWindow::app_closed( int exitCode, QProcess::ExitStatus exitStatus )
   {
     QProcess* qProcess = qobject_cast< QProcess* >( sender( ) );
@@ -172,49 +122,112 @@ namespace vishnu
       std::cout << qProcess->program( ).toStdString( ) << " closed successfully." << std::endl;
     }
 
-    //Look for running app
-    Application* foundApp = nullptr;
-    for ( const auto& app : _apps )
+    if (!_closingProcesses)
     {
-      for (const auto& process : app.second->getProcesses( ) )
+      //Prevent other processes to enter in loop
+      _closingProcesses = true;
+
+      //Look for running app
+      for ( const auto& app : _apps )
       {
-        if ( process->program( ) == qProcess->program( ) )
+        for (const auto& process : app.second->getProcesses( ) )
         {
-            foundApp = app.second;
-            //process->setProgram( QString( ) );
-            //app.second->getPushButton( )->setEnabled( true );
+          if ( process->program( ) == qProcess->program( ) )
+          {
+            //Force close rest of processes of same app
+            for (const auto& process2 : app.second->getProcesses( ) )
+            {
+              if ( process2->isOpen( ) )
+              {
+                process2->terminate( );
+                process2->setProgram( QString( ) );
+              }
+            }
+
+            //Finally, re-enabled app button
+            app.second->getPushButton( )->setEnabled( true );
+
+            //Reset
+            _closingProcesses = false;
+
+            //No need to loop over other processes of same app
+            break;
+          }
         }
       }
     }
-
-    //Force close rest of processes of same app
-    if (foundApp != nullptr)
-    {
-      for (const auto& process : foundApp->getProcesses( ) )
-      {
-        if ( process->isOpen( ) )
-        {
-          process->terminate( );
-        }
-      }
-    }
-
-    //Finally, re-enabled app button
-    foundApp->getPushButton( )->setEnabled( true );
-
-    /*std::map<std::string, Application*>::iterator it;
-    for ( it = _apps.begin( ); it != _apps.end( ); ++it )
-    { 
-      for ( auto process : it->second->getProcesses( ) )
-      {
-        if( process->program( ) == qProcess->program( ) )
-        {
-          process->setProgram( QString( ) );
-          it->second->getPushButton( )->setEnabled( true );
-        }
-      }
-    }*/
   }
+
+  void MainWindow::checkApps( )
+  {
+    if ( !_ui->xmlFilename->text( ).isEmpty( ) )
+    {                
+      for ( const auto& app : _apps )
+      {
+        for (const auto& process : app.second->getProcesses( ) )
+        {
+          std::map<std::string, std::string> args = process->getArguments();
+          auto it = args.find("-f");
+          if ( it != args.end( ) )
+          {
+            process->setArgument( "-f", _ui->xmlFilename->text().toStdString( ) );
+          }
+        }
+
+        //TODO: parse XML in order to enable buttons instead of enabling all of them
+        app.second->getPushButton( )->setEnabled( true );
+      }
+    }
+  }
+
+  void MainWindow::loadApicolat()
+  {
+      //Apicolat
+      Application* apicolatApp = new Application( APICOLAT );
+
+      std::map<std::string, std::string> apicolatArgs;
+      apicolatArgs["launch.sh"] = "";
+      std::string apicolatWD = "../../../apicolat/";
+      apicolatApp->addProcess( SUPERUSER, apicolatArgs, apicolatWD );
+
+      std::map<std::string, std::string> wecoArgs;
+      wecoArgs["-p"] = "12346";
+      wecoArgs["-z"] = _zeqSession;
+      std::string wecoWD = "../../../weco/build/bin/";
+      apicolatApp->addProcess( "../../../weco/build/bin/WeCo", wecoArgs, wecoWD );
+
+      _apps[APICOLAT] = apicolatApp;
+  }
+
+  void MainWindow::loadClint()
+  {
+      //Clint
+      Application* clintApp = new Application( CLINT );
+
+      std::map<std::string, std::string> clintExplorerArgs;
+      clintExplorerArgs[ _zeqSession ] = ""; //TODO: send -z first
+      std::string clintExplorerWD = "../../../ClintExplorer/build/bin/";
+      clintApp->addProcess( "../../../ClintExplorer/build/bin/ClintExplorer", clintExplorerArgs, clintExplorerWD );
+
+      std::map<std::string, std::string> clintArgs;
+      clintArgs["-e"] = "shiny::runApp(appDir = 'CLINTv4.R', launch.browser = TRUE)";
+      std::string clintWD = "../../../Clint/";
+      clintApp->addProcess( "R", clintArgs, clintWD );
+
+      _apps[CLINT] = clintApp;
+  }
+
+  void MainWindow::loadSpineret()
+  {
+      Application* spineretApp = new Application( SPINERET );
+      std::map<std::string, std::string> spineretArgs;
+      spineretArgs["-z"] = _zeqSession;
+      spineretArgs["-f"] = _ui->xmlFilename->text( ).toStdString( );
+      std::string spineretWD = "/home/gbayo/dev/spineret/build/bin";
+      spineretApp->addProcess( "../../../spineret/build/bin/CellExplorer", spineretArgs, spineretWD );
+      _apps[SPINERET] = spineretApp;
+  }
+
 
   void MainWindow::pushButtonApp_clicked( )
   {
@@ -248,28 +261,30 @@ namespace vishnu
     for (const auto& process : app->getProcesses( ) )
     {
       process->setReadChannel( QProcess::StandardOutput );
+      //process->setProcessChannelMode(QProcess::ForwardedChannels);
       process->waitForReadyRead( );
       process->readAllStandardOutput( );
 
       QStringList arguments;
-      arguments << process->getArguments( );
+      for(const auto& arg : process->getArguments( ) )
+      {
+          arguments << QString::fromStdString( arg.first );
+          if ( arg.second != "" )
+          {
+              arguments << QString::fromStdString( arg.second );
+          }
+      }
 
       process->start(
         QString::fromStdString( process->getShellCommand( ) ),
         arguments
       );
-      if ( process->waitForStarted( 2000 ) )
-      {
-         QByteArray out_data = process->readAllStandardOutput( );
-         QString out_string( out_data );
-         std::cout << out_string.toStdString( ).c_str( ) << std::endl;
-         connect( process, SIGNAL( finished ( int , QProcess::ExitStatus ) ),
-           this, SLOT( app_closed( int , QProcess::ExitStatus ) ) );
-      }
-      else
-      {
-        std::cout << "Error: App not start in time!" << std::endl;
-      }
+
+      QByteArray out_data = process->readAllStandardOutput( );
+      QString out_string( out_data );
+      std::cout << out_string.toStdString( ).c_str( ) << std::endl;
+      connect( process, SIGNAL( finished ( int , QProcess::ExitStatus ) ),
+        this, SLOT( app_closed( int , QProcess::ExitStatus ) ) );
     }
   }
 
