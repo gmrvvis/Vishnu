@@ -8,9 +8,11 @@ namespace vishnu
     {
       _shellCommand = shellCommand;
 
-      #ifdef defined(_WIN32) || defined(WIN32)
+      /* Not needed
+	  #if defined(_WIN32) || defined(WIN32)
         _shellCommand += ".exe";
       #endif
+	  */
 
       _arguments = arguments;
 
