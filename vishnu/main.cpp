@@ -27,10 +27,10 @@ int main( int argc, char *argv[] )
 #ifdef __linux__
   // On unix, shared memory is not freed upon crash
   QSharedMemory unixSharedMemory( sharedMemorykey );
-  bool detach = false;
+  //bool detach = false;
   if ( unixSharedMemory.attach( ) == false )
   {
-    detach = unixSharedMemory.detach( );
+    /*detach = */unixSharedMemory.detach( );
   }
   unixSharedMemory.detach( );
 

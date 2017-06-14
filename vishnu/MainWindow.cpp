@@ -186,15 +186,15 @@ namespace vishnu
       Application* apicolatApp = new Application( APICOLAT );
 
       std::map<std::string, std::string> apicolatArgs;
-      apicolatArgs["launch.sh"] = "";
-      std::string apicolatWD = "../../../apicolat/";
+      apicolatArgs["launch.sh"] = ""; //TODO: change script
+      std::string apicolatWD = "../../../gmrvvissp/src/apicolat/";
       apicolatApp->addProcess( SUPERUSER, apicolatArgs, apicolatWD );
 
       std::map<std::string, std::string> wecoArgs;
       wecoArgs["-p"] = "12346";
       wecoArgs["-z"] = _zeqSession;
-      std::string wecoWD = "../../../weco/build/bin/";
-      apicolatApp->addProcess( "../../../weco/build/bin/WeCo", wecoArgs, wecoWD );
+      std::string wecoWD = "../";
+      apicolatApp->addProcess( "../bin/WeCo", wecoArgs, wecoWD );
 
       _apps[APICOLAT] = apicolatApp;
   }
@@ -206,12 +206,12 @@ namespace vishnu
 
       std::map<std::string, std::string> clintExplorerArgs;
       clintExplorerArgs[ _zeqSession ] = ""; //TODO: send -z first
-      std::string clintExplorerWD = "../../../ClintExplorer/build/bin/";
-      clintApp->addProcess( "../../../ClintExplorer/build/bin/ClintExplorer", clintExplorerArgs, clintExplorerWD );
+      std::string clintExplorerWD = "../";
+      clintApp->addProcess( "../bin/ClintExplorer", clintExplorerArgs, clintExplorerWD );
 
       std::map<std::string, std::string> clintArgs;
       clintArgs["-e"] = "shiny::runApp(appDir = 'CLINTv4.R', launch.browser = TRUE)";
-      std::string clintWD = "../../../Clint/";
+      std::string clintWD = "../../../gmrvvissp/src/clint/";
       clintApp->addProcess( "R", clintArgs, clintWD );
 
       _apps[CLINT] = clintApp;
@@ -223,8 +223,8 @@ namespace vishnu
       std::map<std::string, std::string> spineretArgs;
       spineretArgs["-z"] = _zeqSession;
       spineretArgs["-f"] = _ui->xmlFilename->text( ).toStdString( );
-      std::string spineretWD = "/home/gbayo/dev/spineret/build/bin";
-      spineretApp->addProcess( "../../../spineret/build/bin/CellExplorer", spineretArgs, spineretWD );
+      std::string spineretWD = "../";
+      spineretApp->addProcess( "../bin/CellExplorer", spineretArgs, spineretWD );
       _apps[SPINERET] = spineretApp;
   }
 
@@ -324,7 +324,7 @@ namespace vishnu
       if ( !app->second->getPushButton( )->isEnabled( ) )
       {
         std::cout << "Error destroying group: " << syncGroup->getOwner( ) << " is not closed." << std::endl;
-        QMessageBox::StandardButton reply = QMessageBox::warning(this, "Error destroying group",
+        QMessageBox::warning(this, "Error destroying group",
           "Error destroying group: " + QString::fromStdString( syncGroup->getOwner( ) ) +
           " is not closed.", QMessageBox::Ok);
         return;
