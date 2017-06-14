@@ -18,7 +18,7 @@ Win7-VS14-x64-subproject:
 Ubuntu-subproject:
   stage: build
   script:
-  - module load Qt-5.5
+  - module load Qt-5.9
   - bash .gitlab-ci.sh
   tags:
   - ubuntu
