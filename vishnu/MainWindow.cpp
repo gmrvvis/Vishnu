@@ -22,7 +22,6 @@ namespace vishnu
     : QMainWindow( parent )
     , _ui( new Ui::MainWindow )
     , _zeqSession( args["-z"] )
-    , _closingProcesses( false )
   {
     _ui->setupUi( this );
 
@@ -67,12 +66,9 @@ namespace vishnu
     delete _ui;
     for ( const auto& app : _apps )
     {
-      for( const auto& process : app.second->getProcesses( ) )
+      if ( app.second->isOpen( ) )
       {
-        if ( process->isOpen( ) )
-        {
-          process->terminate( );
-        }
+        app.second->terminate( );
       }
     }
   }
@@ -122,38 +118,16 @@ namespace vishnu
       std::cout << qProcess->program( ).toStdString( ) << " closed successfully." << std::endl;
     }
 
-    if (!_closingProcesses)
+    //Look for running app
+    for (  auto app : _apps )
     {
-      //Prevent other processes to enter in loop
-      _closingProcesses = true;
-
-      //Look for running app
-      for ( const auto& app : _apps )
+      if ( app.second->program( ) == qProcess->program( ) )
       {
-        for (const auto& process : app.second->getProcesses( ) )
-        {
-          if ( process->program( ) == qProcess->program( ) )
-          {
-            //Force close rest of processes of same app
-            for (const auto& process2 : app.second->getProcesses( ) )
-            {
-              if ( process2->isOpen( ) )
-              {
-                process2->terminate( );
-                process2->setProgram( QString( ) );
-              }
-            }
-
-            //Finally, re-enabled app button
-            app.second->getPushButton( )->setEnabled( true );
-
-            //Reset
-            _closingProcesses = false;
-
-            //No need to loop over other processes of same app
-            break;
-          }
-        }
+        //app.second->setProgram( QString( ) );
+        disconnect( app.second, SIGNAL( finished ( int , QProcess::ExitStatus ) ),
+          this, SLOT( app_closed( int , QProcess::ExitStatus ) ) );
+        app.second->getPushButton( )->setEnabled( true );
+        break;
       }
     }
   }
@@ -164,14 +138,11 @@ namespace vishnu
     {                
       for ( const auto& app : _apps )
       {
-        for (const auto& process : app.second->getProcesses( ) )
+        std::map<std::string, std::string> args = app.second->getArguments();
+        auto it = args.find("-f");
+        if ( it != args.end( ) )
         {
-          std::map<std::string, std::string> args = process->getArguments();
-          auto it = args.find("-f");
-          if ( it != args.end( ) )
-          {
-            process->setArgument( "-f", _ui->xmlFilename->text().toStdString( ) );
-          }
+          app.second->setArgument( "-f", _ui->xmlFilename->text().toStdString( ) );
         }
 
         //TODO: parse XML in order to enable buttons instead of enabling all of them
@@ -182,49 +153,42 @@ namespace vishnu
 
   void MainWindow::loadApicolat()
   {
-      //Apicolat
-      Application* apicolatApp = new Application( APICOLAT );
-
-      std::map<std::string, std::string> apicolatArgs;
-      apicolatArgs["launch.sh"] = ""; //TODO: change script
-      std::string apicolatWD = "../../../gmrvvissp/src/apicolat/";
-      apicolatApp->addProcess( SUPERUSER, apicolatArgs, apicolatWD );
-
+      std::string wecoShellCommand = "../bin/WeCo";
       std::map<std::string, std::string> wecoArgs;
       wecoArgs["-p"] = "12346";
       wecoArgs["-z"] = _zeqSession;
       std::string wecoWD = "../";
-      apicolatApp->addProcess( "../bin/WeCo", wecoArgs, wecoWD );
+
+      Application* apicolatApp = new Application( APICOLAT, wecoShellCommand,
+        wecoArgs, wecoWD );
 
       _apps[APICOLAT] = apicolatApp;
   }
 
   void MainWindow::loadClint()
   {
-      //Clint
-      Application* clintApp = new Application( CLINT );
-
+      std::string clintExplorerShellCommand = "../bin/ClintExplorer";
       std::map<std::string, std::string> clintExplorerArgs;
       clintExplorerArgs[ _zeqSession ] = ""; //TODO: send -z first
       std::string clintExplorerWD = "../";
-      clintApp->addProcess( "../bin/ClintExplorer", clintExplorerArgs, clintExplorerWD );
 
-      std::map<std::string, std::string> clintArgs;
-      clintArgs["-e"] = "shiny::runApp(appDir = 'CLINTv4.R', launch.browser = TRUE)";
-      std::string clintWD = "../../../gmrvvissp/src/clint/";
-      clintApp->addProcess( "R", clintArgs, clintWD );
+      Application* clintApp = new Application( CLINT, clintExplorerShellCommand,
+        clintExplorerArgs, clintExplorerWD );
 
       _apps[CLINT] = clintApp;
   }
 
   void MainWindow::loadSpineret()
   {
-      Application* spineretApp = new Application( SPINERET );
+      std::string spineretShellCommand = "../bin/CellExplorer";
       std::map<std::string, std::string> spineretArgs;
       spineretArgs["-z"] = _zeqSession;
       spineretArgs["-f"] = _ui->xmlFilename->text( ).toStdString( );
       std::string spineretWD = "../";
-      spineretApp->addProcess( "../bin/CellExplorer", spineretArgs, spineretWD );
+
+      Application* spineretApp = new Application( SPINERET, spineretShellCommand,
+        spineretArgs, spineretWD );
+
       _apps[SPINERET] = spineretApp;
   }
 
@@ -238,14 +202,40 @@ namespace vishnu
       return;
     }
     std::string appName;
-    Application* app;
-    std::map< std::string, Application* >::iterator it;
-    for ( it = _apps.begin( ); it != _apps.end( ); ++it )
+    for (const auto& it : _apps )
     {
-      if ( it->second->getPushButton( ) == appButton)
-      {
-        appName = it->first;
-        app = it->second;
+      if ( it.second->getPushButton( ) == appButton)
+      {        
+        appName = it.first;
+
+        std::cout << "Opening " << appName << std::endl;
+
+        it.second->getPushButton( )->setEnabled( false );
+        it.second->setReadChannel( QProcess::StandardOutput );
+        //it.second->setProcessChannelMode(QProcess::ForwardedChannels); //DEBUG
+        it.second->waitForReadyRead( );
+        it.second->readAllStandardOutput( );
+
+        QStringList arguments;
+        for(const auto& arg : it.second->getArguments( ) )
+        {
+          arguments << QString::fromStdString( arg.first );
+          if ( arg.second != "" )
+          {
+            arguments << QString::fromStdString( arg.second );
+          }
+        }
+
+        it.second->start(
+          QString::fromStdString( it.second->getShellCommand( ) ),
+          arguments
+        );
+
+        QByteArray out_data = it.second->readAllStandardOutput( );
+        QString out_string( out_data );
+        std::cout << out_string.toStdString( ).c_str( ) << std::endl;
+        connect( it.second, SIGNAL( finished ( int , QProcess::ExitStatus ) ),
+          this, SLOT( app_closed( int , QProcess::ExitStatus ) ) );
         break;
       }
     }
@@ -254,38 +244,7 @@ namespace vishnu
       std::cerr << "Error: App not found!" << std::endl;
       return;
     }
-    std::cout << "Opening " << appName << std::endl;
 
-    app->getPushButton( )->setEnabled( false );
-
-    for (const auto& process : app->getProcesses( ) )
-    {
-      process->setReadChannel( QProcess::StandardOutput );
-      //process->setProcessChannelMode(QProcess::ForwardedChannels);
-      process->waitForReadyRead( );
-      process->readAllStandardOutput( );
-
-      QStringList arguments;
-      for(const auto& arg : process->getArguments( ) )
-      {
-          arguments << QString::fromStdString( arg.first );
-          if ( arg.second != "" )
-          {
-              arguments << QString::fromStdString( arg.second );
-          }
-      }
-
-      process->start(
-        QString::fromStdString( process->getShellCommand( ) ),
-        arguments
-      );
-
-      QByteArray out_data = process->readAllStandardOutput( );
-      QString out_string( out_data );
-      std::cout << out_string.toStdString( ).c_str( ) << std::endl;
-      connect( process, SIGNAL( finished ( int , QProcess::ExitStatus ) ),
-        this, SLOT( app_closed( int , QProcess::ExitStatus ) ) );
-    }
   }
 
   void MainWindow::removeGroup_clicked( )
@@ -395,7 +354,7 @@ namespace vishnu
     auto gp = qMakePair( -1, -1 );
     int rs, cs;
     _ui->groupsGridLayout->getItemPosition( index, &gp.first, &gp.second, &rs, &cs );
-    unsigned int row = gp.first;
+    int row = gp.first;
 
     // Remove row from grid
     Auxiliars::removeRow( _ui->groupsGridLayout, row );

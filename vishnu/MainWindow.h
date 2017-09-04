@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QProcess>
-#include <mutex>
+#include <QMutex>
 #include "Application.hpp"
 #include "SyncGroup.hpp"
 #include "WidgetsGroup.hpp"

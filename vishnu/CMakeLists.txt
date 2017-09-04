@@ -18,7 +18,6 @@ set( VISHNU_SOURCES
   MainWindow.cpp
   main.cpp
   Application.cpp
-  Process.cpp
   SyncGroup.cpp
   WidgetsGroup.cpp
 )
@@ -27,7 +26,6 @@ set( VISHNU_HEADERS
   MainWindow.ui
   MainWindow.h
   Application.hpp
-  Process.hpp
   SyncGroup.hpp
   resources.qrc
   WidgetsGroup.hpp
@@ -39,6 +37,7 @@ set( VISHNU_LINK_LIBRARIES
   Qt5::Core
   Qt5::Gui
   Qt5::Widgets
+  Qt5::Network
   manco
 )
 

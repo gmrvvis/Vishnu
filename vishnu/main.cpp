@@ -6,10 +6,9 @@
 
 #include "MainWindow.h"
 #include "utils/Auxiliars.hpp"
+#include "Definitions.hpp"
 
 #include <fstream>
-
-#define DEFAULT_ZEQ_SESSION "hbp://"
 
 int main( int argc, char *argv[] )
 {

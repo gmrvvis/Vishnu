@@ -34,7 +34,7 @@ set( COMMON_PROJECT_DOMAIN gmrv.es )
 
 include( Common )
 
-common_find_package( Qt5 5.9 SYSTEM REQUIRED COMPONENTS Core Widgets )
+common_find_package( Qt5 5.9 SYSTEM REQUIRED COMPONENTS Core Widgets Network )
 common_find_package( manco REQUIRED )
 
 common_find_package_post( )
@@ -43,6 +43,7 @@ list( APPEND VISHNU_DEPENDENT_LIBRARIES
   Qt5::Core 
   Qt5::Gui 
   Qt5::Widgets 
+  Qt5::Network
   manco 
 )
 
