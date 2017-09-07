@@ -17,13 +17,15 @@ int main( int argc, char *argv[] )
   QApplication::setApplicationName( "Launcher" );
   QApplication::setOrganizationName( "GMRV - URJC" );
 
-  const QString sharedMemorykey = QApplication::applicationName( ) + QString( "-Key" );
-  const QString semaphoreKey = QApplication::applicationName( ) + QString( "-SemKey" );
+  const QString sharedMemorykey = QApplication::applicationName( ) +
+    QString( "-Key" );
+  const QString semaphoreKey = QApplication::applicationName( ) +
+    QString( "-SemKey" );
 
   QSystemSemaphore semaphore( semaphoreKey, 1 );
   semaphore.acquire();
 
-#ifdef __linux__
+  #ifdef __linux__
   // On unix, shared memory is not freed upon crash
   QSharedMemory unixSharedMemory( sharedMemorykey );
   //bool detach = false;
@@ -32,8 +34,7 @@ int main( int argc, char *argv[] )
     /*detach = */unixSharedMemory.detach( );
   }
   unixSharedMemory.detach( );
-
-#endif
+  #endif
 
   QSharedMemory sharedMemory( sharedMemorykey );
   bool running = sharedMemory.attach( );
@@ -55,21 +56,22 @@ int main( int argc, char *argv[] )
   std::map<std::string, std::string> args = Auxiliars::splitArgs( argc, argv );
 
    //ZeqSession
-  auto it = args.find("-z");
+  auto it = args.find( "-z" );
   if ( it == args.end( ) )
   {
     args["-z"] = DEFAULT_ZEQ_SESSION;
   }
 
   //XML filename
-  it = args.find("-f");
+  it = args.find( "-f" );
   if ( it != args.end( ) )
   {
     std::ifstream fileExists( it->second );
     if ( !fileExists )
     {
       args.erase( it );
-      std::cerr << "Info: Filename '" << it->second << "'' not found!" << std::endl;
+      std::cerr << "Info: Filename '" << it->second << "'' not found!" <<
+        std::endl;
     }
   }
 

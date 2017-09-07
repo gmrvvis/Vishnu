@@ -8,8 +8,10 @@ namespace vishnu
 
   }
 
-  SyncGroup::SyncGroup( const std::string& key, const std::string& name, const std::string& owner,
-    const std::vector<std::string>& ids, const unsigned int& red, const unsigned int& green, const unsigned int& blue )
+  SyncGroup::SyncGroup( const std::string& key, const std::string& name,
+    const std::string& owner, const std::vector<std::string>& ids,
+    const unsigned int& red, const unsigned int& green,
+    const unsigned int& blue )
   {
     _key = key;
     _name = name;
@@ -72,6 +74,5 @@ namespace vishnu
   {
       _color = color;
   }
-
 
 }

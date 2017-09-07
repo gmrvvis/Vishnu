@@ -11,8 +11,10 @@ namespace vishnu
   {
   public:
     SyncGroup( );
-    SyncGroup( const std::string& key, const std::string& name, const std::string& owner,
-        const std::vector<std::string>& ids, const unsigned int& red, const unsigned int& green, const unsigned int& blue );
+    SyncGroup( const std::string& key, const std::string& name,
+      const std::string& owner, const std::vector<std::string>& ids,
+      const unsigned int& red, const unsigned int& green,
+      const unsigned int& blue );
     ~SyncGroup();
 
     std::string getKey( );

@@ -24,47 +24,47 @@ namespace vishnu
   {
     Q_OBJECT
 
-  public:
-    explicit MainWindow(std::map<std::string, std::string> args,
-      QWidget *parent = 0 );
-    ~MainWindow();
+    public:
+      explicit MainWindow(std::map<std::string, std::string> args,
+        QWidget *parent = 0 );
+      ~MainWindow();
 
-  protected:
-    void closeEvent( QCloseEvent *event ) override;
+    protected:
+      void closeEvent( QCloseEvent *event ) override;
 
-  private slots:
-    void buttonLoadXml_clicked( );
-    void pushButtonApp_clicked( );
-    void app_closed( int exitCode, QProcess::ExitStatus exitStatus );
-    void loadApicolat();
-    void loadClint();
-    void loadSpineret();
-    void checkApps( );
-    void removeGroup_clicked( );
-    void createGroup( const QString& qKey );
-    void changeGroupName( const QString& qKey, const QString& qNewName );
-    void destroyGroup(const QString& qKey);
+    private slots:
+      void buttonLoadXml_clicked( );
+      void pushButtonApp_clicked( );
+      void app_closed( int exitCode, QProcess::ExitStatus exitStatus );
+      void loadApicolat();
+      void loadClint();
+      void loadSpineret();
+      void checkApps( );
+      void removeGroup_clicked( );
+      void createGroup( const QString& qKey );
+      void changeGroupName( const QString& qKey, const QString& qNewName );
+      void destroyGroup(const QString& qKey);
 
-  private:
-    vishnu::Ui::MainWindow *_ui;
-    std::string _zeqSession;
-    bool _closingProcesses;
-    std::map<std::string, Application*> _apps; //appName, Application
-    std::map<std::string, SyncGroup*> _syncGroups; //key, SyncGroup
-    std::map<std::string, WidgetsGroup*> _widgetsGroups; //key, WidgetsGroup
+    private:
+      vishnu::Ui::MainWindow *_ui;
+      std::string _zeqSession;
+      bool _closingProcesses;
+      std::map<std::string, Application*> _apps; //appName, Application
+      std::map<std::string, SyncGroup*> _syncGroups; //key, SyncGroup
+      std::map<std::string, WidgetsGroup*> _widgetsGroups; //key, WidgetsGroup
+      void initZeqSession( );
+      void receivedSyncGroup( zeroeq::gmrv::ConstSyncGroupPtr o );
+      void receivedChangeNameGroupUpdate(
+        zeroeq::gmrv::ConstChangeNameGroupPtr o );
+      void receivedDestroyGroup( zeroeq::gmrv::ConstDestroyGroupPtr o );
 
-    void initZeqSession( );
-    void receivedSyncGroup( zeroeq::gmrv::ConstSyncGroupPtr o );
-    void receivedChangeNameGroupUpdate( zeroeq::gmrv::ConstChangeNameGroupPtr o );
-    void receivedDestroyGroup( zeroeq::gmrv::ConstDestroyGroupPtr o );
-
-  signals:
-    void signalCreateGroup( const QString& );
-    void signalChangeGroupName( const QString&, const QString& );
-    void signalDestroyGroup( const QString& );
-
+    signals:
+      void signalCreateGroup( const QString& );
+      void signalChangeGroupName( const QString&, const QString& );
+      void signalDestroyGroup( const QString& );
   };
 
 }
+
 #endif // MAINWINDOW_H
 

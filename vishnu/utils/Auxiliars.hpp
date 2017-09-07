@@ -3,6 +3,8 @@
 
 #include <QLayoutItem>
 #include <QGridLayout>
+#include <string>
+#include <iostream>
 
 #define DASH '-'
 
@@ -98,6 +100,13 @@ public:
       }
     }
     return args;
+  }
+
+  static void consoleDebugMessage(std::string message)
+  {
+    #ifndef NDEBUG
+      std::cout << "[DEBUG]: " << message << std::endl;
+    #endif
   }
 
 };

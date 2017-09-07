@@ -16,7 +16,6 @@
 
 namespace vishnu
 {
-
   MainWindow::MainWindow( std::map<std::string, std::string> args,
     QWidget *parent )
     : QMainWindow( parent )
@@ -25,14 +24,15 @@ namespace vishnu
   {
     _ui->setupUi( this );
 
-    auto it = args.find("-f");
+    auto it = args.find( "-f" );
     if ( it != args.end( ) )
     {
       _ui->xmlFilename->setText( QString::fromStdString( args["-f"] ) );
       checkApps( );
     }
 
-    connect( _ui->buttonLoadXml, SIGNAL( clicked( bool ) ), this, SLOT( buttonLoadXml_clicked( ) ) );
+    connect( _ui->buttonLoadXml, SIGNAL( clicked( bool ) ), this,
+      SLOT( buttonLoadXml_clicked( ) ) );
 
     loadApicolat();
     loadClint();
@@ -41,7 +41,8 @@ namespace vishnu
     for ( const auto& app : _apps )
     {
       _ui->verticalLayout_2->addWidget( app.second->getPushButton( ) );
-      connect( app.second->getPushButton( ), SIGNAL( clicked( bool ) ), this, SLOT( pushButtonApp_clicked( ) ) );
+      connect( app.second->getPushButton( ), SIGNAL( clicked( bool ) ), this,
+        SLOT( pushButtonApp_clicked( ) ) );
     }
 
     //TODO: fix height
@@ -51,8 +52,9 @@ namespace vishnu
     connect( this, SIGNAL( signalCreateGroup( const QString& ) ),
       SLOT( createGroup( const QString& ) ), Qt::QueuedConnection );
 
-    connect( this, SIGNAL( signalChangeGroupName( const QString&, const QString& ) ),
-      SLOT( changeGroupName( const QString&, const QString& ) ), Qt::QueuedConnection );
+    connect( this, SIGNAL( signalChangeGroupName( const QString&,
+      const QString& ) ), SLOT( changeGroupName( const QString&,
+      const QString& ) ), Qt::QueuedConnection );
 
     connect( this, SIGNAL( signalDestroyGroup( const QString& ) ),
       SLOT( destroyGroup( const QString& ) ), Qt::QueuedConnection );
@@ -75,9 +77,11 @@ namespace vishnu
 
   void MainWindow::closeEvent( QCloseEvent * )
   {
-    /*QMessageBox::StandardButton result = QMessageBox::question( this,
+    /*
+    QMessageBox::StandardButton result = QMessageBox::question( this,
       QString( "Launcher" ), QString( "Are you sure?\n" ),
-      QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes, QMessageBox::Yes );
+      QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
+      QMessageBox::Yes );
 
     if ( result != QMessageBox::Yes )
     {
@@ -93,7 +97,8 @@ namespace vishnu
   void MainWindow::buttonLoadXml_clicked( )
   {
     QString fileDialog = QFileDialog::getOpenFileName( this,
-      QString( "Choose XML file" ), QString( "" ), QString( "XML-Files(*.xml)" ) );
+      QString( "Choose XML file" ), QString( "" ),
+      QString( "XML-Files(*.xml)" ) );
 
     if ( !fileDialog.isEmpty( ) )
     {
@@ -107,15 +112,18 @@ namespace vishnu
     QProcess* qProcess = qobject_cast< QProcess* >( sender( ) );
     if ( exitStatus == QProcess::CrashExit )
     {
-      std::cerr << "Error: " << qProcess->program( ).toStdString( ) << " crashed!" << std::endl;
+      std::cerr << "Error: " << qProcess->program( ).toStdString( ) <<
+        " crashed!" << std::endl;
     }
     else if ( exitCode != 0 )
     {
-      std::cerr << "Error: " << qProcess->program( ).toStdString( ) << " failed!" << std::endl;
+      std::cerr << "Error: " << qProcess->program( ).toStdString( ) <<
+        " failed!" << std::endl;
     }
     else
     {
-      std::cout << qProcess->program( ).toStdString( ) << " closed successfully." << std::endl;
+      std::cout << qProcess->program( ).toStdString( ) <<
+        " closed successfully." << std::endl;
     }
 
     //Look for running app
@@ -124,8 +132,9 @@ namespace vishnu
       if ( app.second->program( ) == qProcess->program( ) )
       {
         //app.second->setProgram( QString( ) );
-        disconnect( app.second, SIGNAL( finished ( int , QProcess::ExitStatus ) ),
-          this, SLOT( app_closed( int , QProcess::ExitStatus ) ) );
+        disconnect( app.second, SIGNAL( finished ( int ,
+          QProcess::ExitStatus ) ), this,
+          SLOT( app_closed( int, QProcess::ExitStatus ) ) );
         app.second->getPushButton( )->setEnabled( true );
         break;
       }
@@ -142,10 +151,12 @@ namespace vishnu
         auto it = args.find("-f");
         if ( it != args.end( ) )
         {
-          app.second->setArgument( "-f", _ui->xmlFilename->text().toStdString( ) );
+          app.second->setArgument( "-f",
+            _ui->xmlFilename->text().toStdString( ) );
         }
 
-        //TODO: parse XML in order to enable buttons instead of enabling all of them
+        //TODO: parse XML in order to enable buttons instead of
+        //enabling all of them
         app.second->getPushButton( )->setEnabled( true );
       }
     }
@@ -153,43 +164,43 @@ namespace vishnu
 
   void MainWindow::loadApicolat()
   {
-      std::string wecoShellCommand = "../bin/WeCo";
-      std::map<std::string, std::string> wecoArgs;
-      wecoArgs["-p"] = "12346";
-      wecoArgs["-z"] = _zeqSession;
-      std::string wecoWD = "../";
+    std::string wecoShellCommand = "../bin/WeCo";
+    std::map<std::string, std::string> wecoArgs;
+    wecoArgs["-p"] = "12346";
+    wecoArgs["-z"] = _zeqSession;
+    std::string wecoWD = "../";
 
-      Application* apicolatApp = new Application( APICOLAT, wecoShellCommand,
-        wecoArgs, wecoWD );
+    Application* apicolatApp = new Application( APICOLAT, wecoShellCommand,
+      wecoArgs, wecoWD );
 
-      _apps[APICOLAT] = apicolatApp;
+    _apps[APICOLAT] = apicolatApp;
   }
 
   void MainWindow::loadClint()
   {
-      std::string clintExplorerShellCommand = "../bin/ClintExplorer";
-      std::map<std::string, std::string> clintExplorerArgs;
-      clintExplorerArgs[ _zeqSession ] = ""; //TODO: send -z first
-      std::string clintExplorerWD = "../";
+    std::string clintExplorerShellCommand = "../bin/ClintExplorer";
+    std::map<std::string, std::string> clintExplorerArgs;
+    clintExplorerArgs[ _zeqSession ] = ""; //TODO: send -z first
+    std::string clintExplorerWD = "../";
 
-      Application* clintApp = new Application( CLINT, clintExplorerShellCommand,
-        clintExplorerArgs, clintExplorerWD );
+    Application* clintApp = new Application( CLINT, clintExplorerShellCommand,
+      clintExplorerArgs, clintExplorerWD );
 
-      _apps[CLINT] = clintApp;
+    _apps[CLINT] = clintApp;
   }
 
   void MainWindow::loadSpineret()
   {
-      std::string spineretShellCommand = "../bin/CellExplorer";
-      std::map<std::string, std::string> spineretArgs;
-      spineretArgs["-z"] = _zeqSession;
-      spineretArgs["-f"] = _ui->xmlFilename->text( ).toStdString( );
-      std::string spineretWD = "../";
+    std::string spineretShellCommand = "../bin/CellExplorer";
+    std::map<std::string, std::string> spineretArgs;
+    spineretArgs["-z"] = _zeqSession;
+    spineretArgs["-f"] = _ui->xmlFilename->text( ).toStdString( );
+    std::string spineretWD = "../";
 
-      Application* spineretApp = new Application( SPINERET, spineretShellCommand,
-        spineretArgs, spineretWD );
+    Application* spineretApp = new Application( SPINERET, spineretShellCommand,
+      spineretArgs, spineretWD );
 
-      _apps[SPINERET] = spineretApp;
+    _apps[SPINERET] = spineretApp;
   }
 
 
@@ -208,7 +219,7 @@ namespace vishnu
       {        
         appName = it.first;
 
-        std::cout << "Opening " << appName << std::endl;
+        Auxiliars::consoleDebugMessage( "Opening " + appName );
 
         it.second->getPushButton( )->setEnabled( false );
         it.second->setReadChannel( QProcess::StandardOutput );
@@ -282,10 +293,11 @@ namespace vishnu
     {
       if ( !app->second->getPushButton( )->isEnabled( ) )
       {
-        std::cout << "Error destroying group: " << syncGroup->getOwner( ) << " is not closed." << std::endl;
-        QMessageBox::warning(this, "Error destroying group",
-          "Error destroying group: " + QString::fromStdString( syncGroup->getOwner( ) ) +
-          " is not closed.", QMessageBox::Ok);
+        std::cout << "Error destroying group: " << syncGroup->getOwner( ) <<
+          " is not closed." << std::endl;
+        QMessageBox::warning( this, "Error destroying group",
+          "Error destroying group: " + QString::fromStdString(
+          syncGroup->getOwner( ) ) + " is not closed.", QMessageBox::Ok );
         return;
       }
     }
@@ -296,8 +308,9 @@ namespace vishnu
     }
 
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::warning(this, "Remove group", "Do you want to remove '" +
-      QString::fromStdString( key ) + "'' group?", QMessageBox::Yes|QMessageBox::No);
+    reply = QMessageBox::warning( this, "Remove group",
+      "Do you want to remove '" + QString::fromStdString( key ) + "'' group?",
+      QMessageBox::Yes|QMessageBox::No );
     if ( reply == QMessageBox::Yes )
     {
       destroyGroup( QString::fromStdString( key ) );
@@ -311,12 +324,15 @@ namespace vishnu
     auto syncGroup = _syncGroups.at( key );   
 
     //Add group to widgets groups
-    QLabel* nameLabel = new QLabel( QString::fromStdString( syncGroup->getName( ) ) );
-    QLabel* ownerLabel = new QLabel( QString::fromStdString( syncGroup->getOwner( ) ) );
+    QLabel* nameLabel = new QLabel(
+      QString::fromStdString( syncGroup->getName( ) ) );
+    QLabel* ownerLabel = new QLabel(
+      QString::fromStdString( syncGroup->getOwner( ) ) );
     QPushButton* closePushButton = new QPushButton( );
     closePushButton->setIcon( QIcon( ":/icons/iconClose.png" ) );
 
-    _widgetsGroups[ key ] = new WidgetsGroup( nameLabel, ownerLabel, closePushButton );
+    _widgetsGroups[ key ] = new WidgetsGroup( nameLabel, ownerLabel,
+      closePushButton );
 
     //Add group to grid layout
     _ui->groupsGridLayout->addWidget( nameLabel );
@@ -324,10 +340,12 @@ namespace vishnu
     _ui->groupsGridLayout->addWidget( closePushButton );
 
     //Add close push button event
-    connect( closePushButton, SIGNAL( clicked( bool ) ), this, SLOT( removeGroup_clicked( ) ) );
+    connect( closePushButton, SIGNAL( clicked( bool ) ), this,
+      SLOT( removeGroup_clicked( ) ) );
   }
 
-  void MainWindow::changeGroupName( const QString& qKey, const QString& qNewName )
+  void MainWindow::changeGroupName( const QString& qKey,
+    const QString& qNewName )
   {
     std::string key = qKey.toStdString( );
     std::string newName = qNewName.toStdString( );
@@ -342,8 +360,9 @@ namespace vishnu
     QLabel* nameLabel = widgetsGroup->getNameLabel( );
     nameLabel->setText( qNewName );
 
-    std::cout << "Group: " << key << ". Changed group name '" << name <<
-      "'' to '" << newName << "' successfully." << std::endl;
+    Auxiliars::consoleDebugMessage( "Group: '" + key +
+      "' - Changed group name '" + name + "'' to '" + newName +
+      "' successfully." );
   }
 
   void MainWindow::destroyGroup( const QString& qKey )
@@ -353,7 +372,8 @@ namespace vishnu
     int index = _ui->groupsGridLayout->indexOf( widget );
     auto gp = qMakePair( -1, -1 );
     int rs, cs;
-    _ui->groupsGridLayout->getItemPosition( index, &gp.first, &gp.second, &rs, &cs );
+    _ui->groupsGridLayout->getItemPosition( index, &gp.first, &gp.second, &rs,
+      &cs );
     int row = gp.first;
 
     // Remove row from grid
@@ -365,7 +385,8 @@ namespace vishnu
     // Remove group from map
     _syncGroups.erase( key );
 
-    std::cout << "Group: " << key << " removed successfully." << std::endl;
+    Auxiliars::consoleDebugMessage("Group: '" + key +
+      "' removed successfully.");
   }
 
   void MainWindow::initZeqSession( )
@@ -373,24 +394,35 @@ namespace vishnu
     std::cout << "Init ZeqSession ( " << _zeqSession << " )" << std::endl;
     manco::ZeqManager::instance( ).init( _zeqSession );
     manco::ZeqManager::instance( ).setReceivedSyncGroupCallback(
-      std::bind( &MainWindow::receivedSyncGroup, this, std::placeholders::_1 ) );
+      std::bind( &MainWindow::receivedSyncGroup, this,
+      std::placeholders::_1 ) );
     manco::ZeqManager::instance( ).setReceivedChangeNameGroupUpdateCallback(
-      std::bind( &MainWindow::receivedChangeNameGroupUpdate, this, std::placeholders::_1 ) );
+      std::bind( &MainWindow::receivedChangeNameGroupUpdate, this,
+      std::placeholders::_1 ) );
     manco::ZeqManager::instance( ).setReceivedDestroyGroupCallback(
-      std::bind( &MainWindow::receivedDestroyGroup, this, std::placeholders::_1 ) );
+      std::bind( &MainWindow::receivedDestroyGroup, this,
+      std::placeholders::_1 ) );
   }
 
   void MainWindow::receivedSyncGroup( zeroeq::gmrv::ConstSyncGroupPtr o )
   {
     std::vector<unsigned int> color = o->getColorVector( );
-    std::vector< std::string > vectorIds = manco::ZeqManager::split( o->getIdsString( ), DELIMITER );
-    /*std::cout << "DEBUG: Received SyncGroup ( " <<
-      "\n\tkey: " << o->getKeyString( ) <<
-      "\n\tname: " << o->getNameString( ) <<
-      "\n\towner: " << o->getOwnerString( ) <<
-      "\n\tcolor: (" << color[0] << ", " << color[1] << ", "  << color[2] << ")" <<
-      "\n\tids: (... commented ...)";
-    */
+    std::vector< std::string > vectorIds = manco::ZeqManager::split(
+      o->getIdsString( ), DELIMITER );
+
+    std::string message = std::string( "Received SyncGroup (" ) +
+      std::string( "\n\tkey: " ) + o->getKeyString( ) +
+      std::string( "\n\tname: " ) + o->getNameString( ) +
+      std::string( "\n\towner: " ) + o->getOwnerString( ) +
+      std::string( "\n\tcolor: (" ) +
+      std::to_string( color[0] ) + std::string( ", " ) +
+      std::to_string( color[1] ) + std::string( ", " ) +
+      std::to_string( color[2] ) +
+      std::string( ")" ) +
+      std::string( "\n\tids: (... commented ...)" );
+
+    Auxiliars::consoleDebugMessage( message );
+
     /*"\n\tids: ";
     for ( auto it = vectorIds.begin( ); it != vectorIds.end( ); ++it )
     {
@@ -412,10 +444,11 @@ namespace vishnu
       _syncGroups[ key ]= syncGroup;
 
       //Set widgets group     
-      emit signalChangeGroupName( QString::fromStdString( syncGroup->getKey( ) ),
-        QString::fromStdString( o->getNameString( ) ) );
+      emit signalChangeGroupName( QString::fromStdString(
+        syncGroup->getKey( ) ), QString::fromStdString( o->getNameString( ) ) );
 
-      std::cout << "Group: " << key << " changed successfully." << std::endl;
+      Auxiliars::consoleDebugMessage("Group: '" + key +
+        "' changed successfully.");
     }
     else
     {
@@ -425,18 +458,22 @@ namespace vishnu
       //Add widgets group
       emit signalCreateGroup( QString::fromStdString( syncGroup->getKey( ) ) );
 
-      std::cout << "Group: " << key << " created successfully." << std::endl;
+      Auxiliars::consoleDebugMessage("Group: '" + key +
+        "' created successfully.");
     }
   }
 
-  void MainWindow::receivedChangeNameGroupUpdate( zeroeq::gmrv::ConstChangeNameGroupPtr o )
+  void MainWindow::receivedChangeNameGroupUpdate(
+    zeroeq::gmrv::ConstChangeNameGroupPtr o )
   {
     std::string key = o->getKeyString( );
-    //std::cout << "DEBUG: Received ChangeNameGroupUpdate, key: " << key << std::endl;
+    //std::cout << "DEBUG: Received ChangeNameGroupUpdate, key: " << key <<
+    //  std::endl;
     auto syncGroup = _syncGroups[ key ];
     if ( syncGroup == nullptr )
     {
-      std::cerr << "Info: " << key << " group doesn't exist, ignoring change name group callback." << std::endl;
+      Auxiliars::consoleDebugMessage("Group: '" + key + "' doesn't exist, " +
+        "ignoring change name group callback.");
       return;
     }
 
@@ -451,7 +488,8 @@ namespace vishnu
     auto syncGroup = _syncGroups.find( key );
     if ( syncGroup == _syncGroups.end( ) )
     {
-      std::cerr << "Info: " << key << " group doesn't exist, ignoring destroy group callback." << std::endl;
+      Auxiliars::consoleDebugMessage("Group: '" + key + "' doesn't exist, " +
+        "ignoring destroy group callback.");
       return;
     }
     emit signalDestroyGroup( QString::fromStdString( key ) );

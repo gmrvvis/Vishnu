@@ -2,11 +2,13 @@
 
 namespace vishnu
 {
-  Application::Application( const std::string& appName, const std::string& shellCommand,
-                            const std::map<std::string, std::string>& arguments,
-                            const std::string& workingDirectory )
+  Application::Application( const std::string& appName,
+    const std::string& shellCommand,
+    const std::map<std::string, std::string>& arguments,
+    const std::string& workingDirectory )
   {
-    _pushButton = new QPushButton( capitalize( QString::fromStdString( appName ) ) );
+    _pushButton = new QPushButton( capitalize(
+      QString::fromStdString( appName ) ) );
     _pushButton->setEnabled( false );
 
     _shellCommand = shellCommand;
@@ -53,12 +55,14 @@ namespace vishnu
     return _arguments;
   }
 
-  void Application::setArguments( const std::map<std::string, std::string>& arguments )
+  void Application::setArguments( const std::map<std::string,
+    std::string>& arguments )
   {
     _arguments = arguments;
   }
 
-  void Application::setArgument( const std::string& type, const std::string& value)
+  void Application::setArgument( const std::string& type,
+    const std::string& value )
   {
     _arguments[type] = value;
   }
