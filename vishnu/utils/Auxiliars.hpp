@@ -102,7 +102,11 @@ public:
     return args;
   }
 
-  static void consoleDebugMessage(std::string message)
+#ifndef NDEBUG
+  static void consoleDebugMessage( const std::string& message )
+#else
+  static void consoleDebugMessage( const std::string& )
+#endif
   {
     #ifndef NDEBUG
       std::cout << "[DEBUG]: " << message << std::endl;
@@ -110,4 +114,5 @@ public:
   }
 
 };
+
 #endif /* __AUXILIARS__ */
