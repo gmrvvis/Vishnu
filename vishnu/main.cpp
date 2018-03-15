@@ -5,10 +5,11 @@
 #include <QSystemSemaphore>
 
 #include "MainWindow.h"
-#include "utils/Auxiliars.hpp"
 #include "Definitions.hpp"
 
 #include <fstream>
+
+#include <sp1common/Args.hpp>
 
 int main( int argc, char *argv[] )
 {
@@ -53,27 +54,7 @@ int main( int argc, char *argv[] )
     return 1;
   }
 
-  std::map<std::string, std::string> args = Auxiliars::splitArgs( argc, argv );
-
-   //ZeqSession
-  auto it = args.find( "-z" );
-  if ( it == args.end( ) )
-  {
-    args["-z"] = DEFAULT_ZEQ_SESSION;
-  }
-
-  //XML filename
-  it = args.find( "-f" );
-  if ( it != args.end( ) )
-  {
-    std::ifstream fileExists( it->second );
-    if ( !fileExists )
-    {
-      args.erase( it );
-      std::cerr << "Info: Filename '" << it->second << "'' not found!" <<
-        std::endl;
-    }
-  }
+  sp1common::Args args( argc, argv );
 
   vishnu::MainWindow window( args );
   QResource::registerResource( "resources.rcc" );

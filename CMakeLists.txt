@@ -1,3 +1,11 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+#   Vishnu
+#   2017 (c) GMRV / Universidad Rey Juan Carlos
+#   gmrv@gmrv.es
+#   www.gmrv.es
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 cmake_minimum_required( VERSION 3.1 )
 set( PROJECT_VERSION_MAJOR "1" )
 set( PROJECT_VERSION_MINOR "0" )
@@ -13,7 +21,8 @@ endif( )
 
 list( APPEND CMAKE_MODULE_PATH
   ${PROJECT_SOURCE_DIR}/CMake
-  ${CMAKE_SOURCE_DIR}/CMake/common )
+  ${CMAKE_SOURCE_DIR}/CMake/common
+)
 
 # Default build type is Debug
 if( NOT CMAKE_BUILD_TYPE )
@@ -29,13 +38,13 @@ include( GitExternal )
 set( VISHNU_DESCRIPTION "Vishnu" )
 set( COMMON_PROJECT_DOMAIN gmrv.es )
 
-# Allow warnings
-# set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w" )
-
 include( Common )
 
-common_find_package( Qt5 5.9 SYSTEM REQUIRED COMPONENTS Core Widgets Network )
+common_find_package( Qt5Core SYSTEM REQUIRED )
+common_find_package( Qt5Widgets SYSTEM REQUIRED )
+common_find_package( Qt5Network SYSTEM REQUIRED )
 common_find_package( manco REQUIRED )
+common_find_package( sp1common REQUIRED )
 
 common_find_package_post( )
 
@@ -44,18 +53,21 @@ list( APPEND VISHNU_DEPENDENT_LIBRARIES
   Qt5::Gui 
   Qt5::Widgets 
   Qt5::Network
-  manco 
+  manco
+  sp1common
 )
 
 add_subdirectory( vishnu )
 
-if( MSVC )
-  if( ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.6 )
-    # Set Vishnu as startup project on Visual Studio
-    set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
-	  PROPERTY VS_STARTUP_PROJECT "Vishnu" )
-  endif( )
+if( MSVC )  
+  # Set Vishnu as startup project on Visual Studio, CMake v3.6
+  if( CMAKE_VERSION VERSION_GREATER 3.6 )
+    set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT vishnu )
+  endif( )  
 endif( )
 
-include( CPackConfig )
+set( DOXYGEN_MAINPAGE_MD README.md )
+set( DOXYGEN_EXTRA_INPUT ${PROJECT_SOURCE_DIR}/README.md )
 include( DoxygenRule )
+
+include( CPackConfig )

@@ -9,9 +9,8 @@
 #include "SyncGroup.hpp"
 #include "WidgetsGroup.hpp"
 
-#define APICOLAT "APICOLAT"
-#define CLINT "CLINT"
-#define SPINERET "SPINERET"
+#include <manco/Enums.hpp>
+#include <sp1common/Args.hpp>
 
 namespace vishnu
 {
@@ -25,7 +24,7 @@ namespace vishnu
     Q_OBJECT
 
     public:
-      explicit MainWindow(std::map<std::string, std::string> args,
+      explicit MainWindow(sp1common::Args args,
         QWidget *parent = 0 );
       ~MainWindow();
 
@@ -36,9 +35,9 @@ namespace vishnu
       void buttonLoadXml_clicked( );
       void pushButtonApp_clicked( );
       void app_closed( int exitCode, QProcess::ExitStatus exitStatus );
-      void loadApicolat();
       void loadClint();
-      void loadSpineret();
+      void loadDCExplorer();
+      void loadPyramidal();
       void checkApps( );
       void removeGroup_clicked( );
       void createGroup( const QString& qKey );
@@ -49,7 +48,7 @@ namespace vishnu
       vishnu::Ui::MainWindow *_ui;
       std::string _zeqSession;
       bool _closingProcesses;
-      std::map<std::string, Application*> _apps; //appName, Application
+      std::map<manco::ApplicationType, Application*> _apps; //appName, Application
       std::map<std::string, SyncGroup*> _syncGroups; //key, SyncGroup
       std::map<std::string, WidgetsGroup*> _widgetsGroups; //key, WidgetsGroup
       void initZeqSession( );

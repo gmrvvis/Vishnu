@@ -16,27 +16,24 @@
 
 namespace vishnu
 {
-  MainWindow::MainWindow( std::map<std::string, std::string> args,
+  MainWindow::MainWindow( sp1common::Args args,
     QWidget *parent )
     : QMainWindow( parent )
     , _ui( new Ui::MainWindow )
-    , _zeqSession( args["-z"] )
   {
     _ui->setupUi( this );
 
-    auto it = args.find( "-f" );
-    if ( it != args.end( ) )
-    {
-      _ui->xmlFilename->setText( QString::fromStdString( args["-f"] ) );
-      checkApps( );
-    }
+    _zeqSession = args.get( "-z" );
+
+    _ui->xmlFilename->setText( QString::fromStdString( args.get( "-f" ) ) );
+    checkApps( );
 
     connect( _ui->buttonLoadXml, SIGNAL( clicked( bool ) ), this,
       SLOT( buttonLoadXml_clicked( ) ) );
 
-    loadApicolat();
     loadClint();
-    loadSpineret();
+    loadDCExplorer();
+    loadPyramidal();
 
     for ( const auto& app : _apps )
     {
@@ -162,20 +159,6 @@ namespace vishnu
     }
   }
 
-  void MainWindow::loadApicolat()
-  {
-    std::string wecoShellCommand = "../bin/WeCo";
-    std::map<std::string, std::string> wecoArgs;
-    wecoArgs["-p"] = "12346";
-    wecoArgs["-z"] = _zeqSession;
-    std::string wecoWD = "../";
-
-    Application* apicolatApp = new Application( APICOLAT, wecoShellCommand,
-      wecoArgs, wecoWD );
-
-    _apps[APICOLAT] = apicolatApp;
-  }
-
   void MainWindow::loadClint()
   {
     std::string clintExplorerShellCommand = "../bin/ClintExplorer";
@@ -183,13 +166,28 @@ namespace vishnu
     clintExplorerArgs[ _zeqSession ] = ""; //TODO: send -z first
     std::string clintExplorerWD = "../";
 
-    Application* clintApp = new Application( CLINT, clintExplorerShellCommand,
-      clintExplorerArgs, clintExplorerWD );
+    Application* clintApp = new Application( manco::ApplicationType::CLINT,
+      clintExplorerShellCommand, clintExplorerArgs, clintExplorerWD );
 
-    _apps[CLINT] = clintApp;
+    _apps[manco::ApplicationType::CLINT] = clintApp;
   }
 
-  void MainWindow::loadSpineret()
+  void MainWindow::loadDCExplorer()
+  {
+    std::string wecoShellCommand = "../bin/WeCo";
+    std::map<std::string, std::string> wecoArgs;
+    wecoArgs["-p"] = "12346";
+    wecoArgs["-z"] = _zeqSession;
+    std::string wecoWD = "../";
+
+    Application* apicolatApp = new Application(
+      manco::ApplicationType::DCEXPLORER, wecoShellCommand,
+      wecoArgs, wecoWD );
+
+    _apps[manco::ApplicationType::DCEXPLORER] = apicolatApp;
+  }
+
+  void MainWindow::loadPyramidal()
   {
     std::string spineretShellCommand = "../bin/CellExplorer";
     std::map<std::string, std::string> spineretArgs;
@@ -197,10 +195,11 @@ namespace vishnu
     spineretArgs["-f"] = _ui->xmlFilename->text( ).toStdString( );
     std::string spineretWD = "../";
 
-    Application* spineretApp = new Application( SPINERET, spineretShellCommand,
-      spineretArgs, spineretWD );
+    Application* spineretApp = new Application(
+      manco::ApplicationType::PYRAMIDAL, spineretShellCommand, spineretArgs,
+      spineretWD );
 
-    _apps[SPINERET] = spineretApp;
+    _apps[manco::ApplicationType::PYRAMIDAL] = spineretApp;
   }
 
 
@@ -212,14 +211,14 @@ namespace vishnu
       std::cerr << "Error: App not found!" << std::endl;
       return;
     }
-    std::string appName;
+    manco::ApplicationType appName;
     for (const auto& it : _apps )
     {
       if ( it.second->getPushButton( ) == appButton)
       {        
         appName = it.first;
 
-        Auxiliars::consoleDebugMessage( "Opening " + appName );
+        Auxiliars::consoleDebugMessage( "Opening " + toString( appName ) );
 
         it.second->getPushButton( )->setEnabled( false );
         it.second->setReadChannel( QProcess::StandardOutput );
@@ -250,12 +249,6 @@ namespace vishnu
         break;
       }
     }
-    if ( appName == "" )
-    {
-      std::cerr << "Error: App not found!" << std::endl;
-      return;
-    }
-
   }
 
   void MainWindow::removeGroup_clicked( )
@@ -288,7 +281,9 @@ namespace vishnu
     // Checks for app closed
     auto syncGroup = _syncGroups.at( key );
 
-    auto app = _apps.find( syncGroup->getOwner( ) );
+    manco::ApplicationType appType = manco::toApplicationType(
+      syncGroup->getOwner( ) );
+    auto app = _apps.find( appType );
     if( app != _apps.end( ) )
     {
       if ( !app->second->getPushButton( )->isEnabled( ) )

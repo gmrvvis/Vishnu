@@ -2,13 +2,13 @@
 
 namespace vishnu
 {
-  Application::Application( const std::string& appName,
+  Application::Application( const manco::ApplicationType& appName,
     const std::string& shellCommand,
     const std::map<std::string, std::string>& arguments,
     const std::string& workingDirectory )
   {
     _pushButton = new QPushButton( capitalize(
-      QString::fromStdString( appName ) ) );
+      QString::fromStdString( toString( appName ) ) ) );
     _pushButton->setEnabled( false );
 
     _shellCommand = shellCommand;

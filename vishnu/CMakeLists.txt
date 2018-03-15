@@ -21,6 +21,7 @@ set( VISHNU_SOURCES
   SyncGroup.cpp
   WidgetsGroup.cpp
 )
+
 set( VISHNU_HEADERS
   ${PROJECT_BINARY_DIR}/include/vishnu/version.h
   MainWindow.ui
@@ -39,14 +40,15 @@ set( VISHNU_LINK_LIBRARIES
   Qt5::Widgets
   Qt5::Network
   manco
+  sp1common
 )
 
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories( ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src )
 
 if( MSVC )
+  add_definitions( "-W4" )
   add_definitions( -DVISHNU_STATIC )
 endif( )
 
-common_application( Vishnu )
-
+common_application( vishnu )

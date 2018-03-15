@@ -11,7 +11,7 @@ namespace vishnu
   class Application : public QProcess
   {
     public:
-      Application( const std::string& appName,
+      Application( const manco::ApplicationType& appName,
         const std::string& shellCommand, const std::map<std::string,
         std::string>& arguments = std::map<std::string, std::string>( ),
         const std::string& workingDirectory = std::string( ) );
