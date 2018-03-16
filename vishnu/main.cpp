@@ -9,14 +9,17 @@
 
 #include <fstream>
 
-#include <sp1common/Args.hpp>
+#include <sp1common/sp1common.h>
+#include <vishnu/version.h>
+using namespace vishnu;
 
 int main( int argc, char *argv[] )
 {
   QApplication app( argc, argv );
-  QApplication::setApplicationVersion( "1.0" );
-  QApplication::setApplicationName( "Launcher" );
-  QApplication::setOrganizationName( "GMRV - URJC" );
+  QApplication::setApplicationVersion( QString::fromStdString( 
+    Version::getString( ) ) );
+  QApplication::setApplicationName( APPLICATION_NAME );
+  QApplication::setOrganizationName( ORGANIZATION_NAME );
 
   const QString sharedMemorykey = QApplication::applicationName( ) +
     QString( "-Key" );

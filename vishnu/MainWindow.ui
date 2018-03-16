@@ -135,14 +135,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="xmlFilename">
+         <widget class="QLineEdit" name="csvFilename">
           <property name="readOnly">
            <bool>true</bool>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="buttonLoadXml">
+         <widget class="QToolButton" name="buttonLoadCsv">
           <property name="text">
            <string>...</string>
           </property>

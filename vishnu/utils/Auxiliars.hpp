@@ -6,8 +6,6 @@
 #include <string>
 #include <iostream>
 
-#define DASH '-'
-
 class Auxiliars
 {
 public:
@@ -52,17 +50,6 @@ public:
     remove(layout, row, -1, deleteWidgets);
     layout->setRowMinimumHeight(row, 0);
     layout->setRowStretch(row, 0);
-  }
-
-#ifndef NDEBUG
-  static void consoleDebugMessage( const std::string& message )
-#else
-  static void consoleDebugMessage( const std::string& )
-#endif
-  {
-    #ifndef NDEBUG
-      std::cout << "[DEBUG]: " << message << std::endl;
-    #endif
   }
 
 };

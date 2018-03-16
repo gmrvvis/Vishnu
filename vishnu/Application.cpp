@@ -2,30 +2,23 @@
 
 namespace vishnu
 {
-  Application::Application( const manco::ApplicationType& appName,
-    const std::string& shellCommand,
-    const std::map<std::string, std::string>& arguments,
-    const std::string& workingDirectory )
+  Application::Application( const manco::ApplicationType& applicationType,
+    const std::string& displayName, const std::string& cmd,
+    const sp1common::Args& args, const std::string& workingDirectory )
+    : _applicationType( applicationType )
+    , _displayName( displayName )
+    , _cmd( cmd )
+    , _args( args )
+    , _workingDirectory( workingDirectory )
   {
-    _pushButton = new QPushButton( capitalize(
-      QString::fromStdString( toString( appName ) ) ) );
+    _pushButton = new QPushButton( QString::fromStdString( displayName ) );
     _pushButton->setEnabled( false );
-
-    _shellCommand = shellCommand;
 
     /* Not needed
     #if defined(_WIN32) || defined(WIN32)
       _shellCommand += ".exe";
     #endif
     */
-
-    _arguments = arguments;
-
-    _workingDirectory = workingDirectory;
-    if ( workingDirectory != "" )
-    {
-      this->setWorkingDirectory( QString::fromStdString( workingDirectory ) );
-    }
   }
 
   Application::~Application( )
@@ -33,37 +26,28 @@ namespace vishnu
 
   }
 
+  manco::ApplicationType Application::getApplicationType( ) const
+  {
+    return _applicationType;
+  }
+
+  std::string Application::getDisplayName( ) const
+  {
+    return _displayName;
+  }
+
+  std::string Application::getCmd( ) const
+  {
+    return _cmd;
+  }
+
+  sp1common::ArgsMap Application::getArgs( ) const
+  {
+    return _args.get( );
+  }
+
   QPushButton* Application::getPushButton( ) const
   {
     return _pushButton;
-  }
-
-  QString Application::capitalize( const QString &string ) const
-  {
-    QString tmp = string;
-    tmp = tmp.toLower( );
-    tmp[0] = string[0].toUpper( );
-    return tmp;
-  }
-  std::string Application::getShellCommand( ) const
-  {
-    return _shellCommand;
-  }
-
-  std::map<std::string, std::string> Application::getArguments( ) const
-  {
-    return _arguments;
-  }
-
-  void Application::setArguments( const std::map<std::string,
-    std::string>& arguments )
-  {
-    _arguments = arguments;
-  }
-
-  void Application::setArgument( const std::string& type,
-    const std::string& value )
-  {
-    _arguments[type] = value;
   }
 }

@@ -1,5 +1,5 @@
-#ifndef WIDGETSGROUP_H
-#define WIDGETSGROUP_H
+#ifndef VISHNU_WIDGETSGROUP_HPP
+#define VISHNU_WIDGETSGROUP_HPP
 
 #include <QLabel>
 #include <QPushButton>

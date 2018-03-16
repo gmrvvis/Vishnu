@@ -14,6 +14,8 @@
 #include "Definitions.hpp"
 #include "utils/Auxiliars.hpp"
 
+#include <QDebug>
+
 namespace vishnu
 {
   MainWindow::MainWindow( sp1common::Args args,
@@ -23,13 +25,14 @@ namespace vishnu
   {
     _ui->setupUi( this );
 
+    _workingDirectory = args.get( "-wd" );
     _zeqSession = args.get( "-z" );
 
-    _ui->xmlFilename->setText( QString::fromStdString( args.get( "-f" ) ) );
+    _ui->csvFilename->setText( QString::fromStdString( args.get( "-f" ) ) );
     checkApps( );
 
-    connect( _ui->buttonLoadXml, SIGNAL( clicked( bool ) ), this,
-      SLOT( buttonLoadXml_clicked( ) ) );
+    connect( _ui->buttonLoadCsv, SIGNAL( clicked( bool ) ), this,
+      SLOT( buttonLoadCsv_clicked( ) ) );
 
     loadClint();
     loadDCExplorer();
@@ -71,35 +74,38 @@ namespace vishnu
       }
     }
   }
-
-  void MainWindow::closeEvent( QCloseEvent * )
-  {
-    /*
+  
+  void MainWindow::closeEvent( QCloseEvent* e )
+  {    
     QMessageBox::StandardButton result = QMessageBox::question( this,
-      QString( "Launcher" ), QString( "Are you sure?\n" ),
-      QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
-      QMessageBox::Yes );
+      QString( APPLICATION_NAME ), QString( "Are you sure?\n" ),
+      QMessageBox::Yes | QMessageBox::No );
 
     if ( result != QMessageBox::Yes )
     {
-      event->ignore( );
+      e->ignore( );
     }
     else
     {
-      event->accept( );
-    }
-    */
+      e->accept( );
+    }    
   }
 
-  void MainWindow::buttonLoadXml_clicked( )
+  void MainWindow::buttonLoadCsv_clicked( )
   {
     QString fileDialog = QFileDialog::getOpenFileName( this,
-      QString( "Choose XML file" ), QString( "" ),
-      QString( "XML-Files(*.xml)" ) );
+      QString( "Choose CSV file" ), QString( "" ),
+      QString( "CSV-Files(*.csv)" ) );
 
     if ( !fileDialog.isEmpty( ) )
     {
-     _ui->xmlFilename->setText( fileDialog );
+      _ui->csvFilename->setText( fileDialog );
+
+      std::vector< std::string > csvHeaders = 
+        sp1common::Files::readCsvHeaders( fileDialog.toStdString( ) );
+
+      std::cout << sp1common::Strings::join( csvHeaders, "," ) << std::endl;
+
       checkApps( );
     }
   }
@@ -140,17 +146,10 @@ namespace vishnu
 
   void MainWindow::checkApps( )
   {
-    if ( !_ui->xmlFilename->text( ).isEmpty( ) )
+    if ( !_ui->csvFilename->text( ).isEmpty( ) )
     {                
       for ( const auto& app : _apps )
       {
-        std::map<std::string, std::string> args = app.second->getArguments();
-        auto it = args.find("-f");
-        if ( it != args.end( ) )
-        {
-          app.second->setArgument( "-f",
-            _ui->xmlFilename->text().toStdString( ) );
-        }
 
         //TODO: parse XML in order to enable buttons instead of
         //enabling all of them
@@ -161,47 +160,75 @@ namespace vishnu
 
   void MainWindow::loadClint()
   {
-    std::string clintExplorerShellCommand = "../bin/ClintExplorer";
-    std::map<std::string, std::string> clintExplorerArgs;
-    clintExplorerArgs[ _zeqSession ] = ""; //TODO: send -z first
-    std::string clintExplorerWD = "../";
+    std::string displayName = "Clint";
+    std::string cmd = "ClintExplorer";
+    sp1common::Args args;
+    if ( !_zeqSession.empty( ) )
+    {
+      args.set( "-z", _zeqSession );
+      args.set( "-sp", 31400 );
+    }
+    args.set( "-ce", _workingDirectory );
+    args.set( "-ch", "http://localhost" );
+    args.set( "-cp", 8765 );
 
-    Application* clintApp = new Application( manco::ApplicationType::CLINT,
-      clintExplorerShellCommand, clintExplorerArgs, clintExplorerWD );
+    if ( !_ui->csvFilename->text( ).isEmpty( ) )
+    {
+      args.set( "-f", _ui->csvFilename->text( ).toStdString( ) );
+    }
 
-    _apps[manco::ApplicationType::CLINT] = clintApp;
+    Application* app = new Application( manco::ApplicationType::CLINT,
+      displayName, cmd, args, _workingDirectory );
+
+    _apps[manco::ApplicationType::CLINT] = app;
   }
 
   void MainWindow::loadDCExplorer()
   {
-    std::string wecoShellCommand = "../bin/WeCo";
-    std::map<std::string, std::string> wecoArgs;
-    wecoArgs["-p"] = "12346";
-    wecoArgs["-z"] = _zeqSession;
-    std::string wecoWD = "../";
+    std::string displayName = "DCExplorer";
+    std::string cmd = "WeCo";
+    std::string dockerContainerName = "apicolat";
 
-    Application* apicolatApp = new Application(
-      manco::ApplicationType::DCEXPLORER, wecoShellCommand,
-      wecoArgs, wecoWD );
+    sp1common::Args args;
 
-    _apps[manco::ApplicationType::DCEXPLORER] = apicolatApp;
+    if ( !_zeqSession.empty( ) )
+    {
+      args.set( "-z", _zeqSession );
+      args.set( "-p", 12345 );
+    }
+    args.set( "-u", "http://localhost:8888" );
+    args.set( "-n", displayName );
+    args.set( "-dcn", dockerContainerName );
+
+    if ( !_ui->csvFilename->text( ).isEmpty( ) )
+    {
+      args.set( "-f", _ui->csvFilename->text( ).toStdString( ) );
+    }
+
+    Application* app = new Application( manco::ApplicationType::DCEXPLORER, 
+      displayName, cmd, args, _workingDirectory );
+
+    _apps[manco::ApplicationType::DCEXPLORER] = app;
   }
 
   void MainWindow::loadPyramidal()
   {
-    std::string spineretShellCommand = "../bin/CellExplorer";
-    std::map<std::string, std::string> spineretArgs;
-    spineretArgs["-z"] = _zeqSession;
-    spineretArgs["-f"] = _ui->xmlFilename->text( ).toStdString( );
-    std::string spineretWD = "../";
+    std::string displayName = "Pyramidal";
+    std::string cmd = "CellExplorer";
 
-    Application* spineretApp = new Application(
-      manco::ApplicationType::PYRAMIDAL, spineretShellCommand, spineretArgs,
-      spineretWD );
+    sp1common::Args args;
+    args.set( "-z", _zeqSession );
 
-    _apps[manco::ApplicationType::PYRAMIDAL] = spineretApp;
+    if ( !_ui->csvFilename->text( ).isEmpty( ) )
+    {
+      args.set( "-f", _ui->csvFilename->text( ).toStdString( ) );
+    }
+
+    Application* app = new Application( manco::ApplicationType::PYRAMIDAL, 
+      displayName, cmd, args, _workingDirectory );
+
+    _apps[manco::ApplicationType::PYRAMIDAL] = app;
   }
-
 
   void MainWindow::pushButtonApp_clicked( )
   {
@@ -211,14 +238,12 @@ namespace vishnu
       std::cerr << "Error: App not found!" << std::endl;
       return;
     }
-    manco::ApplicationType appName;
+
     for (const auto& it : _apps )
     {
       if ( it.second->getPushButton( ) == appButton)
       {        
-        appName = it.first;
-
-        Auxiliars::consoleDebugMessage( "Opening " + toString( appName ) );
+        sp1common::Debug::consoleMessage( "Opening " + it.second->getDisplayName( ) );
 
         it.second->getPushButton( )->setEnabled( false );
         it.second->setReadChannel( QProcess::StandardOutput );
@@ -227,17 +252,17 @@ namespace vishnu
         it.second->readAllStandardOutput( );
 
         QStringList arguments;
-        for(const auto& arg : it.second->getArguments( ) )
+        for(const auto& arg : it.second->getArgs( ) )
         {
           arguments << QString::fromStdString( arg.first );
-          if ( arg.second != "" )
+          if ( !arg.second.empty( ) )
           {
             arguments << QString::fromStdString( arg.second );
           }
         }
 
         it.second->start(
-          QString::fromStdString( it.second->getShellCommand( ) ),
+          QString::fromStdString( it.second->getCmd( ) ),
           arguments
         );
 
@@ -254,7 +279,7 @@ namespace vishnu
   void MainWindow::removeGroup_clicked( )
   {
     // Checks for XML loaded
-    if ( _ui->xmlFilename->text( ) == QString( "" ) )
+    if ( _ui->csvFilename->text( ) == QString( "" ) )
     {
       std::cout << "Error closing group: XML file is not loaded." << std::endl;
       return;
@@ -355,7 +380,7 @@ namespace vishnu
     QLabel* nameLabel = widgetsGroup->getNameLabel( );
     nameLabel->setText( qNewName );
 
-    Auxiliars::consoleDebugMessage( "Group: '" + key +
+    sp1common::Debug::consoleMessage( "Group: '" + key +
       "' - Changed group name '" + name + "'' to '" + newName +
       "' successfully." );
   }
@@ -380,7 +405,7 @@ namespace vishnu
     // Remove group from map
     _syncGroups.erase( key );
 
-    Auxiliars::consoleDebugMessage("Group: '" + key +
+    sp1common::Debug::consoleMessage("Group: '" + key +
       "' removed successfully.");
   }
 
@@ -416,7 +441,7 @@ namespace vishnu
       std::string( ")" ) +
       std::string( "\n\tids: (... commented ...)" );
 
-    Auxiliars::consoleDebugMessage( message );
+    sp1common::Debug::consoleMessage( message );
 
     /*"\n\tids: ";
     for ( auto it = vectorIds.begin( ); it != vectorIds.end( ); ++it )
@@ -442,7 +467,7 @@ namespace vishnu
       emit signalChangeGroupName( QString::fromStdString(
         syncGroup->getKey( ) ), QString::fromStdString( o->getNameString( ) ) );
 
-      Auxiliars::consoleDebugMessage("Group: '" + key +
+      sp1common::Debug::consoleMessage("Group: '" + key +
         "' changed successfully.");
     }
     else
@@ -453,7 +478,7 @@ namespace vishnu
       //Add widgets group
       emit signalCreateGroup( QString::fromStdString( syncGroup->getKey( ) ) );
 
-      Auxiliars::consoleDebugMessage("Group: '" + key +
+      sp1common::Debug::consoleMessage("Group: '" + key +
         "' created successfully.");
     }
   }
@@ -467,7 +492,7 @@ namespace vishnu
     auto syncGroup = _syncGroups[ key ];
     if ( syncGroup == nullptr )
     {
-      Auxiliars::consoleDebugMessage("Group: '" + key + "' doesn't exist, " +
+      sp1common::Debug::consoleMessage("Group: '" + key + "' doesn't exist, " +
         "ignoring change name group callback.");
       return;
     }
@@ -483,7 +508,7 @@ namespace vishnu
     auto syncGroup = _syncGroups.find( key );
     if ( syncGroup == _syncGroups.end( ) )
     {
-      Auxiliars::consoleDebugMessage("Group: '" + key + "' doesn't exist, " +
+      sp1common::Debug::consoleMessage("Group: '" + key + "' doesn't exist, " +
         "ignoring destroy group callback.");
       return;
     }

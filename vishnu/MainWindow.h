@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef VISHNU_MAINWINDOW_H
+#define VISHNU_MAINWINDOW_H
 
 #include <QMainWindow>
 #include <QPushButton>
@@ -9,8 +9,8 @@
 #include "SyncGroup.hpp"
 #include "WidgetsGroup.hpp"
 
-#include <manco/Enums.hpp>
-#include <sp1common/Args.hpp>
+#include <manco/manco.h>
+#include <sp1common/sp1common.h>
 
 namespace vishnu
 {
@@ -32,7 +32,7 @@ namespace vishnu
       void closeEvent( QCloseEvent *event ) override;
 
     private slots:
-      void buttonLoadXml_clicked( );
+      void buttonLoadCsv_clicked( );
       void pushButtonApp_clicked( );
       void app_closed( int exitCode, QProcess::ExitStatus exitStatus );
       void loadClint();
@@ -47,6 +47,7 @@ namespace vishnu
     private:
       vishnu::Ui::MainWindow *_ui;
       std::string _zeqSession;
+      std::string _workingDirectory;
       bool _closingProcesses;
       std::map<manco::ApplicationType, Application*> _apps; //appName, Application
       std::map<std::string, SyncGroup*> _syncGroups; //key, SyncGroup
@@ -65,5 +66,5 @@ namespace vishnu
 
 }
 
-#endif // MAINWINDOW_H
+#endif
 
