@@ -39,11 +39,11 @@ namespace vishnu
     loadDCExplorer();
     loadPyramidal();
 
-    for ( const auto& app : _apps )
+    for ( const auto& application : _applications )
     {
-      _ui->verticalLayout_2->addWidget( app.second->getPushButton( ) );
-      connect( app.second->getPushButton( ), SIGNAL( clicked( bool ) ), this,
-        SLOT( pushButtonApp_clicked( ) ) );
+      _ui->verticalLayout_2->addWidget( application.second->getPushButton( ) );
+      QObject::connect( application.second->getPushButton( ),
+        SIGNAL( clicked( bool ) ), this, SLOT( pushButtonApp_clicked( ) ) );
     }
 
     //TODO: fix height
@@ -105,11 +105,11 @@ namespace vishnu
   MainWindow::~MainWindow( )
   {
     delete _ui;
-    for ( const auto& app : _apps )
+    for ( const auto& appplication : _applications )
     {
-      if ( app.second->isOpen( ) )
+      if ( appplication.second->isOpen( ) )
       {
-        app.second->terminate( );
+        appplication.second->terminate( );
       }
     }
   }
@@ -169,15 +169,15 @@ namespace vishnu
     }
 
     //Look for running app
-    for (  auto app : _apps )
+    for (  auto appplication : _applications )
     {
-      if ( app.second->program( ) == qProcess->program( ) )
+      if ( appplication.second->program( ) == qProcess->program( ) )
       {
         //app.second->setProgram( QString( ) );
-        disconnect( app.second, SIGNAL( finished ( int ,
-          QProcess::ExitStatus ) ), this,
+        QObject::disconnect( appplication.second.get( ),
+          SIGNAL( finished ( int , QProcess::ExitStatus ) ), this,
           SLOT( app_closed( int, QProcess::ExitStatus ) ) );
-        app.second->getPushButton( )->setEnabled( true );
+        appplication.second->getPushButton( )->setEnabled( true );
         break;
       }
     }
@@ -187,12 +187,12 @@ namespace vishnu
   {
     if ( !_ui->csvFilename->text( ).isEmpty( ) )
     {                
-      for ( const auto& app : _apps )
+      for ( const auto& appplication : _applications )
       {
 
         //TODO: parse XML in order to enable buttons instead of
         //enabling all of them
-        app.second->getPushButton( )->setEnabled( true );
+        appplication.second->getPushButton( )->setEnabled( true );
       }
     }
   }
@@ -216,10 +216,16 @@ namespace vishnu
       args.set( "-f", _ui->csvFilename->text( ).toStdString( ) );
     }
 
-    Application* app = new Application( manco::ApplicationType::CLINT,
-      displayName, cmd, args, _workingDirectory );
+   std::string instanceId = sp1common::Strings::generateRandom( 5 );
+   args.set( "-id", instanceId );
 
-    _apps[manco::ApplicationType::CLINT] = app;
+    ApplicationPtr appplication( new Application( manco::ApplicationType::CLINT,
+      displayName, cmd, args, _workingDirectory ) );
+
+    std::string owner = manco::ZeqManager::getOwner(
+      manco::ApplicationType::CLINT, instanceId );
+
+    _applications[ owner ] = appplication;
   }
 
   void MainWindow::loadDCExplorer()
@@ -244,10 +250,17 @@ namespace vishnu
       args.set( "-f", _ui->csvFilename->text( ).toStdString( ) );
     }
 
-    Application* app = new Application( manco::ApplicationType::DCEXPLORER, 
-      displayName, cmd, args, _workingDirectory );
+    std::string instanceId = sp1common::Strings::generateRandom( 5 );
+    args.set( "-id", instanceId );
 
-    _apps[manco::ApplicationType::DCEXPLORER] = app;
+    ApplicationPtr application( new Application(
+      manco::ApplicationType::DCEXPLORER, displayName, cmd, args,
+      _workingDirectory ) );
+
+    std::string owner = manco::ZeqManager::getOwner(
+      manco::ApplicationType::DCEXPLORER, instanceId );
+
+    _applications[ owner ] = application;
   }
 
   void MainWindow::loadPyramidal()
@@ -263,10 +276,16 @@ namespace vishnu
       args.set( "-f", _ui->csvFilename->text( ).toStdString( ) );
     }
 
-    Application* app = new Application( manco::ApplicationType::PYRAMIDAL, 
-      displayName, cmd, args, _workingDirectory );
+    std::string instanceId = sp1common::Strings::generateRandom( 5 );
+    args.set( "-id", instanceId );
 
-    _apps[manco::ApplicationType::PYRAMIDAL] = app;
+    ApplicationPtr application( new Application( manco::ApplicationType::PYRAMIDAL,
+      displayName, cmd, args, _workingDirectory ) );
+
+    std::string owner = manco::ZeqManager::getOwner(
+      manco::ApplicationType::PYRAMIDAL, instanceId );
+
+    _applications[ owner ] = application;
   }
 
   void MainWindow::pushButtonApp_clicked( )
@@ -278,7 +297,7 @@ namespace vishnu
       return;
     }
 
-    for (const auto& it : _apps )
+    for (const auto& it : _applications )
     {
       if ( it.second->getPushButton( ) == appButton)
       {        
@@ -308,8 +327,9 @@ namespace vishnu
         QByteArray out_data = it.second->readAllStandardOutput( );
         QString out_string( out_data );
         std::cout << out_string.toStdString( ).c_str( ) << std::endl;
-        connect( it.second, SIGNAL( finished ( int , QProcess::ExitStatus ) ),
-          this, SLOT( app_closed( int , QProcess::ExitStatus ) ) );
+        QObject::connect( it.second.get( ),
+          SIGNAL( finished ( int , QProcess::ExitStatus ) ), this,
+          SLOT( app_closed( int , QProcess::ExitStatus ) ) );
         break;
       }
     }
@@ -325,13 +345,12 @@ namespace vishnu
     }
 
     auto closeButton = qobject_cast< QPushButton* >( sender( ) );
-    std::map<std::string, WidgetsGroup*>::iterator it;
     std::string key;
-    for ( it = _widgetsGroups.begin( ); it != _widgetsGroups.end( ); ++it )
+    for ( const auto& it : _widgetsGroups )
     {
-      if ( it->second->getClosePushButton( ) == closeButton )
+      if ( it.second->getClosePushButton( ) == closeButton )
       {
-        key = it->first;
+        key = it.first;
         break;
       }
     }
@@ -345,10 +364,10 @@ namespace vishnu
     // Checks for app closed
     auto syncGroup = _syncGroups.at( key );
 
-    manco::ApplicationType appType = manco::toApplicationType(
-      syncGroup->getOwner( ) );
-    auto app = _apps.find( appType );
-    if( app != _apps.end( ) )
+    std::string owner = syncGroup->getOwner( );
+
+    auto app = _applications.find( owner );
+    if( app != _applications.end( ) )
     {
       if ( !app->second->getPushButton( )->isEnabled( ) )
       {
@@ -390,8 +409,8 @@ namespace vishnu
     QPushButton* closePushButton = new QPushButton( );
     closePushButton->setIcon( QIcon( ":/icons/iconClose.png" ) );
 
-    _widgetsGroups[ key ] = new WidgetsGroup( nameLabel, ownerLabel,
-      closePushButton );
+    _widgetsGroups[ key ] = WidgetsGroupPtr( new WidgetsGroup( nameLabel,
+      ownerLabel, closePushButton ) );
 
     //Add group to grid layout
     _ui->groupsGridLayout->addWidget( nameLabel );
@@ -490,17 +509,17 @@ namespace vishnu
     //std::cout << ")" << std::endl;
 
     std::string key = o->getKeyString( );
-    SyncGroup* syncGroup = new SyncGroup( key, o->getNameString( ),
-      o->getOwnerString( ), vectorIds, color[0], color[1], color[2] );
+    SyncGroupPtr syncGroup( new SyncGroup( key, o->getNameString( ),
+      o->getOwnerString( ), vectorIds, color[0], color[1], color[2] ) );
 
     //Add or set group to sync groups
 
-    std::map<std::string, SyncGroup*>::iterator it;
-    it = _syncGroups.find( key );
+    //SyncGroups::iterator it;
+    auto it = _syncGroups.find( key );
     if ( it != _syncGroups.end( ) )
     {
       //Found -> Set group
-      _syncGroups[ key ]= syncGroup;
+      _syncGroups[ key ] = syncGroup;
 
       //Set widgets group     
       emit signalChangeGroupName( QString::fromStdString(

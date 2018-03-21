@@ -1,6 +1,10 @@
 #ifndef VISHNU_MAINWINDOW_H
 #define VISHNU_MAINWINDOW_H
 
+#include <string>
+#include <map>
+#include <memory>
+
 #include <QMainWindow>
 #include <QPushButton>
 #include <QProcess>
@@ -18,6 +22,15 @@ namespace vishnu
   {
     class MainWindow;
   }
+
+  typedef std::shared_ptr< Application > ApplicationPtr;
+  typedef std::map< std::string, ApplicationPtr > Applications;
+
+  typedef std::shared_ptr< SyncGroup > SyncGroupPtr;
+  typedef std::map< std::string, SyncGroupPtr > SyncGroups;
+
+  typedef std::shared_ptr< WidgetsGroup > WidgetsGroupPtr;
+  typedef std::map< std::string, WidgetsGroupPtr > WidgetsGroups;
 
   class MainWindow : public QMainWindow
   {
@@ -49,9 +62,9 @@ namespace vishnu
       std::string _zeqSession;
       std::string _workingDirectory;
       bool _closingProcesses;
-      std::map<manco::ApplicationType, Application*> _apps; //appName, Application
-      std::map<std::string, SyncGroup*> _syncGroups; //key, SyncGroup
-      std::map<std::string, WidgetsGroup*> _widgetsGroups; //key, WidgetsGroup
+      Applications _applications;
+      SyncGroups _syncGroups;
+      WidgetsGroups _widgetsGroups;
       void initZeqSession( );
       void receivedSyncGroup( zeroeq::gmrv::ConstSyncGroupPtr o );
       void receivedChangeNameGroupUpdate(
