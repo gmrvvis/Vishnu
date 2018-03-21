@@ -20,6 +20,7 @@ set( VISHNU_SOURCES
   Application.cpp
   SyncGroup.cpp
   WidgetsGroup.cpp
+  widgets/DataSetWidget.cpp
 )
 
 set( VISHNU_HEADERS
@@ -32,6 +33,7 @@ set( VISHNU_HEADERS
   WidgetsGroup.hpp
   Definitions.hpp
   utils/Auxiliars.hpp
+  widgets/DataSetWidget.hpp
 )
 
 set( VISHNU_LINK_LIBRARIES

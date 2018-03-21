@@ -13,6 +13,7 @@
 
 #include "Definitions.hpp"
 #include "utils/Auxiliars.hpp"
+#include "widgets/DataSetWidget.hpp"
 
 #include <QDebug>
 
@@ -47,7 +48,7 @@ namespace vishnu
 
     //TODO: fix height
     //setMaximumHeight( height( ) );
-    setFixedHeight( 500 );
+    //setFixedHeight( 500 );
 
     connect( this, SIGNAL( signalCreateGroup( const QString& ) ),
       SLOT( createGroup( const QString& ) ), Qt::QueuedConnection );
@@ -61,6 +62,44 @@ namespace vishnu
 
     //ZeqSession
     initZeqSession( );
+
+
+
+
+    //itemN = QListWidgetItem()
+    DataSetWidget* dsw = new DataSetWidget( "Segmentations001", "/media/data/spineretdata/m16 cing 1 9/v3/basal/csv/m16 cing 1 9basales SpineRet3.csv");
+    //QLabel* l = new QLabel( );
+    //l->setText("XSSDSD");
+
+    //QAbstractItemModel* model = new QAbstractItemModel( );
+    //QModelIndex index;
+    //index.co
+
+    //_ui->dataSetListWidget->addItem(l);
+
+
+
+
+
+    //Creating a new list widget item whose parent is the listwidget itself
+    QListWidgetItem* listWidgetItem = new QListWidgetItem(_ui->dataSetListWidget);
+
+    //Adding the item to the listwidget
+    _ui->dataSetListWidget->addItem (listWidgetItem);
+
+    //Creating an object of the designed widget which is to be added to the listwidget
+    //TheWidgetItem *theWidgetItem = new TheWidgetItem;
+
+    //Making sure that the listWidgetItem has the same size as the TheWidgetItem
+    listWidgetItem->setSizeHint (dsw->sizeHint ());
+
+    //Finally adding the itemWidget to the list
+    _ui->dataSetListWidget->setItemWidget (listWidgetItem, dsw);
+
+
+
+
+
   }
 
   MainWindow::~MainWindow( )
@@ -76,7 +115,7 @@ namespace vishnu
   }
   
   void MainWindow::closeEvent( QCloseEvent* e )
-  {    
+  {
     QMessageBox::StandardButton result = QMessageBox::question( this,
       QString( APPLICATION_NAME ), QString( "Are you sure?\n" ),
       QMessageBox::Yes | QMessageBox::No );
@@ -88,7 +127,7 @@ namespace vishnu
     else
     {
       e->accept( );
-    }    
+    }
   }
 
   void MainWindow::buttonLoadCsv_clicked( )
