@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QProcess>
 #include <QMutex>
+
 #include "Application.hpp"
 #include "SyncGroup.hpp"
 #include "WidgetsGroup.hpp"
@@ -41,11 +42,13 @@ namespace vishnu
         QWidget *parent = 0 );
       ~MainWindow();
 
+    public slots:
+
+
     protected:
       void closeEvent( QCloseEvent *event ) override;
 
     private slots:
-      void buttonLoadCsv_clicked( );
       void pushButtonApp_clicked( );
       void app_closed( int exitCode, QProcess::ExitStatus exitStatus );
       void loadClint();
@@ -57,6 +60,9 @@ namespace vishnu
       void changeGroupName( const QString& qKey, const QString& qNewName );
       void destroyGroup(const QString& qKey);
 
+      void addDataSetItem();
+      void removeDataSetItem();
+
     private:
       vishnu::Ui::MainWindow *_ui;
       std::string _zeqSession;
@@ -65,6 +71,10 @@ namespace vishnu
       Applications _applications;
       SyncGroups _syncGroups;
       WidgetsGroups _widgetsGroups;
+
+      QAction *addDataSetAction;
+      QAction *removeDataSetAction;
+
       void initZeqSession( );
       void receivedSyncGroup( zeroeq::gmrv::ConstSyncGroupPtr o );
       void receivedChangeNameGroupUpdate(

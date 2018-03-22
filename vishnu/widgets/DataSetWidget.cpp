@@ -16,7 +16,7 @@ namespace vishnu
     QLabel* image = new QLabel( );
     image->setBackgroundRole( QPalette::Dark );
     //image->setScaledContents( true );
-    QPixmap pixmap( ":/icons/addDataSet.png" );
+    QPixmap pixmap( ":/icons/dataSet.png" );
     image->setPixmap( pixmap );
 
     QHBoxLayout *hLayout = new QHBoxLayout( this );

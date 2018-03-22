@@ -21,6 +21,7 @@ set( VISHNU_SOURCES
   SyncGroup.cpp
   WidgetsGroup.cpp
   widgets/DataSetWidget.cpp
+  RegExpInputDialog.cpp
 )
 
 set( VISHNU_HEADERS
@@ -34,6 +35,7 @@ set( VISHNU_HEADERS
   Definitions.hpp
   utils/Auxiliars.hpp
   widgets/DataSetWidget.hpp
+  RegExpInputDialog.hpp
 )
 
 set( VISHNU_LINK_LIBRARIES

@@ -13,9 +13,8 @@
 
 #include "Definitions.hpp"
 #include "utils/Auxiliars.hpp"
+#include "RegExpInputDialog.hpp"
 #include "widgets/DataSetWidget.hpp"
-
-#include <QDebug>
 
 namespace vishnu
 {
@@ -29,11 +28,8 @@ namespace vishnu
     _workingDirectory = args.get( "-wd" );
     _zeqSession = args.get( "-z" );
 
-    _ui->csvFilename->setText( QString::fromStdString( args.get( "-f" ) ) );
-    checkApps( );
-
-    connect( _ui->buttonLoadCsv, SIGNAL( clicked( bool ) ), this,
-      SLOT( buttonLoadCsv_clicked( ) ) );
+    QObject::connect( _ui->actionOpenData, SIGNAL( triggered() ), this,
+      SLOT( addDataSetItem( ) ) );
 
     loadClint();
     loadDCExplorer();
@@ -46,59 +42,29 @@ namespace vishnu
         SIGNAL( clicked( bool ) ), this, SLOT( pushButtonApp_clicked( ) ) );
     }
 
-    //TODO: fix height
-    //setMaximumHeight( height( ) );
-    //setFixedHeight( 500 );
-
-    connect( this, SIGNAL( signalCreateGroup( const QString& ) ),
+    QObject::connect( this, SIGNAL( signalCreateGroup( const QString& ) ),
       SLOT( createGroup( const QString& ) ), Qt::QueuedConnection );
 
-    connect( this, SIGNAL( signalChangeGroupName( const QString&,
+    QObject::connect( this, SIGNAL( signalChangeGroupName( const QString&,
       const QString& ) ), SLOT( changeGroupName( const QString&,
       const QString& ) ), Qt::QueuedConnection );
 
-    connect( this, SIGNAL( signalDestroyGroup( const QString& ) ),
+    QObject::connect( this, SIGNAL( signalDestroyGroup( const QString& ) ),
       SLOT( destroyGroup( const QString& ) ), Qt::QueuedConnection );
 
     //ZeqSession
     initZeqSession( );
 
+    //DataSetListWidget
+    //_ui->dataSetListWidget = new QListWidget(this);
+    //_ui->dataSetListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+    QObject::connect(addDataSetAction, SIGNAL(triggered()), this, SLOT(addDataSetItem()));
+    QObject::connect(removeDataSetAction, SIGNAL(triggered()), this, SLOT(removeDataSetItem()));
+    //QObject::connect(listWidget,
+     //       SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)),
+      //      this, SLOT(updateMenus(QListWidgetItem *)));
 
-
-
-    //itemN = QListWidgetItem()
-    DataSetWidget* dsw = new DataSetWidget( "Segmentations001", "/media/data/spineretdata/m16 cing 1 9/v3/basal/csv/m16 cing 1 9basales SpineRet3.csv");
-    //QLabel* l = new QLabel( );
-    //l->setText("XSSDSD");
-
-    //QAbstractItemModel* model = new QAbstractItemModel( );
-    //QModelIndex index;
-    //index.co
-
-    //_ui->dataSetListWidget->addItem(l);
-
-
-
-
-
-    //Creating a new list widget item whose parent is the listwidget itself
-    QListWidgetItem* listWidgetItem = new QListWidgetItem(_ui->dataSetListWidget);
-
-    //Adding the item to the listwidget
-    _ui->dataSetListWidget->addItem (listWidgetItem);
-
-    //Creating an object of the designed widget which is to be added to the listwidget
-    //TheWidgetItem *theWidgetItem = new TheWidgetItem;
-
-    //Making sure that the listWidgetItem has the same size as the TheWidgetItem
-    listWidgetItem->setSizeHint (dsw->sizeHint ());
-
-    //Finally adding the itemWidget to the list
-    _ui->dataSetListWidget->setItemWidget (listWidgetItem, dsw);
-
-
-
-
+    //End DataSetListWidget
 
   }
 
@@ -130,23 +96,72 @@ namespace vishnu
     }
   }
 
-  void MainWindow::buttonLoadCsv_clicked( )
+  void MainWindow::addDataSetItem( )
   {
-    QString fileDialog = QFileDialog::getOpenFileName( this,
+    QString filePath = QFileDialog::getOpenFileName( this,
       QString( "Choose CSV file" ), QString( "" ),
       QString( "CSV-Files(*.csv)" ) );
 
-    if ( !fileDialog.isEmpty( ) )
+    if ( filePath.isEmpty( ) )
     {
-      _ui->csvFilename->setText( fileDialog );
-
-      std::vector< std::string > csvHeaders = 
-        sp1common::Files::readCsvHeaders( fileDialog.toStdString( ) );
-
-      std::cout << sp1common::Strings::join( csvHeaders, "," ) << std::endl;
-
-      checkApps( );
+      return;
     }
+
+    QFileInfo fileInfo( filePath );
+
+    //Format basename to 10 chars without spaces
+    std::string basename = fileInfo.baseName( ).toStdString( );
+    basename.erase( std::remove_if( basename.begin( ), basename.end( ),
+      isspace ), basename.end( ) );
+    basename.resize (10);
+
+    //Check if it's a valid name
+    bool validName;
+    QRegularExpression regularExpression("[A-Za-z0-9]{1,10}$");
+    QString dataSetName = RegExpInputDialog::getText(this, "DataSet name",
+      "Enter DataSet name", QString::fromStdString( basename ),
+      regularExpression, &validName);
+    if ( !validName )
+    {
+      return;
+    }
+
+    std::string name = dataSetName.toStdString( );
+    std::string path = filePath.toStdString( );
+
+    //Check if name doesn't exist
+    /*for(int i = 0; i < _ui->dataSetListWidget->count(); ++i)
+    {
+        QListWidgetItem* item = _ui->dataSetListWidget->item( i );
+        DataSetWidget* widget = dynamic_cast<DataSetWidget*>( item );
+        if ( widget->getName( ) == name )
+        {
+          QMessageBox::warning( this, APPLICATION_NAME,
+            tr("Invalid name. This name already exists.") );
+          return;
+        }
+    }*/
+
+    //Add to dataset
+    DataSetWidget* dsw = new DataSetWidget( name, path );
+    QListWidgetItem* listWidgetItem = new QListWidgetItem(_ui->dataSetListWidget);
+    _ui->dataSetListWidget->addItem( listWidgetItem );
+    listWidgetItem->setSizeHint( dsw->sizeHint ( ) );
+    _ui->dataSetListWidget->setItemWidget (listWidgetItem, dsw);
+
+    std::vector< std::string > csvHeaders =
+      sp1common::Files::readCsvHeaders( filePath.toStdString( ) );
+
+    std::cout << sp1common::Strings::join( csvHeaders, "," ) << std::endl;
+
+    //_ui->csvFilename->setText( fileDialog );
+    //checkApps( );
+
+  }
+
+  void MainWindow::removeDataSetItem( )
+  {
+
   }
 
   void MainWindow::app_closed( int exitCode, QProcess::ExitStatus exitStatus )
@@ -185,7 +200,7 @@ namespace vishnu
 
   void MainWindow::checkApps( )
   {
-    if ( !_ui->csvFilename->text( ).isEmpty( ) )
+    /*if ( !_ui->csvFilename->text( ).isEmpty( ) )
     {                
       for ( const auto& appplication : _applications )
       {
@@ -194,7 +209,7 @@ namespace vishnu
         //enabling all of them
         appplication.second->getPushButton( )->setEnabled( true );
       }
-    }
+    }*/
   }
 
   void MainWindow::loadClint()
@@ -211,10 +226,10 @@ namespace vishnu
     args.set( "-ch", "http://localhost" );
     args.set( "-cp", 8765 );
 
-    if ( !_ui->csvFilename->text( ).isEmpty( ) )
+    /*if ( !_ui->csvFilename->text( ).isEmpty( ) )
     {
       args.set( "-f", _ui->csvFilename->text( ).toStdString( ) );
-    }
+    }*/
 
    std::string instanceId = sp1common::Strings::generateRandom( 5 );
    args.set( "-id", instanceId );
@@ -245,10 +260,10 @@ namespace vishnu
     args.set( "-n", displayName );
     args.set( "-dcn", dockerContainerName );
 
-    if ( !_ui->csvFilename->text( ).isEmpty( ) )
+    /*if ( !_ui->csvFilename->text( ).isEmpty( ) )
     {
       args.set( "-f", _ui->csvFilename->text( ).toStdString( ) );
-    }
+    }*/
 
     std::string instanceId = sp1common::Strings::generateRandom( 5 );
     args.set( "-id", instanceId );
@@ -271,10 +286,10 @@ namespace vishnu
     sp1common::Args args;
     args.set( "-z", _zeqSession );
 
-    if ( !_ui->csvFilename->text( ).isEmpty( ) )
+    /*if ( !_ui->csvFilename->text( ).isEmpty( ) )
     {
       args.set( "-f", _ui->csvFilename->text( ).toStdString( ) );
-    }
+    }*/
 
     std::string instanceId = sp1common::Strings::generateRandom( 5 );
     args.set( "-id", instanceId );
@@ -337,13 +352,6 @@ namespace vishnu
 
   void MainWindow::removeGroup_clicked( )
   {
-    // Checks for XML loaded
-    if ( _ui->csvFilename->text( ) == QString( "" ) )
-    {
-      std::cout << "Error closing group: XML file is not loaded." << std::endl;
-      return;
-    }
-
     auto closeButton = qobject_cast< QPushButton* >( sender( ) );
     std::string key;
     for ( const auto& it : _widgetsGroups )
