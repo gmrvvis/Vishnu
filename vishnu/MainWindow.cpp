@@ -25,11 +25,50 @@ namespace vishnu
   {
     _ui->setupUi( this );
 
+    //MenuBar
+    QMenu *fileMenu = new QMenu(tr("&File"));
+
+    QAction *quitAction = fileMenu->addAction(tr("E&xit"));
+    quitAction->setShortcut(tr("Ctrl+Q"));
+
+    QMenu *itemsMenu = new QMenu(tr("&DataSets"));
+
+    addDataSetAction = itemsMenu->addAction(tr("&Add DataSet"));
+    //removeAction = itemsMenu->addAction(tr("&Remove Item"));
+    //QAction *ascendingAction = itemsMenu->addAction(tr("Sort in &Ascending Order"));
+    //QAction *descendingAction = itemsMenu->addAction(tr("Sort in &Descending Order"));
+
+    menuBar()->addMenu(fileMenu);
+    menuBar()->addMenu(itemsMenu);
+    //End MenuBar
+
+    //ToolBar
+    QToolBar* toolBar = new QToolBar( );
+    toolBar->setMovable( false );
+
+    QAction* actionAddDataSet = new QAction( );
+    actionAddDataSet->setIcon( QIcon( ":/icons/addDataSet.png" ) );
+    actionAddDataSet->setText( "AddDataSet" );
+    actionAddDataSet->setToolTip( "Add Data Set" );
+    actionAddDataSet->setShortcut( QKeySequence( "Ctrl+O" ) ); 
+    QObject::connect( actionAddDataSet, SIGNAL( triggered() ), this,
+      SLOT( addDataSetItem( ) ) );
+
+    toolBar->addAction( actionAddDataSet );
+
+    addToolBar(Qt::TopToolBarArea, toolBar);
+
+    //End ToolBar
+
+    //DataSetListWidget
+    //EndDataSetListWidget
+
+
+
     _workingDirectory = args.get( "-wd" );
     _zeqSession = args.get( "-z" );
 
-    QObject::connect( _ui->actionOpenData, SIGNAL( triggered() ), this,
-      SLOT( addDataSetItem( ) ) );
+
 
     loadClint();
     loadDCExplorer();
@@ -59,7 +98,7 @@ namespace vishnu
     //_ui->dataSetListWidget = new QListWidget(this);
     //_ui->dataSetListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     QObject::connect(addDataSetAction, SIGNAL(triggered()), this, SLOT(addDataSetItem()));
-    QObject::connect(removeDataSetAction, SIGNAL(triggered()), this, SLOT(removeDataSetItem()));
+    //QObject::connect(removeDataSetAction, SIGNAL(triggered()), this, SLOT(removeDataSetItem()));
     //QObject::connect(listWidget,
      //       SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)),
       //      this, SLOT(updateMenus(QListWidgetItem *)));
@@ -115,40 +154,55 @@ namespace vishnu
       isspace ), basename.end( ) );
     basename.resize (10);
 
-    //Check if it's a valid name
-    bool validName;
-    QRegularExpression regularExpression("[A-Za-z0-9]{1,10}$");
-    QString dataSetName = RegExpInputDialog::getText(this, "DataSet name",
-      "Enter DataSet name", QString::fromStdString( basename ),
-      regularExpression, &validName);
-    if ( !validName )
-    {
-      return;
-    }
-
-    std::string name = dataSetName.toStdString( );
+    std::string name;
     std::string path = filePath.toStdString( );
+    std::string tempName = basename;
+    bool validName = false;
+    bool notUsedName = true;
 
-    //Check if name doesn't exist
-    /*for(int i = 0; i < _ui->dataSetListWidget->count(); ++i)
+    do
     {
+      //Check if it's a valid name
+      QRegularExpression regularExpression("[A-Za-z0-9]{1,10}$");
+      QString dataSetName = RegExpInputDialog::getText(this, "DataSet name",
+        "Enter DataSet name", QString::fromStdString( tempName ),
+        regularExpression, &validName);
+      if ( !validName )
+      {
+        return;
+      }
+
+      name = dataSetName.toStdString( );
+
+      //Check if name doesn't exist
+      notUsedName = true;
+      for(int i = 0; i < _ui->dataSetListWidget->count(); ++i)
+      {
         QListWidgetItem* item = _ui->dataSetListWidget->item( i );
-        DataSetWidget* widget = dynamic_cast<DataSetWidget*>( item );
+        DataSetWidget* widget = static_cast< DataSetWidget* >(
+          _ui->dataSetListWidget->itemWidget( item ) );
         if ( widget->getName( ) == name )
         {
           QMessageBox::warning( this, APPLICATION_NAME,
             tr("Invalid name. This name already exists.") );
-          return;
+          notUsedName = false;
         }
-    }*/
+      }
+
+    } while( !notUsedName );
 
     //Add to dataset
-    DataSetWidget* dsw = new DataSetWidget( name, path );
-    QListWidgetItem* listWidgetItem = new QListWidgetItem(_ui->dataSetListWidget);
+    DataSetWidget* dsw = new DataSetWidget( name, path );    
+    QListWidgetItem* listWidgetItem = new QListWidgetItem(
+      _ui->dataSetListWidget );
     _ui->dataSetListWidget->addItem( listWidgetItem );
     listWidgetItem->setSizeHint( dsw->sizeHint ( ) );
     _ui->dataSetListWidget->setItemWidget (listWidgetItem, dsw);
 
+    QObject::connect( dsw->getPushButton( ), SIGNAL( clicked( ) ), this,
+      SLOT( removeDataSetItem( ) ) );
+
+    //dsw->getPushButton( )->parent( )
     std::vector< std::string > csvHeaders =
       sp1common::Files::readCsvHeaders( filePath.toStdString( ) );
 
@@ -156,12 +210,13 @@ namespace vishnu
 
     //_ui->csvFilename->setText( fileDialog );
     //checkApps( );
-
   }
+
 
   void MainWindow::removeDataSetItem( )
   {
-
+    _ui->dataSetListWidget->takeItem( _ui->dataSetListWidget->row(
+      _ui->dataSetListWidget->currentItem()));
   }
 
   void MainWindow::app_closed( int exitCode, QProcess::ExitStatus exitStatus )

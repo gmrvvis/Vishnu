@@ -3,6 +3,8 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPixmap>
+#include <QStyle>
+#include <sstream>
 
 namespace vishnu
 {
@@ -10,30 +12,58 @@ namespace vishnu
   DataSetWidget::DataSetWidget( const std::string& name,
     const std::string& path, QWidget* /*parent*/ )
   {
+    QHBoxLayout *hLayout = new QHBoxLayout( this );
+
+    //From left to right
+    //DataSet image
+    QLabel* dataSetImage = new QLabel( );
+    dataSetImage->setStyleSheet("width: 32px; height: 32px;");
+    //dataSetImage->setScaledContents( true );
+    QPixmap dataSetPixmap( ":/icons/dataSet.png" );
+    dataSetImage->setPixmap( dataSetPixmap );
+
+    QVBoxLayout *vLayout1 = new QVBoxLayout( );
+    vLayout1->addWidget( dataSetImage, 0, 0);
+    hLayout->addLayout( vLayout1, 0);
+    hLayout->addSpacing(30);
+
+    //Name and path
     setName( name );
     setPath( path );
 
-    QLabel* image = new QLabel( );
-    image->setBackgroundRole( QPalette::Dark );
-    //image->setScaledContents( true );
-    QPixmap pixmap( ":/icons/dataSet.png" );
-    image->setPixmap( pixmap );
-
-    QHBoxLayout *hLayout = new QHBoxLayout( this );
-    QVBoxLayout *vLeftLayout = new QVBoxLayout( );
-    vLeftLayout->addWidget( image, 0, 0);
-
-    hLayout->addLayout( vLeftLayout, 0);
-    //hLayout->addWidget( image, 0, 0);
+    QVBoxLayout *vLayout2 = new QVBoxLayout( );
+    vLayout2->addWidget( _name, 0, 0);
+    vLayout2->addWidget( _path, 1, 0);
+    hLayout->addLayout( vLayout2, 1);
     hLayout->addSpacing(30);
 
-    QVBoxLayout *vLayout = new QVBoxLayout( );
-    vLayout->addWidget( _name, 0, 0);
-    vLayout->addWidget( _path, 1, 0);
+    //DataSet CheckBox
+    _checkbox.setChecked( true ); //default checked
+    std::stringstream checkBoxStyleSheet;
+    checkBoxStyleSheet << "QCheckBox::indicator { width: 32px; height: 32px; }"
+      << "QCheckBox::indicator:checked { background-image:url(:/icons/checked.png); }"
+      << "QCheckBox::indicator:unchecked { background-image:url(:/icons/unchecked.png); }";
+    _checkbox.setStyleSheet( QString::fromStdString( checkBoxStyleSheet.str( ) ) );
 
-    hLayout->addLayout( vLayout, 1);
+    QVBoxLayout *vLayout3 = new QVBoxLayout( );
+    vLayout3->addWidget( &_checkbox, 0, 0);
+    hLayout->addLayout( vLayout3, 0);
+    hLayout->addSpacing(30);
 
+    //DataSet remove image
+    QLabel* removeDataSetImage = new QLabel( );
+    removeDataSetImage->setStyleSheet("width: 32px; height: 32px;");
+    //removeDataSetImage->setScaledContents( true );
+    QPixmap removeDataSetPixmap( ":/icons/close.png" );
+    removeDataSetImage->setPixmap( removeDataSetPixmap );
+    _remove = new QPushButton( );
+    _remove->setIcon( QIcon( ":/icons/close.png" ) );
+    //QObject::connect( actionRemoveDataSet, SIGNAL( triggered() ), this,
+      //SLOT( removeDataSetItem( ) ) );
 
+    QVBoxLayout *vLayout4 = new QVBoxLayout( );
+    vLayout4->addWidget( _remove, 0, 0);
+    hLayout->addLayout( vLayout4, 0);
 
     QPalette pal(palette());
     //pal.setColor(QPalette:, Qt::black);
@@ -82,6 +112,11 @@ namespace vishnu
   void DataSetWidget::setChecked( const bool& checked )
   {
     _checkbox.setChecked( checked );
+  }
+
+  QPushButton* DataSetWidget::getPushButton()
+  {
+    return _remove;
   }
 
 }

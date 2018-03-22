@@ -10,6 +10,8 @@
 #include <QProcess>
 #include <QMutex>
 
+#include <QToolBar>
+
 #include "Application.hpp"
 #include "SyncGroup.hpp"
 #include "WidgetsGroup.hpp"
@@ -61,9 +63,10 @@ namespace vishnu
       void destroyGroup(const QString& qKey);
 
       void addDataSetItem();
-      void removeDataSetItem();
+      void removeDataSetItem( );
 
     private:
+
       vishnu::Ui::MainWindow *_ui;
       std::string _zeqSession;
       std::string _workingDirectory;

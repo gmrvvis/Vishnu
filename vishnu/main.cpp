@@ -4,6 +4,9 @@
 #include <QSharedMemory>
 #include <QSystemSemaphore>
 
+#include <QDesktopWidget>
+#include <QStyle>
+
 #include "MainWindow.h"
 #include "Definitions.hpp"
 
@@ -61,7 +64,18 @@ int main( int argc, char *argv[] )
 
   vishnu::MainWindow window( args );
   QResource::registerResource( "resources.rcc" );
+  window.setGeometry( QRect( 0, 0, APPLICATION_WIDTH, APPLICATION_HEIGHT ) );
+
+  QRect screenGeometry = QApplication::desktop()->screenGeometry();
+  int x = ( screenGeometry.width() - window.width( ) ) / 2;
+  int y = ( screenGeometry.height() - window.height( ) ) / 2;
+  window.move( x, y );
+
+  window.setMinimumSize( 300, 0 );
+  window.setWindowIcon( QIcon( ":/icons/iconLauncher.png") );
+  window.setIconSize( QSize( 32, 32 ) );
   window.setWindowTitle( QApplication::applicationName( ) );
+
   window.show( );
   return app.exec( );
 }

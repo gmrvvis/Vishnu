@@ -6,6 +6,7 @@
 #include <QIcon>
 #include <QLabel>
 #include <QCheckBox>
+#include <QPushButton>
 
 namespace vishnu
 {
@@ -26,13 +27,17 @@ namespace vishnu
     void setPath( const std::string& path );
 
     bool getChecked( ) const;
+
     void setChecked( const bool& checked );
+
+    QPushButton* getPushButton();
 
   private:
 
     QLabel* _name = nullptr;
     QLabel* _path = nullptr;
     QCheckBox _checkbox;
+    QPushButton* _remove = nullptr;
 
   };
 
