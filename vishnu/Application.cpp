@@ -1,8 +1,8 @@
-#include "Application.hpp"
+#include "Application.h"
 
 namespace vishnu
 {
-  Application::Application( const manco::ApplicationType& applicationType,
+  Application::Application( const sp1common::ApplicationType& applicationType,
     const std::string& displayName, const std::string& cmd,
     const sp1common::Args& args, const std::string& workingDirectory )
     : _applicationType( applicationType )
@@ -26,7 +26,7 @@ namespace vishnu
 
   }
 
-  manco::ApplicationType Application::getApplicationType( ) const
+  sp1common::ApplicationType Application::getApplicationType( ) const
   {
     return _applicationType;
   }

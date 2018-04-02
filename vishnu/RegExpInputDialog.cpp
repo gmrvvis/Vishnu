@@ -1,6 +1,9 @@
-#include "RegExpInputDialog.hpp"
+#include "RegExpInputDialog.h"
 
 #include <QPushButton>
+#include <QStyle>
+#include <QDesktopWidget>
+#include <QApplication>
 
 namespace vishnu
 {
@@ -10,11 +13,20 @@ namespace vishnu
   {
     if(flags!=0) setWindowFlags(flags);
 
+    setGeometry(
+        QStyle::alignedRect(
+            Qt::LeftToRight,
+            Qt::AlignCenter,
+            size(),
+            qApp->desktop()->availableGeometry()
+        )
+    );
+
     QVBoxLayout *l=new QVBoxLayout(this);
 
     _label=new QLabel(this);
 
-    _regularExpression=QRegularExpression("*");
+    //_regularExpression=QRegularExpression("*");
     _validator=new QRegularExpressionValidator(_regularExpression);
 
     _text=new QLineEdit(this);

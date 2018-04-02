@@ -1,5 +1,5 @@
-#ifndef VISHNU_SYNCGROUP_HPP
-#define VISHNU_SYNCGROUP_HPP
+#ifndef VISHNU_SYNCGROUP_H
+#define VISHNU_SYNCGROUP_H
 
 #include <QColor>
 #include <string>

@@ -2,27 +2,16 @@
 <ui version="4.0">
  <class>vishnu::MainWindow</class>
  <widget class="QMainWindow" name="vishnu::MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>536</width>
+    <height>401</height>
+   </rect>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
-    <item row="1" column="0">
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QGroupBox" name="groupBox">
-        <property name="title">
-         <string>Apps</string>
-        </property>
-        <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="0">
-          <layout class="QVBoxLayout" name="verticalLayout_2"/>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout"/>
-      </item>
-     </layout>
-    </item>
     <item row="2" column="0">
      <widget class="QScrollArea" name="scrollArea">
       <property name="maximumSize">
@@ -45,8 +34,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>669</width>
-         <height>289</height>
+         <width>254</width>
+         <height>68</height>
         </rect>
        </property>
        <property name="maximumSize">
@@ -118,8 +107,27 @@
     <item row="0" column="0">
      <widget class="QListWidget" name="dataSetListWidget"/>
     </item>
+    <item row="1" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>Apps</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <layout class="QVBoxLayout" name="verticalLayout_2"/>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout"/>
+      </item>
+     </layout>
+    </item>
     <item row="0" column="1">
-     <widget class="QTableWidget" name="tableWidget"/>
+     <widget class="QTableWidget" name="propertiesTableWidget"/>
     </item>
    </layout>
   </widget>
@@ -128,7 +136,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1366</width>
+     <width>536</width>
      <height>25</height>
     </rect>
    </property>
@@ -136,8 +144,6 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

@@ -13,8 +13,8 @@
 
 #include "Definitions.hpp"
 #include "utils/Auxiliars.hpp"
-#include "RegExpInputDialog.hpp"
-#include "widgets/DataSetWidget.hpp"
+#include "RegExpInputDialog.h"
+#include "widgets/DataSetWidget.h"
 
 namespace vishnu
 {
@@ -104,7 +104,8 @@ namespace vishnu
       //      this, SLOT(updateMenus(QListWidgetItem *)));
 
     //End DataSetListWidget
-
+    //connect(_ui->dataSetListWidget, SIGNAL(itemClicked(QListWidgetItem *)),
+      //SLOT(itemClicked(QListWidgetItem *)));
   }
 
   MainWindow::~MainWindow( )
@@ -192,15 +193,29 @@ namespace vishnu
     } while( !notUsedName );
 
     //Add to dataset
-    DataSetWidget* dsw = new DataSetWidget( name, path );    
-    QListWidgetItem* listWidgetItem = new QListWidgetItem(
-      _ui->dataSetListWidget );
+    DataSetWidget* dsw = new DataSetWidget( name, path );
+    dsw->setListWidgetItem( new QListWidgetItem(
+      _ui->dataSetListWidget ) );
+
+    QListWidgetItem* listWidgetItem = dsw->getListWidgetItem( );
+
+    //QListWidgetItem* listWidgetItem = new QListWidgetItem(
+      //_ui->dataSetListWidget );
     _ui->dataSetListWidget->addItem( listWidgetItem );
     listWidgetItem->setSizeHint( dsw->sizeHint ( ) );
     _ui->dataSetListWidget->setItemWidget (listWidgetItem, dsw);
 
-    QObject::connect( dsw->getPushButton( ), SIGNAL( clicked( ) ), this,
-      SLOT( removeDataSetItem( ) ) );
+    /*QListWidgetItem* listWidgetItem = new QListWidgetItem(
+      _ui->dataSetListWidget );
+    _ui->dataSetListWidget->addItem( listWidgetItem );
+    listWidgetItem->setSizeHint( dsw->sizeHint ( ) );
+    _ui->dataSetListWidget->setItemWidget (listWidgetItem, dsw);*/
+
+    QObject::connect( dsw, SIGNAL( removeSelected( ) ), this,
+          SLOT( removeDataSetItem( ) ) );
+
+    /*QObject::connect( dsw->getPushButton( ), SIGNAL( clicked( ) ), this,
+      SLOT( removeDataSetItem( ) ) );*/
 
     //dsw->getPushButton( )->parent( )
     std::vector< std::string > csvHeaders =
@@ -215,6 +230,9 @@ namespace vishnu
 
   void MainWindow::removeDataSetItem( )
   {
+    //_ui->dataSetListWidget->removeItemWidget( widgetItem );
+    //_ui->dataSetListWidget->takeItem( _ui->dataSetListWidget->row(
+      //widgetItem));
     _ui->dataSetListWidget->takeItem( _ui->dataSetListWidget->row(
       _ui->dataSetListWidget->currentItem()));
   }
@@ -289,11 +307,12 @@ namespace vishnu
    std::string instanceId = sp1common::Strings::generateRandom( 5 );
    args.set( "-id", instanceId );
 
-    ApplicationPtr appplication( new Application( manco::ApplicationType::CLINT,
-      displayName, cmd, args, _workingDirectory ) );
+    ApplicationPtr appplication( new Application(
+      sp1common::ApplicationType::CLINT, displayName, cmd, args,
+      _workingDirectory ) );
 
-    std::string owner = manco::ZeqManager::getOwner(
-      manco::ApplicationType::CLINT, instanceId );
+    std::string owner = sp1common::toString(
+      sp1common::ApplicationType::CLINT ) + instanceId;
 
     _applications[ owner ] = appplication;
   }
@@ -324,11 +343,11 @@ namespace vishnu
     args.set( "-id", instanceId );
 
     ApplicationPtr application( new Application(
-      manco::ApplicationType::DCEXPLORER, displayName, cmd, args,
+      sp1common::ApplicationType::DCEXPLORER, displayName, cmd, args,
       _workingDirectory ) );
 
-    std::string owner = manco::ZeqManager::getOwner(
-      manco::ApplicationType::DCEXPLORER, instanceId );
+    std::string owner = sp1common::toString(
+      sp1common::ApplicationType::DCEXPLORER ) + instanceId;
 
     _applications[ owner ] = application;
   }
@@ -349,11 +368,12 @@ namespace vishnu
     std::string instanceId = sp1common::Strings::generateRandom( 5 );
     args.set( "-id", instanceId );
 
-    ApplicationPtr application( new Application( manco::ApplicationType::PYRAMIDAL,
-      displayName, cmd, args, _workingDirectory ) );
+    ApplicationPtr application( new Application(
+      sp1common::ApplicationType::PYRAMIDAL, displayName, cmd, args,
+      _workingDirectory ) );
 
-    std::string owner = manco::ZeqManager::getOwner(
-      manco::ApplicationType::PYRAMIDAL, instanceId );
+    std::string owner = sp1common::toString(
+      sp1common::ApplicationType::PYRAMIDAL ) + instanceId;
 
     _applications[ owner ] = application;
   }
@@ -371,7 +391,8 @@ namespace vishnu
     {
       if ( it.second->getPushButton( ) == appButton)
       {        
-        sp1common::Debug::consoleMessage( "Opening " + it.second->getDisplayName( ) );
+        sp1common::Debug::consoleMessage( "Opening "
+          + it.second->getDisplayName( ) );
 
         it.second->getPushButton( )->setEnabled( false );
         it.second->setReadChannel( QProcess::StandardOutput );
@@ -636,5 +657,16 @@ namespace vishnu
     emit signalDestroyGroup( QString::fromStdString( key ) );
   }
 
+  void MainWindow::itemClicked(QListWidgetItem *item)
+  {
+     if (!item)
+     {
+        std::cout << "NO ITEM" << std::endl;
+        return;
+     }
+     std::cout << "row [" << _ui->dataSetListWidget->row(item) << "] == "
+       << static_cast<DataSetWidget*>(
+       _ui->dataSetListWidget->itemWidget( item) )->getName() << std::endl;
+  }
 }
 

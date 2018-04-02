@@ -1,11 +1,10 @@
-#ifndef VISHNU_APPLICATION_HPP
-#define VISHNU_APPLICATION_HPP
+#ifndef VISHNU_APPLICATION_H
+#define VISHNU_APPLICATION_H
 
 #include <QProcess>
 #include <QPushButton>
 #include <QStringList>
 
-#include <manco/manco.h>
 #include <sp1common/sp1common.h>
 
 namespace vishnu
@@ -13,14 +12,14 @@ namespace vishnu
   class Application : public QProcess
   {
     public:
-      Application( const manco::ApplicationType& applicationType,
+      Application( const sp1common::ApplicationType& applicationType,
         const std::string& displayName,
         const std::string& shellCommand, 
         const sp1common::Args& args,
         const std::string& workingDirectory = std::string( ) );
       ~Application( );
 
-      manco::ApplicationType getApplicationType( ) const;
+      sp1common::ApplicationType getApplicationType( ) const;
       std::string getDisplayName( ) const;
       std::string getCmd( ) const;
       sp1common::ArgsMap getArgs( ) const;
@@ -28,7 +27,7 @@ namespace vishnu
 
     private:
       
-      manco::ApplicationType _applicationType;
+      sp1common::ApplicationType _applicationType;
       std::string _displayName;
       std::string _cmd;
       sp1common::Args _args;

@@ -1,4 +1,4 @@
-#include "WidgetsGroup.hpp"
+#include "WidgetsGroup.h"
 
 namespace vishnu
 {

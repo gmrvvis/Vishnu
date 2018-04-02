@@ -11,10 +11,11 @@
 #include <QMutex>
 
 #include <QToolBar>
+#include <QListWidgetItem>
 
-#include "Application.hpp"
-#include "SyncGroup.hpp"
-#include "WidgetsGroup.hpp"
+#include "Application.h"
+#include "SyncGroup.h"
+#include "WidgetsGroup.h"
 
 #include <manco/manco.h>
 #include <sp1common/sp1common.h>
@@ -65,7 +66,9 @@ namespace vishnu
       void addDataSetItem();
       void removeDataSetItem( );
 
-    private:
+       void itemClicked(QListWidgetItem *item);
+
+  private:
 
       vishnu::Ui::MainWindow *_ui;
       std::string _zeqSession;

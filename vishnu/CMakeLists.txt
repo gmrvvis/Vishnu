@@ -28,14 +28,14 @@ set( VISHNU_HEADERS
   ${PROJECT_BINARY_DIR}/include/vishnu/version.h
   MainWindow.ui
   MainWindow.h
-  Application.hpp
-  SyncGroup.hpp
+  Application.h
+  SyncGroup.h
   resources.qrc
-  WidgetsGroup.hpp
+  WidgetsGroup.h
   Definitions.hpp
   utils/Auxiliars.hpp
-  widgets/DataSetWidget.hpp
-  RegExpInputDialog.hpp
+  widgets/DataSetWidget.h
+  RegExpInputDialog.h
 )
 
 set( VISHNU_LINK_LIBRARIES
