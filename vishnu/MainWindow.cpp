@@ -106,6 +106,20 @@ namespace vishnu
     //End DataSetListWidget
     //connect(_ui->dataSetListWidget, SIGNAL(itemClicked(QListWidgetItem *)),
       //SLOT(itemClicked(QListWidgetItem *)));
+
+    _ui->dataSetListWidget->setSelectionMode( QAbstractItemView::SingleSelection );
+    _ui->dataSetListWidget->setDragDropMode( QAbstractItemView::DragDrop );
+    _ui->dataSetListWidget->setDefaultDropAction( Qt::MoveAction );
+
+    _ui->propertiesTableWidget->setColumnCount( 3 );
+    QStringList headers;
+    headers << "Property name" << "Use" << "Primary Key";
+    _ui->propertiesTableWidget->setHorizontalHeaderLabels( headers );
+    _ui->propertiesTableWidget->setSortingEnabled( false );
+
+    connect( _ui->propertiesTableWidget, SIGNAL( cellDoubleClicked (int, int) ),
+      this, SLOT( cellSelected( int, int ) ) );
+
   }
 
   MainWindow::~MainWindow( )
@@ -223,10 +237,32 @@ namespace vishnu
 
     std::cout << sp1common::Strings::join( csvHeaders, "," ) << std::endl;
 
+    for ( const auto& header : csvHeaders )
+    {
+      std::vector< std::string > propertyVector;
+      for (int i = 0; i < _ui->propertiesTableWidget->rowCount(); ++i )
+      {
+        propertyVector.push_back(
+          _ui->propertiesTableWidget->item(i, 0)->text().toStdString( ) );
+      }
+
+      if (std::find(propertyVector.begin(), propertyVector.end(), header)
+        == propertyVector.end())
+      {
+        _ui->propertiesTableWidget->setItem(
+          _ui->propertiesTableWidget->rowCount(), 1,
+            new QTableWidgetItem( QString::fromStdString( header ) ));
+      }
+    }
+
     //_ui->csvFilename->setText( fileDialog );
     //checkApps( );
   }
 
+  void MainWindow::cellSelected(int nRow, int nCol)
+  {
+    std::cout << "Cell clicked: " << nRow << nCol << std::endl;
+  }
 
   void MainWindow::removeDataSetItem( )
   {

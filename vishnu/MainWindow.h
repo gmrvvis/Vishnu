@@ -66,7 +66,9 @@ namespace vishnu
       void addDataSetItem();
       void removeDataSetItem( );
 
-       void itemClicked(QListWidgetItem *item);
+      void itemClicked( QListWidgetItem *item );
+
+      void cellSelected( int nRow, int nCol );
 
   private:
 
