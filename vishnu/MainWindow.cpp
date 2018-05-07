@@ -7,12 +7,13 @@
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QPixmap>
+#include <QComboBox>
+#include <QGroupBox>
 
 #include <iostream>
 #include <stdio.h>
 
 #include "Definitions.hpp"
-#include "utils/Auxiliars.hpp"
 #include "RegExpInputDialog.h"
 #include "widgets/DataSetWidget.h"
 
@@ -27,12 +28,9 @@ namespace vishnu
 
     //MenuBar
     QMenu *fileMenu = new QMenu(tr("&File"));
-
     QAction *quitAction = fileMenu->addAction(tr("E&xit"));
     quitAction->setShortcut(tr("Ctrl+Q"));
-
     QMenu *itemsMenu = new QMenu(tr("&DataSets"));
-
     addDataSetAction = itemsMenu->addAction(tr("&Add DataSet"));
     //removeAction = itemsMenu->addAction(tr("&Remove Item"));
     //QAction *ascendingAction = itemsMenu->addAction(tr("Sort in &Ascending Order"));
@@ -45,7 +43,6 @@ namespace vishnu
     //ToolBar
     QToolBar* toolBar = new QToolBar( );
     toolBar->setMovable( false );
-
     QAction* actionAddDataSet = new QAction( );
     actionAddDataSet->setIcon( QIcon( ":/icons/addDataSet.png" ) );
     actionAddDataSet->setText( "AddDataSet" );
@@ -53,73 +50,105 @@ namespace vishnu
     actionAddDataSet->setShortcut( QKeySequence( "Ctrl+O" ) ); 
     QObject::connect( actionAddDataSet, SIGNAL( triggered() ), this,
       SLOT( addDataSetItem( ) ) );
-
     toolBar->addAction( actionAddDataSet );
-
     addToolBar(Qt::TopToolBarArea, toolBar);
-
     //End ToolBar
-
-    //DataSetListWidget
-    //EndDataSetListWidget
-
-
 
     _workingDirectory = args.get( "-wd" );
     _zeqSession = args.get( "-z" );
 
-
-
-    loadClint();
-    loadDCExplorer();
-    loadPyramidal();
-
-    for ( const auto& application : _applications )
-    {
-      _ui->verticalLayout_2->addWidget( application.second->getPushButton( ) );
-      QObject::connect( application.second->getPushButton( ),
-        SIGNAL( clicked( bool ) ), this, SLOT( pushButtonApp_clicked( ) ) );
-    }
-
-    QObject::connect( this, SIGNAL( signalCreateGroup( const QString& ) ),
-      SLOT( createGroup( const QString& ) ), Qt::QueuedConnection );
+    QObject::connect( this, SIGNAL( signalSyncGroup( const QString&,
+      const QString&, const QString&, const std::vector< std::string >&,
+      const QColor& ) ), SLOT( syncGroup( const QString&, const QString&,
+      const QString&, const std::vector< std::string >&, const QColor& ) ),
+      Qt::QueuedConnection );
 
     QObject::connect( this, SIGNAL( signalChangeGroupName( const QString&,
       const QString& ) ), SLOT( changeGroupName( const QString&,
       const QString& ) ), Qt::QueuedConnection );
 
+    QObject::connect( this, SIGNAL( signalChangeGroupColor( const QString&,
+      const QColor& ) ), SLOT( changeGroupColor( const QString&,
+      const QColor& ) ), Qt::QueuedConnection );
+
     QObject::connect( this, SIGNAL( signalDestroyGroup( const QString& ) ),
-      SLOT( destroyGroup( const QString& ) ), Qt::QueuedConnection );
+      SLOT( removeGroup( const QString& ) ), Qt::QueuedConnection );
 
     //ZeqSession
     initZeqSession( );
 
+    QGridLayout* gridLayout = new QGridLayout( );
+    _ui->centralWidget->setLayout( gridLayout );
+
+    //DataSets && Properties horizontal layout
+    QHBoxLayout* hBoxLayout = new QHBoxLayout();
+
     //DataSetListWidget
-    //_ui->dataSetListWidget = new QListWidget(this);
-    //_ui->dataSetListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-    QObject::connect(addDataSetAction, SIGNAL(triggered()), this, SLOT(addDataSetItem()));
-    //QObject::connect(removeDataSetAction, SIGNAL(triggered()), this, SLOT(removeDataSetItem()));
-    //QObject::connect(listWidget,
-     //       SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)),
-      //      this, SLOT(updateMenus(QListWidgetItem *)));
+    _dataSetListWidget = new DataSetListWidget( );
 
-    //End DataSetListWidget
-    //connect(_ui->dataSetListWidget, SIGNAL(itemClicked(QListWidgetItem *)),
-      //SLOT(itemClicked(QListWidgetItem *)));
+    QSizePolicy dsSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
+    dsSizePolicy.setHorizontalStretch( 1 );
+    _dataSetListWidget->setSizePolicy( dsSizePolicy );
+    hBoxLayout->addWidget( _dataSetListWidget, 0 );
 
-    _ui->dataSetListWidget->setSelectionMode( QAbstractItemView::SingleSelection );
-    _ui->dataSetListWidget->setDragDropMode( QAbstractItemView::DragDrop );
-    _ui->dataSetListWidget->setDefaultDropAction( Qt::MoveAction );
+    QObject::connect( addDataSetAction, SIGNAL( triggered( ) ), this,
+      SLOT( addDataSetItem( ) ) );
 
-    _ui->propertiesTableWidget->setColumnCount( 3 );
-    QStringList headers;
-    headers << "Property name" << "Use" << "Primary Key";
-    _ui->propertiesTableWidget->setHorizontalHeaderLabels( headers );
-    _ui->propertiesTableWidget->setSortingEnabled( false );
+    QObject::connect( _dataSetListWidget,
+      SIGNAL( addDataSetEvent( const std::string& ) ), this,
+      SLOT( addDataSetItem( const std::string& ) ) );
 
-    connect( _ui->propertiesTableWidget, SIGNAL( cellDoubleClicked (int, int) ),
-      this, SLOT( cellSelected( int, int ) ) );
+    //PropertiesTableWidget
+    _propertiesTableWidget = new PropertiesTableWidget( );
 
+    QSizePolicy prSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
+    prSizePolicy.setHorizontalStretch( 1 );
+    _propertiesTableWidget->setSizePolicy( prSizePolicy );
+    hBoxLayout->addWidget( _propertiesTableWidget, 1 );
+
+    gridLayout->addLayout( hBoxLayout, 0, 0, Qt::AlignTop );
+
+    //Applications
+    loadClint();
+    loadDCExplorer();
+    loadPyramidal();
+
+    QHBoxLayout* hBoxLayout2 = new QHBoxLayout( );
+    QVBoxLayout* vBoxLayout = new QVBoxLayout( );
+    QGroupBox* appsGroupBox = new QGroupBox();
+    for ( const auto& application : _applications )
+    {
+      vBoxLayout->addWidget( application.second->getPushButton( ) );
+
+      QObject::connect( application.second->getPushButton( ),
+        SIGNAL( clicked( bool ) ), this, SLOT( runApp( ) ) );
+    }
+    vBoxLayout->stretch(1);
+    appsGroupBox->setLayout(vBoxLayout);
+
+    QSizePolicy appsSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
+    appsSizePolicy.setHorizontalStretch( 1 );
+    appsGroupBox->setSizePolicy( appsSizePolicy );
+    hBoxLayout2->addWidget( appsGroupBox, 0 );
+
+    //Groups
+    _zeqGroupListWidget = new ZEQGroupListWidget( );
+
+    QSizePolicy groupsSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
+    groupsSizePolicy.setHorizontalStretch( 1 );
+    _zeqGroupListWidget->setSizePolicy( groupsSizePolicy );
+    hBoxLayout2->addWidget( _zeqGroupListWidget, 1 );
+
+    gridLayout->addLayout( hBoxLayout2, 1, 0, Qt::AlignTop );
+
+    /*std::vector<std::string> ids;
+    ids.push_back("test");
+    syncGroup("GROUP1#!#OWNER1", "GROUP1", "OWNER1", ids, QColor(255, 65, 77));
+    syncGroup("GROUP2#!#OWNER2", "GROUP2", "OWNER2", ids, QColor(3, 255, 77));
+    syncGroup("GROUP3#!#OWNER3", "GROUP3", "OWNER3", ids, QColor(3, 65, 255));
+    changeGroupColor("GROUP1#!#OWNER1", QColor(0, 255, 0));
+    changeGroupName("GROUP2#!#OWNER2", "newName");
+    removeGroup("GROUP3#!#OWNER3");*/
   }
 
   MainWindow::~MainWindow( )
@@ -150,130 +179,84 @@ namespace vishnu
     }
   }
 
-  void MainWindow::addDataSetItem( )
+  void MainWindow::addDataSetItem( const std::string& dropped )
   {
-    QString filePath = QFileDialog::getOpenFileName( this,
-      QString( "Choose CSV file" ), QString( "" ),
-      QString( "CSV-Files(*.csv)" ) );
+    DataSetWidget* dsw = _dataSetListWidget->addDataSet( dropped );
 
-    if ( filePath.isEmpty( ) )
+    if ( dsw )
     {
-      return;
+      QObject::connect( dsw, SIGNAL( removeSelected( ) ), this,
+        SLOT( removeDataSetItem( ) ) );
+
+      _propertiesTableWidget->addProperties( dsw->getHeaders( ) );
     }
-
-    QFileInfo fileInfo( filePath );
-
-    //Format basename to 10 chars without spaces
-    std::string basename = fileInfo.baseName( ).toStdString( );
-    basename.erase( std::remove_if( basename.begin( ), basename.end( ),
-      isspace ), basename.end( ) );
-    basename.resize (10);
-
-    std::string name;
-    std::string path = filePath.toStdString( );
-    std::string tempName = basename;
-    bool validName = false;
-    bool notUsedName = true;
-
-    do
-    {
-      //Check if it's a valid name
-      QRegularExpression regularExpression("[A-Za-z0-9]{1,10}$");
-      QString dataSetName = RegExpInputDialog::getText(this, "DataSet name",
-        "Enter DataSet name", QString::fromStdString( tempName ),
-        regularExpression, &validName);
-      if ( !validName )
-      {
-        return;
-      }
-
-      name = dataSetName.toStdString( );
-
-      //Check if name doesn't exist
-      notUsedName = true;
-      for(int i = 0; i < _ui->dataSetListWidget->count(); ++i)
-      {
-        QListWidgetItem* item = _ui->dataSetListWidget->item( i );
-        DataSetWidget* widget = static_cast< DataSetWidget* >(
-          _ui->dataSetListWidget->itemWidget( item ) );
-        if ( widget->getName( ) == name )
-        {
-          QMessageBox::warning( this, APPLICATION_NAME,
-            tr("Invalid name. This name already exists.") );
-          notUsedName = false;
-        }
-      }
-
-    } while( !notUsedName );
-
-    //Add to dataset
-    DataSetWidget* dsw = new DataSetWidget( name, path );
-    dsw->setListWidgetItem( new QListWidgetItem(
-      _ui->dataSetListWidget ) );
-
-    QListWidgetItem* listWidgetItem = dsw->getListWidgetItem( );
-
-    //QListWidgetItem* listWidgetItem = new QListWidgetItem(
-      //_ui->dataSetListWidget );
-    _ui->dataSetListWidget->addItem( listWidgetItem );
-    listWidgetItem->setSizeHint( dsw->sizeHint ( ) );
-    _ui->dataSetListWidget->setItemWidget (listWidgetItem, dsw);
-
-    /*QListWidgetItem* listWidgetItem = new QListWidgetItem(
-      _ui->dataSetListWidget );
-    _ui->dataSetListWidget->addItem( listWidgetItem );
-    listWidgetItem->setSizeHint( dsw->sizeHint ( ) );
-    _ui->dataSetListWidget->setItemWidget (listWidgetItem, dsw);*/
-
-    QObject::connect( dsw, SIGNAL( removeSelected( ) ), this,
-          SLOT( removeDataSetItem( ) ) );
-
-    /*QObject::connect( dsw->getPushButton( ), SIGNAL( clicked( ) ), this,
-      SLOT( removeDataSetItem( ) ) );*/
-
-    //dsw->getPushButton( )->parent( )
-    std::vector< std::string > csvHeaders =
-      sp1common::Files::readCsvHeaders( filePath.toStdString( ) );
-
-    std::cout << sp1common::Strings::join( csvHeaders, "," ) << std::endl;
-
-    for ( const auto& header : csvHeaders )
-    {
-      std::vector< std::string > propertyVector;
-      for (int i = 0; i < _ui->propertiesTableWidget->rowCount(); ++i )
-      {
-        propertyVector.push_back(
-          _ui->propertiesTableWidget->item(i, 0)->text().toStdString( ) );
-      }
-
-      if (std::find(propertyVector.begin(), propertyVector.end(), header)
-        == propertyVector.end())
-      {
-        _ui->propertiesTableWidget->setItem(
-          _ui->propertiesTableWidget->rowCount(), 1,
-            new QTableWidgetItem( QString::fromStdString( header ) ));
-      }
-    }
-
-    //_ui->csvFilename->setText( fileDialog );
-    //checkApps( );
-  }
-
-  void MainWindow::cellSelected(int nRow, int nCol)
-  {
-    std::cout << "Cell clicked: " << nRow << nCol << std::endl;
   }
 
   void MainWindow::removeDataSetItem( )
   {
-    //_ui->dataSetListWidget->removeItemWidget( widgetItem );
-    //_ui->dataSetListWidget->takeItem( _ui->dataSetListWidget->row(
-      //widgetItem));
-    _ui->dataSetListWidget->takeItem( _ui->dataSetListWidget->row(
-      _ui->dataSetListWidget->currentItem()));
+    std::vector< std::string > propertiesToRemove =
+      _dataSetListWidget->getPropertiesToRemove( );
+
+    _propertiesTableWidget->removeProperties( propertiesToRemove );
+
+    _dataSetListWidget->removeCurrentDataSet( );
   }
 
-  void MainWindow::app_closed( int exitCode, QProcess::ExitStatus exitStatus )
+  void MainWindow::syncGroup( const QString& key, const QString& name,
+    const QString& owner, const std::vector< std::string >& ids,
+    const QColor& color )
+  {
+    ZEQGroupWidget* zeqGroupWidget = _zeqGroupListWidget->syncGroup(
+      key.toStdString( ), name, owner, ids, color );
+
+    if ( zeqGroupWidget )
+    {
+      QObject::connect( zeqGroupWidget, SIGNAL( signalChangeGroupName( const QString&, const QString& ) ), this,
+        SLOT( changeGroupName( const QString&, const QString& ) ) );
+
+      QObject::connect( zeqGroupWidget, SIGNAL( signalChangeGroupColor( const QString&, const QColor& ) ), this,
+        SLOT( changeGroupColor( const QString&, const QColor& ) ) );
+
+      QObject::connect( zeqGroupWidget, SIGNAL( signalRemoveSelectedGroup( ) ), this,
+        SLOT( removeSelectedGroup( ) ) );
+    }
+  }
+
+  void MainWindow::changeGroupName( const QString& key,
+    const QString& name )
+  {
+    _zeqGroupListWidget->changeGroupName( key.toStdString( ), name );
+  }
+
+  void MainWindow::changeGroupColor( const QString& key,
+    const QColor& color )
+  {
+    _zeqGroupListWidget->changeGroupColor( key.toStdString( ), color );
+  }
+
+  void MainWindow::removeSelectedGroup( )
+  {
+    //Clicked on destroy group button -> Ask && publish ZEQ event
+    std::string currentKey =
+      _zeqGroupListWidget->getKey( _zeqGroupListWidget->currentItem( ) );
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::warning( this, "Remove group",
+      "Do you want to remove '" + QString::fromStdString( currentKey )
+      + "'' group?", QMessageBox::Yes|QMessageBox::No );
+    if ( reply == QMessageBox::Yes )
+    {
+      _zeqGroupListWidget->removeCurrentGroup( );
+      manco::ZeqManager::instance( ).publishDestroyGroup( currentKey );
+    }
+  }
+
+  void MainWindow::removeGroup( const QString& key )
+  {
+    //Received ZEQ event -> Don't ask and destroy
+    _zeqGroupListWidget->removeGroup( key.toStdString( ) );
+  }
+
+  void MainWindow::closeApp( int exitCode, QProcess::ExitStatus exitStatus )
   {
     QProcess* qProcess = qobject_cast< QProcess* >( sender( ) );
     if ( exitStatus == QProcess::CrashExit )
@@ -300,7 +283,7 @@ namespace vishnu
         //app.second->setProgram( QString( ) );
         QObject::disconnect( appplication.second.get( ),
           SIGNAL( finished ( int , QProcess::ExitStatus ) ), this,
-          SLOT( app_closed( int, QProcess::ExitStatus ) ) );
+          SLOT( closeApp( int, QProcess::ExitStatus ) ) );
         appplication.second->getPushButton( )->setEnabled( true );
         break;
       }
@@ -345,7 +328,7 @@ namespace vishnu
 
     ApplicationPtr appplication( new Application(
       sp1common::ApplicationType::CLINT, displayName, cmd, args,
-      _workingDirectory ) );
+      QIcon(":/icons/logoClint.jpeg"), _workingDirectory ) );
 
     std::string owner = sp1common::toString(
       sp1common::ApplicationType::CLINT ) + instanceId;
@@ -380,7 +363,7 @@ namespace vishnu
 
     ApplicationPtr application( new Application(
       sp1common::ApplicationType::DCEXPLORER, displayName, cmd, args,
-      _workingDirectory ) );
+      QIcon(":/icons/logoDCExplorer.ico"), _workingDirectory ) );
 
     std::string owner = sp1common::toString(
       sp1common::ApplicationType::DCEXPLORER ) + instanceId;
@@ -406,7 +389,7 @@ namespace vishnu
 
     ApplicationPtr application( new Application(
       sp1common::ApplicationType::PYRAMIDAL, displayName, cmd, args,
-      _workingDirectory ) );
+      QIcon(":/icons/logoPyramidal.png"), _workingDirectory ) );
 
     std::string owner = sp1common::toString(
       sp1common::ApplicationType::PYRAMIDAL ) + instanceId;
@@ -414,7 +397,7 @@ namespace vishnu
     _applications[ owner ] = application;
   }
 
-  void MainWindow::pushButtonApp_clicked( )
+  void MainWindow::runApp( )
   {
     QPushButton* appButton = qobject_cast< QPushButton* >( sender( ) );
     if ( !appButton )
@@ -456,135 +439,10 @@ namespace vishnu
         std::cout << out_string.toStdString( ).c_str( ) << std::endl;
         QObject::connect( it.second.get( ),
           SIGNAL( finished ( int , QProcess::ExitStatus ) ), this,
-          SLOT( app_closed( int , QProcess::ExitStatus ) ) );
+          SLOT( closeApp( int , QProcess::ExitStatus ) ) );
         break;
       }
     }
-  }
-
-  void MainWindow::removeGroup_clicked( )
-  {
-    auto closeButton = qobject_cast< QPushButton* >( sender( ) );
-    std::string key;
-    for ( const auto& it : _widgetsGroups )
-    {
-      if ( it.second->getClosePushButton( ) == closeButton )
-      {
-        key = it.first;
-        break;
-      }
-    }
-
-    if ( key == "" )
-    {
-      std::cerr << "Error closing group: Group not found!" << std::endl;
-      return;
-    }
-
-    // Checks for app closed
-    auto syncGroup = _syncGroups.at( key );
-
-    std::string owner = syncGroup->getOwner( );
-
-    auto app = _applications.find( owner );
-    if( app != _applications.end( ) )
-    {
-      if ( !app->second->getPushButton( )->isEnabled( ) )
-      {
-        std::cout << "Error destroying group: " << syncGroup->getOwner( ) <<
-          " is not closed." << std::endl;
-        QMessageBox::warning( this, "Error destroying group",
-          "Error destroying group: " + QString::fromStdString(
-          syncGroup->getOwner( ) ) + " is not closed.", QMessageBox::Ok );
-        return;
-      }
-    }
-    else
-    {
-      std::cerr << "Error closing group: App not found!" << std::endl;
-      return;
-    }
-
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::warning( this, "Remove group",
-      "Do you want to remove '" + QString::fromStdString( key ) + "'' group?",
-      QMessageBox::Yes|QMessageBox::No );
-    if ( reply == QMessageBox::Yes )
-    {
-      destroyGroup( QString::fromStdString( key ) );
-      manco::ZeqManager::instance( ).publishDestroyGroup( key );
-    }
-  }
-
-  void MainWindow::createGroup( const QString &qKey )
-  {
-    std::string key = qKey.toStdString( );
-    auto syncGroup = _syncGroups.at( key );   
-
-    //Add group to widgets groups
-    QLabel* nameLabel = new QLabel(
-      QString::fromStdString( syncGroup->getName( ) ) );
-    QLabel* ownerLabel = new QLabel(
-      QString::fromStdString( syncGroup->getOwner( ) ) );
-    QPushButton* closePushButton = new QPushButton( );
-    closePushButton->setIcon( QIcon( ":/icons/iconClose.png" ) );
-
-    _widgetsGroups[ key ] = WidgetsGroupPtr( new WidgetsGroup( nameLabel,
-      ownerLabel, closePushButton ) );
-
-    //Add group to grid layout
-    _ui->groupsGridLayout->addWidget( nameLabel );
-    _ui->groupsGridLayout->addWidget( ownerLabel );
-    _ui->groupsGridLayout->addWidget( closePushButton );
-
-    //Add close push button event
-    connect( closePushButton, SIGNAL( clicked( bool ) ), this,
-      SLOT( removeGroup_clicked( ) ) );
-  }
-
-  void MainWindow::changeGroupName( const QString& qKey,
-    const QString& qNewName )
-  {
-    std::string key = qKey.toStdString( );
-    std::string newName = qNewName.toStdString( );
-
-    //Sync groups
-    auto syncGroup = _syncGroups.at( key );
-    std::string name = syncGroup->getName( );
-    syncGroup->setName( newName );
-
-    //Widgets groups
-    auto widgetsGroup = _widgetsGroups.at( key );
-    QLabel* nameLabel = widgetsGroup->getNameLabel( );
-    nameLabel->setText( qNewName );
-
-    sp1common::Debug::consoleMessage( "Group: '" + key +
-      "' - Changed group name '" + name + "'' to '" + newName +
-      "' successfully." );
-  }
-
-  void MainWindow::destroyGroup( const QString& qKey )
-  {
-    std::string key = qKey.toStdString( );
-    auto widget = _widgetsGroups.at( key )->getNameLabel( );
-    int index = _ui->groupsGridLayout->indexOf( widget );
-    auto gp = qMakePair( -1, -1 );
-    int rs, cs;
-    _ui->groupsGridLayout->getItemPosition( index, &gp.first, &gp.second, &rs,
-      &cs );
-    int row = gp.first;
-
-    // Remove row from grid
-    Auxiliars::removeRow( _ui->groupsGridLayout, row );
-
-    // Remove group from widgets
-    _widgetsGroups.erase( key );
-
-    // Remove group from map
-    _syncGroups.erase( key );
-
-    sp1common::Debug::consoleMessage("Group: '" + key +
-      "' removed successfully.");
   }
 
   void MainWindow::initZeqSession( )
@@ -595,7 +453,10 @@ namespace vishnu
       std::bind( &MainWindow::receivedSyncGroup, this,
       std::placeholders::_1 ) );
     manco::ZeqManager::instance( ).setReceivedChangeNameGroupUpdateCallback(
-      std::bind( &MainWindow::receivedChangeNameGroupUpdate, this,
+      std::bind( &MainWindow::receivedChangeNameGroup, this,
+      std::placeholders::_1 ) );
+    manco::ZeqManager::instance( ).setReceivedChangeColorUpdateCallback(
+      std::bind( &MainWindow::receivedChangeColorGroup, this,
       std::placeholders::_1 ) );
     manco::ZeqManager::instance( ).setReceivedDestroyGroupCallback(
       std::bind( &MainWindow::receivedDestroyGroup, this,
@@ -608,101 +469,47 @@ namespace vishnu
     std::vector< std::string > vectorIds = manco::ZeqManager::split(
       o->getIdsString( ), DELIMITER );
 
-    std::string message = std::string( "Received SyncGroup (" ) +
-      std::string( "\n\tkey: " ) + o->getKeyString( ) +
-      std::string( "\n\tname: " ) + o->getNameString( ) +
-      std::string( "\n\towner: " ) + o->getOwnerString( ) +
-      std::string( "\n\tcolor: (" ) +
-      std::to_string( color[0] ) + std::string( ", " ) +
-      std::to_string( color[1] ) + std::string( ", " ) +
-      std::to_string( color[2] ) +
-      std::string( ")" ) +
-      std::string( "\n\tids: (... commented ...)" );
+    std::stringstream message;
+    message << "Received SyncGroup ("
+      << "\n\tkey: " << o->getKeyString( )
+      << "\n\tname: " << o->getNameString( )
+      << "\n\towner: " << o->getOwnerString( )
+      << "\n\tcolor: ("
+      << color[0] << ", "
+      << color[1] << ", "
+      << color[2] << ")"
+      << "\n\tids: (... commented ...)";
+    sp1common::Debug::consoleMessage( message.str( ) );
 
-    sp1common::Debug::consoleMessage( message );
-
-    /*"\n\tids: ";
-    for ( auto it = vectorIds.begin( ); it != vectorIds.end( ); ++it )
-    {
-      std::cout << *it << ' ';
-    }*/
-    //std::cout << ")" << std::endl;
-
-    std::string key = o->getKeyString( );
-    SyncGroupPtr syncGroup( new SyncGroup( key, o->getNameString( ),
-      o->getOwnerString( ), vectorIds, color[0], color[1], color[2] ) );
-
-    //Add or set group to sync groups
-
-    //SyncGroups::iterator it;
-    auto it = _syncGroups.find( key );
-    if ( it != _syncGroups.end( ) )
-    {
-      //Found -> Set group
-      _syncGroups[ key ] = syncGroup;
-
-      //Set widgets group     
-      emit signalChangeGroupName( QString::fromStdString(
-        syncGroup->getKey( ) ), QString::fromStdString( o->getNameString( ) ) );
-
-      sp1common::Debug::consoleMessage("Group: '" + key +
-        "' changed successfully.");
-    }
-    else
-    {
-      //Not found -> Create new group
-      _syncGroups[ o->getKeyString( ) ]= syncGroup;
-
-      //Add widgets group
-      emit signalCreateGroup( QString::fromStdString( syncGroup->getKey( ) ) );
-
-      sp1common::Debug::consoleMessage("Group: '" + key +
-        "' created successfully.");
-    }
+    emit signalSyncGroup(
+      QString::fromStdString( o->getKeyString( ) ),
+      QString::fromStdString( o->getNameString( ) ),
+      QString::fromStdString( o->getOwnerString( ) ),
+      vectorIds,
+      QColor( static_cast<int>(color[0]), static_cast<int>(color[1]),
+        static_cast<int>(color[2]) )
+    );
   }
 
-  void MainWindow::receivedChangeNameGroupUpdate(
+  void MainWindow::receivedChangeNameGroup(
     zeroeq::gmrv::ConstChangeNameGroupPtr o )
   {
-    std::string key = o->getKeyString( );
-    //std::cout << "DEBUG: Received ChangeNameGroupUpdate, key: " << key <<
-    //  std::endl;
-    auto syncGroup = _syncGroups[ key ];
-    if ( syncGroup == nullptr )
-    {
-      sp1common::Debug::consoleMessage("Group: '" + key + "' doesn't exist, " +
-        "ignoring change name group callback.");
-      return;
-    }
-
-    emit signalChangeGroupName( QString::fromStdString( syncGroup->getKey( ) ),
+    emit signalChangeGroupName( QString::fromStdString( o->getKeyString( ) ),
       QString::fromStdString( o->getNameString( ) ) );
+  }
+
+  void MainWindow::receivedChangeColorGroup(
+    zeroeq::gmrv::ConstChangeColorGroupPtr o )
+  {
+    std::vector<unsigned int> color = o->getColorVector( );
+    emit signalChangeGroupColor( QString::fromStdString( o->getKeyString( ) ),
+      QColor( static_cast<int>(color[0]), static_cast<int>(color[1]),
+        static_cast<int>(color[2]) ) );
   }
 
   void MainWindow::receivedDestroyGroup( zeroeq::gmrv::ConstDestroyGroupPtr o )
   {
-    std::string key = o->getKeyString( );
-    //std::cout << "DEBUG: Received DestroyGroup, key: " << key << std::endl;
-    auto syncGroup = _syncGroups.find( key );
-    if ( syncGroup == _syncGroups.end( ) )
-    {
-      sp1common::Debug::consoleMessage("Group: '" + key + "' doesn't exist, " +
-        "ignoring destroy group callback.");
-      return;
-    }
-    emit signalDestroyGroup( QString::fromStdString( key ) );
-  }
-
-  void MainWindow::itemClicked(QListWidgetItem *item)
-  {
-     if (!item)
-     {
-        std::cout << "NO ITEM" << std::endl;
-        return;
-     }
-     std::cout << "row [" << _ui->dataSetListWidget->row(item) << "] == "
-       << static_cast<DataSetWidget*>(
-       _ui->dataSetListWidget->itemWidget( item) )->getName() << std::endl;
+    emit signalDestroyGroup( QString::fromStdString( o->getKeyString( ) ) );
   }
 }
 

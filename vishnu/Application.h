@@ -16,6 +16,7 @@ namespace vishnu
         const std::string& displayName,
         const std::string& shellCommand, 
         const sp1common::Args& args,
+        const QIcon icon,
         const std::string& workingDirectory = std::string( ) );
       ~Application( );
 

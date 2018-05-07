@@ -36,6 +36,8 @@ namespace vishnu
 
     void setListWidgetItem( QListWidgetItem* listWidgetItem );
 
+    std::vector< std::string > getHeaders( );
+
   signals:
 
     void removeSelected( void );
@@ -57,6 +59,7 @@ namespace vishnu
     QCheckBox _checkbox;
     QPushButton* _remove = nullptr;
     QListWidgetItem* _listWidgetItem = nullptr;
+    std::vector< std::string > _headers;
 
   };
 

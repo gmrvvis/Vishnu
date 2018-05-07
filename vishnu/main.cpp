@@ -72,7 +72,7 @@ int main( int argc, char *argv[] )
   window.move( x, y );
 
   window.setMinimumSize( 300, 0 );
-  window.setWindowIcon( QIcon( ":/icons/iconLauncher.png") );
+  window.setWindowIcon( QIcon( ":/icons/logoVishnu.png") );
   window.setIconSize( QSize( 32, 32 ) );
   window.setWindowTitle( QApplication::applicationName( ) );
 

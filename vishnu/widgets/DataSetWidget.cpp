@@ -83,6 +83,8 @@ namespace vishnu
 
     setLayout( hLayout );
     //setStyleSheet("border: 1px solid red");
+
+    _headers = sp1common::Files::readCsvHeaders( path );
   }
 
   std::string DataSetWidget::getName( ) const
@@ -191,6 +193,11 @@ namespace vishnu
   void DataSetWidget::setListWidgetItem( QListWidgetItem* listWidgetItem )
   {
     _listWidgetItem = listWidgetItem;
+  }
+
+  std::vector< std::string > DataSetWidget::getHeaders( )
+  {
+    return _headers;
   }
 
 }

@@ -1,11 +1,14 @@
 <RCC>
   <qresource prefix="/">
-    <file>icons/iconLauncher.png</file>
+    <file>icons/logoVishnu.png</file>
     <file>icons/addDataSet.png</file>
     <file>icons/dataSet.png</file>
     <file>icons/close.png</file>
     <file>icons/checked.png</file>
     <file>icons/unchecked.png</file>
-    <file>icons/iconClose.png</file>
+    <file>icons/blank.png</file>
+    <file>icons/logoPyramidal.png</file>
+    <file>icons/logoDCExplorer.ico</file>
+    <file>icons/logoClint.jpeg</file>
   </qresource>
 </RCC>
