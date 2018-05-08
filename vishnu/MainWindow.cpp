@@ -141,14 +141,17 @@ namespace vishnu
 
     gridLayout->addLayout( hBoxLayout2, 1, 0, Qt::AlignTop );
 
-    /*std::vector<std::string> ids;
+    std::vector<std::string> ids;
     ids.push_back("test");
-    syncGroup("GROUP1#!#OWNER1", "GROUP1", "OWNER1", ids, QColor(255, 65, 77));
-    syncGroup("GROUP2#!#OWNER2", "GROUP2", "OWNER2", ids, QColor(3, 255, 77));
-    syncGroup("GROUP3#!#OWNER3", "GROUP3", "OWNER3", ids, QColor(3, 65, 255));
-    changeGroupColor("GROUP1#!#OWNER1", QColor(0, 255, 0));
-    changeGroupName("GROUP2#!#OWNER2", "newName");
-    removeGroup("GROUP3#!#OWNER3");*/
+    syncGroup("GROUP1#!#CLINT", "GROUP1", "CLINT", ids, QColor(255, 65, 77));
+    syncGroup("GROUP1#!#DCEXPLORER", "GROUP2", "DCEXPLORER", ids, QColor(3, 255, 77));
+    syncGroup("GROUP2#!#DCEXPLORER", "GROUP3", "DCEXPLORER", ids, QColor(67, 67, 15));
+    syncGroup("GROUP1#!#PYRAMIDAL", "GROUP3", "PYRAMIDAL", ids, QColor(60, 128, 0));
+    syncGroup("GROUP2#!#PYRAMIDAL", "GROUP3", "PYRAMIDAL", ids, QColor(127, 79, 55));
+    changeGroupColor("GROUP1#!#CLINT", QColor(0, 255, 0));
+    changeGroupName("GROUP2#!#DCEXPLORER", "newName");
+    syncGroup("GROUP2#!#PYRAMIDAL", "otherName", "PYRAMIDAL", ids, QColor(255, 65, 77));
+    removeGroup("GROUP3#!#PYRAMIDAL");
   }
 
   MainWindow::~MainWindow( )
@@ -304,6 +307,132 @@ namespace vishnu
     }*/
   }
 
+  bool MainWindow::generateDataFiles( QDir dir )
+  {
+    sp1common::Debug::consoleMessage( "Generating app data files in folder: "
+      + dir.absolutePath( ).toStdString( ) );
+
+    bool result = false;
+
+    bool pkInUse = false;
+
+    std::vector< std::string > primaryKeys;
+    std::vector< std::string > properties;
+    //Properties properties;
+
+    for ( auto const& property : _propertiesTableWidget->getProperties( ) )
+    {
+      if ( property->getUse( ) )
+      {
+        if ( property->getPrimaryKey( ) )
+        {
+          for ( const auto& dataSet : _dataSetListWidget->getDataSets( ) )
+          {
+            if ( dataSet.second->getChecked( ) )
+            {
+              std::vector< std::string > dataSetHeaders =
+                dataSet.second->getHeaders( );
+              if ( std::find( dataSetHeaders.begin( ), dataSetHeaders.end( ),
+                property->getName( ) ) == dataSetHeaders.end( ) )
+              {
+                //Property is primary but DataSet doesn't contains the property
+                return false;
+              }
+              else
+              {
+                //There are at least one primary key in use
+                pkInUse = true;
+              }
+            }
+          }
+          primaryKeys.push_back( property->getName( ) );
+        }
+        else
+        {
+          //properties.push_back( property );
+          properties.push_back( property->getName( ) );
+        }
+      }
+    }
+
+    if ( !pkInUse )
+    {
+       sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
+         "There must be at least one primary key in properties table.", false );
+
+       return false;
+    }
+
+    std::string primaryKeysJoined = sp1common::Strings::join( primaryKeys,
+      "-" );
+
+    //Create CSV with data
+    std::string outFile = dir.absolutePath( ).toStdString( ) + "/data.csv";
+
+    std::string headers = sp1common::Strings::join( properties, "," );
+    headers = primaryKeysJoined + "," + headers;
+
+    result = sp1common::Files::writeCsv( outFile, headers );
+    if ( !result )
+    {
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
+        "Can't create CSV file.", false );
+      return false;
+    }
+
+    for ( const auto& dataSet : _dataSetListWidget->getDataSets( ) )
+    {
+      if ( dataSet.second->getChecked( ) )
+      {
+        sp1common::Matrix csvData = sp1common::Files::readCsv(
+          dataSet.second->getPath( ) );
+
+        std::vector< unsigned int > primaryKeyIndices;
+        std::vector< std::string > dataSetHeaders = dataSet.second->getHeaders( );
+        for ( unsigned int i = 0; i < dataSetHeaders.size( ); ++i )
+        {
+          if ( std::find( primaryKeys.begin( ), primaryKeys.end( ),
+            dataSetHeaders.at( i ) ) != primaryKeys.end( ) )
+          {
+            primaryKeyIndices.push_back( i );
+          }
+        }
+
+        //Starts at 1 (omit headers)
+        for ( unsigned int row = 1; row < csvData.size( ); ++row )
+        {
+          std::string pkLine;
+          std::string line;
+          std::vector< std::string > csvRow = csvData.at( row );
+
+          for ( unsigned int col = 0; col < csvRow.size(); ++col )
+          {
+            if ( std::find( primaryKeyIndices.begin( ),
+              primaryKeyIndices.end( ), col ) != primaryKeyIndices.end( ) )
+            {
+              pkLine += "-" + csvRow.at( col );
+            }
+            else
+            {
+              line += (line.empty()) ? csvRow.at( col ) : "," + csvRow.at( col );
+            }
+          }
+
+          line = dataSet.first + pkLine + "," + line;
+          result = sp1common::Files::writeCsv( outFile, line, true );
+          if ( !result )
+          {
+            sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
+              "Can't create CSV file.", false );
+            return false;
+          }
+        }
+      }
+    }
+
+    return result;
+  }
+
   void MainWindow::loadClint()
   {
     std::string displayName = "Clint";
@@ -399,6 +528,29 @@ namespace vishnu
 
   void MainWindow::runApp( )
   {
+    //Destroy && create temporary folder
+    QString vishnuTempPath = QDir::tempPath( ) + "/" + "vishnu";
+    QDir vishnuTempDir( vishnuTempPath );
+    if ( vishnuTempDir.exists( ) )
+    {
+      vishnuTempDir.removeRecursively( );
+    }
+
+    if ( !vishnuTempDir.mkpath( vishnuTempPath ) )
+    {
+        sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
+          "Can't create " + vishnuTempPath.toStdString( ) + " folder.",
+          false );
+        return;
+    }
+
+    if ( !generateDataFiles( vishnuTempDir ) )
+    {
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
+        "Can't create data files.", false );
+      return;
+    }
+
     QPushButton* appButton = qobject_cast< QPushButton* >( sender( ) );
     if ( !appButton )
     {

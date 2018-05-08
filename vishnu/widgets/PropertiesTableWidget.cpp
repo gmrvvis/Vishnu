@@ -84,4 +84,29 @@ namespace vishnu
     }
   }
 
+  Properties PropertiesTableWidget::getProperties( )
+  {
+    Properties properties;
+
+    for( int row = 0; row < rowCount( ); ++row )
+    {
+      std::string name = static_cast< QLabel* >( cellWidget( row, 0 )
+        )->text( ).toStdString( );
+      bool use = static_cast< QCheckBox* >( cellWidget( row, 1 )
+        )->isChecked( );
+      bool primaryKey = static_cast< QCheckBox* >( cellWidget( row, 2 )
+        )->isChecked( );
+      QComboBox* dataTypeComboBox = static_cast< QComboBox* >( cellWidget(
+        row, 3 ) );
+      sp1common::DataType dataType = sp1common::toDataType(
+        dataTypeComboBox->itemData( dataTypeComboBox->currentIndex( )
+      ).toString( ).toStdString( ) );
+
+      PropertyPtr property( new Property( name, use, primaryKey, dataType) );
+      properties.push_back( property );
+    }
+
+    return properties;
+  }
+
 }

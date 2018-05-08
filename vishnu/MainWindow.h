@@ -13,6 +13,7 @@
 
 #include <QToolBar>
 #include <QListWidgetItem>
+#include <QDir>
 
 #include "Application.h"
 #include "widgets/DataSetListWidget.h"
@@ -57,6 +58,7 @@ namespace vishnu
       void loadDCExplorer();
       void loadPyramidal();
       void checkApps( );
+      bool generateDataFiles( QDir dir );
 
       void addDataSetItem( const std::string& dropped = std::string( ) );
       void removeDataSetItem( );

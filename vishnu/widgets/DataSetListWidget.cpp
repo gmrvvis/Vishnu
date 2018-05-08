@@ -105,18 +105,18 @@ namespace vishnu
 
     std::vector< std::string > propertiesToRemove = currentDsw->getHeaders( );
 
-    for(int row = 0; row < count( ); ++row)
+    for( int row = 0; row < count( ); ++row )
     {
       QListWidgetItem* listItem = item( row );
       if ( listItem != currentItem( ) )
       {
-        DataSetWidget* dsw = static_cast<DataSetWidget*>(
+        DataSetWidget* dsw = static_cast< DataSetWidget* >(
           itemWidget( listItem ) );
         std::vector< std::string > properties = dsw->getHeaders( );
         for ( const auto& property: properties )
         {
-          propertiesToRemove.erase(std::remove(propertiesToRemove.begin(),
-            propertiesToRemove.end(), property), propertiesToRemove.end());
+          propertiesToRemove.erase( std::remove( propertiesToRemove.begin( ),
+            propertiesToRemove.end( ), property ), propertiesToRemove.end( ) );
         }
       }
     }
@@ -127,6 +127,24 @@ namespace vishnu
   void DataSetListWidget::removeCurrentDataSet( )
   {    
     takeItem( row( currentItem( ) ) );
+  }
+
+  DataSets DataSetListWidget::getDataSets( )
+  {
+    DataSets dataSets;
+
+    for( int row = 0; row < count( ); ++row )
+    {
+      DataSetWidget* dsw = static_cast< DataSetWidget* >(
+        itemWidget( item( row ) ) );
+
+      DataSetPtr dataSet( new DataSet( dsw->getPath( ), dsw->getChecked( ),
+        dsw->getHeaders( ) ) );
+      dataSets[ dsw->getName() ] = dataSet;
+
+    }
+
+    return dataSets;
   }
 
   void DataSetListWidget::dragEnterEvent( QDragEnterEvent* event )

@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include <memory>
 
 #include <QIcon>
 #include <QLabel>
@@ -13,9 +15,13 @@
 #include <sp1common/sp1common.h>
 
 #include "DataSetWidget.h"
+#include "../DataSet.h"
 
 namespace vishnu
 {
+
+  typedef std::shared_ptr< DataSet > DataSetPtr;
+  typedef std::map< std::string, DataSetPtr > DataSets;
 
   class DataSetListWidget : public QListWidget
   {
@@ -31,6 +37,8 @@ namespace vishnu
     std::vector< std::string > getPropertiesToRemove( );
 
     void removeCurrentDataSet( );
+
+    DataSets getDataSets( );
 
     protected:
 

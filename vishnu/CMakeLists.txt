@@ -22,7 +22,8 @@ set( VISHNU_SOURCES
   widgets/PropertiesTableWidget.cpp
   widgets/ZEQGroupListWidget.cpp
   widgets/DataSetWidget.cpp
-  widgets/PropertyWidget.cpp
+  Property.cpp
+  DataSet.cpp
   widgets/ZEQGroupWidget.cpp
   RegExpInputDialog.cpp
 )
@@ -38,7 +39,8 @@ set( VISHNU_HEADERS
   widgets/PropertiesTableWidget.h
   widgets/ZEQGroupListWidget.h
   widgets/DataSetWidget.h
-  widgets/PropertyWidget.h
+  Property.h
+  DataSet.h
   widgets/ZEQGroupWidget.h
   RegExpInputDialog.h
 )

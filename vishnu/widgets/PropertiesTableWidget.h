@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include <memory>
 
 #include <QListWidgetItem>
 #include <QIcon>
@@ -12,9 +14,13 @@
 #include <QTableWidget>
 
 #include <sp1common/sp1common.h>
+#include "../Property.h"
 
 namespace vishnu
 {
+
+  typedef std::shared_ptr< Property > PropertyPtr;
+  typedef std::vector< PropertyPtr > Properties;
 
   class PropertiesTableWidget : public QTableWidget
   {
@@ -28,6 +34,8 @@ namespace vishnu
     void addProperties( const std::vector< std::string >& properties );
 
     void removeProperties( const std::vector< std::string >& properties );
+
+    Properties getProperties( );
 
   };
 
