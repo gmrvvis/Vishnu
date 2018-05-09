@@ -80,16 +80,8 @@ namespace vishnu
     QGridLayout* gridLayout = new QGridLayout( );
     _ui->centralWidget->setLayout( gridLayout );
 
-    //DataSets && Properties horizontal layout
-    QHBoxLayout* hBoxLayout = new QHBoxLayout();
-
     //DataSetListWidget
     _dataSetListWidget = new DataSetListWidget( );
-
-    QSizePolicy dsSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
-    dsSizePolicy.setHorizontalStretch( 1 );
-    _dataSetListWidget->setSizePolicy( dsSizePolicy );
-    hBoxLayout->addWidget( _dataSetListWidget, 0 );
 
     QObject::connect( addDataSetAction, SIGNAL( triggered( ) ), this,
       SLOT( addDataSetItem( ) ) );
@@ -101,47 +93,49 @@ namespace vishnu
     //PropertiesTableWidget
     _propertiesTableWidget = new PropertiesTableWidget( );
 
-    QSizePolicy prSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
-    prSizePolicy.setHorizontalStretch( 1 );
-    _propertiesTableWidget->setSizePolicy( prSizePolicy );
-    hBoxLayout->addWidget( _propertiesTableWidget, 1 );
-
-    gridLayout->addLayout( hBoxLayout, 0, 0, Qt::AlignTop );
-
     //Applications
     loadClint();
     loadDCExplorer();
     loadPyramidal();
 
-    QHBoxLayout* hBoxLayout2 = new QHBoxLayout( );
-    QVBoxLayout* vBoxLayout = new QVBoxLayout( );
-    QGroupBox* appsGroupBox = new QGroupBox();
+    QVBoxLayout* appsVBoxLayout = new QVBoxLayout( );
     for ( const auto& application : _applications )
     {
-      vBoxLayout->addWidget( application.second->getPushButton( ) );
+      appsVBoxLayout->addWidget( application.second->getPushButton( ) );
 
       QObject::connect( application.second->getPushButton( ),
         SIGNAL( clicked( bool ) ), this, SLOT( runApp( ) ) );
     }
-    vBoxLayout->stretch(1);
-    appsGroupBox->setLayout(vBoxLayout);
-
-    QSizePolicy appsSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
-    appsSizePolicy.setHorizontalStretch( 1 );
-    appsGroupBox->setSizePolicy( appsSizePolicy );
-    hBoxLayout2->addWidget( appsGroupBox, 0 );
 
     //Groups
     _zeqGroupListWidget = new ZEQGroupListWidget( );
 
+    //Add all widgets to grid
+    QSizePolicy dsSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
+    dsSizePolicy.setHorizontalStretch( 255 );
+    _dataSetListWidget->setSizePolicy( dsSizePolicy );
+
+    QSizePolicy prSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
+    prSizePolicy.setHorizontalStretch( 1 );
+    _propertiesTableWidget->setSizePolicy( prSizePolicy );
+
     QSizePolicy groupsSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
     groupsSizePolicy.setHorizontalStretch( 1 );
     _zeqGroupListWidget->setSizePolicy( groupsSizePolicy );
-    hBoxLayout2->addWidget( _zeqGroupListWidget, 1 );
 
-    gridLayout->addLayout( hBoxLayout2, 1, 0, Qt::AlignTop );
+    //DataSets && Applications
+    QHBoxLayout* topHBoxLayout = new QHBoxLayout();
+    topHBoxLayout->addWidget( _dataSetListWidget, 0 );
+    topHBoxLayout->addLayout( appsVBoxLayout, 1 );
+    gridLayout->addLayout( topHBoxLayout, 0, 0, Qt::AlignTop );
 
-    std::vector<std::string> ids;
+    //Properties && ZEQ Groups
+    QHBoxLayout* bottomHBoxLayout = new QHBoxLayout( );
+    bottomHBoxLayout->addWidget( _propertiesTableWidget, 0 );
+    bottomHBoxLayout->addWidget( _zeqGroupListWidget, 1 );
+    gridLayout->addLayout( bottomHBoxLayout, 1, 0, Qt::AlignTop );
+
+    /*std::vector<std::string> ids;
     ids.push_back("test");
     syncGroup("GROUP1#!#CLINT", "GROUP1", "CLINT", ids, QColor(255, 65, 77));
     syncGroup("GROUP1#!#DCEXPLORER", "GROUP2", "DCEXPLORER", ids, QColor(3, 255, 77));
@@ -151,7 +145,7 @@ namespace vishnu
     changeGroupColor("GROUP1#!#CLINT", QColor(0, 255, 0));
     changeGroupName("GROUP2#!#DCEXPLORER", "newName");
     syncGroup("GROUP2#!#PYRAMIDAL", "otherName", "PYRAMIDAL", ids, QColor(255, 65, 77));
-    removeGroup("GROUP3#!#PYRAMIDAL");
+    removeGroup("GROUP3#!#PYRAMIDAL");*/
   }
 
   MainWindow::~MainWindow( )
