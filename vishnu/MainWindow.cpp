@@ -186,6 +186,9 @@ namespace vishnu
         SLOT( removeDataSetItem( ) ) );
 
       _propertiesTableWidget->addProperties( dsw->getHeaders( ) );
+
+      _propertiesTableWidget->checkPrimaryKeys(
+        _dataSetListWidget->getCommonProperties( ) );
     }
   }
 
@@ -197,6 +200,9 @@ namespace vishnu
     _propertiesTableWidget->removeProperties( propertiesToRemove );
 
     _dataSetListWidget->removeCurrentDataSet( );
+
+    _propertiesTableWidget->checkPrimaryKeys(
+      _dataSetListWidget->getCommonProperties( ) );
   }
 
   void MainWindow::syncGroup( const QString& key, const QString& name,
@@ -311,8 +317,8 @@ namespace vishnu
     bool pkInUse = false;
 
     std::vector< std::string > primaryKeys;
-    std::vector< std::string > properties;
-    //Properties properties;
+    std::vector< std::string > propertyNames;
+    std::vector< std::string > propertyDataTypes;
 
     for ( auto const& property : _propertiesTableWidget->getProperties( ) )
     {
@@ -343,8 +349,9 @@ namespace vishnu
         }
         else
         {
-          //properties.push_back( property );
-          properties.push_back( property->getName( ) );
+          propertyNames.push_back( property->getName( ) );
+          propertyDataTypes.push_back( sp1common::toString(
+            property->getDataType( ) ) );
         }
       }
     }
@@ -357,16 +364,18 @@ namespace vishnu
        return false;
     }
 
-    std::string primaryKeysJoined = sp1common::Strings::join( primaryKeys,
-      "-" );
+    /*std::string primaryKeyName = sp1common::Strings::joinAndTrim( primaryKeys,
+      "-" );*/
+    std::string primaryKeyName = "Key";
 
     //Create CSV with data
-    std::string outFile = dir.absolutePath( ).toStdString( ) + "/data.csv";
+    std::string csvOutFile = dir.absolutePath( ).toStdString( ) + "/data.csv";
 
-    std::string headers = sp1common::Strings::join( properties, "," );
-    headers = primaryKeysJoined + "," + headers;
+    std::string headers = sp1common::Strings::join( propertyNames, "," );
+    //headers = primaryKeysJoined + "," + headers;
+    headers = primaryKeyName + "," + headers;
 
-    result = sp1common::Files::writeCsv( outFile, headers );
+    result = sp1common::Files::writeCsv( csvOutFile, headers );
     if ( !result )
     {
       sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
@@ -404,16 +413,20 @@ namespace vishnu
             if ( std::find( primaryKeyIndices.begin( ),
               primaryKeyIndices.end( ), col ) != primaryKeyIndices.end( ) )
             {
-              pkLine += "-" + csvRow.at( col );
+              pkLine += ( pkLine.empty( ) )
+                ? sp1common::Strings::trim( csvRow.at( col ) )
+                : "-" + sp1common::Strings::trim( csvRow.at( col ) );
             }
             else
             {
-              line += (line.empty()) ? csvRow.at( col ) : "," + csvRow.at( col );
+              line += ( line.empty( ) )
+                ? csvRow.at( col )
+                : "," + csvRow.at( col );
             }
           }
 
           line = dataSet.first + pkLine + "," + line;
-          result = sp1common::Files::writeCsv( outFile, line, true );
+          result = sp1common::Files::writeCsv( csvOutFile, line, true );
           if ( !result )
           {
             sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
@@ -423,6 +436,139 @@ namespace vishnu
         }
       }
     }
+
+    //Create XML file
+    std::string xmlOutFile = dir.absolutePath( ).toStdString( ) + "/data.xml";
+
+    result = sp1common::Files::writeXmlStartDocument( xmlOutFile );
+
+    result = sp1common::Files::writeXmlDTD( xmlOutFile,
+      "<!DOCTYPE configuration SYSTEM \"http://gmrv.es/pyramidalexplorer/PyramidalExplorerData-0.2.0.dtd\">"
+    );
+
+    result = sp1common::Files::writeXmlStartElement( xmlOutFile,
+      "configuration" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "app", "PyramidalExplorer" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "version", "0.2.0" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "label", "data" );
+        result = sp1common::Files::writeXmlCloseElement( xmlOutFile );
+
+    result = sp1common::Files::writeXmlStartElement( xmlOutFile,
+      "data" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "objectsLabel", "customDataSet" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "additionalMeshesLabel", "" );
+    result = sp1common::Files::writeXmlCloseElement( xmlOutFile );
+
+    result = sp1common::Files::writeXmlStartElement( xmlOutFile,
+      "features" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "idColumn", primaryKeyName );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "positionXColumn", "" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "positionYColumn", "" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "positionZColumn", "" );
+    result = sp1common::Files::writeXmlCloseElement( xmlOutFile );
+
+    for ( unsigned int i = 0; i < propertyNames.size( ); ++i )
+    {
+        result = sp1common::Files::writeXmlStartElement( xmlOutFile,
+          "feature" );
+        result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+          "sourceColumn", propertyNames.at( i ) );
+        result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+          "applicationLabel", propertyNames.at( i ) );
+        result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+          "unitsLabel", "mV" );
+        result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+          "dataType", propertyDataTypes.at( i ) );
+        result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+          "dataStructureType", "none" );
+        result = sp1common::Files::writeXmlEndElement( xmlOutFile );
+    }
+    result = sp1common::Files::writeXmlEndElement( xmlOutFile, "features" );
+
+    result = sp1common::Files::writeXmlStartElement( xmlOutFile,
+      "set" );
+    result = sp1common::Files::writeXmlCloseElement( xmlOutFile );
+    result = sp1common::Files::writeXmlTextElement( xmlOutFile,
+      "objectsFeaturesCSV", csvOutFile );
+    result = sp1common::Files::writeXmlTextElement( xmlOutFile,
+      "objectsMeshesPath", dir.absolutePath( ).toStdString( )
+      + "/geometricData/" );
+    result = sp1common::Files::writeXmlEndElement( xmlOutFile, "set" );
+
+    result = sp1common::Files::writeXmlStartElement( xmlOutFile,
+      "colors" );
+    result = sp1common::Files::writeXmlCloseElement( xmlOutFile );
+
+    result = sp1common::Files::writeXmlStartElement( xmlOutFile,
+      "additionalMeshesColor" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "r", "60" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "g", "60" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "b", "60" );
+    result = sp1common::Files::writeXmlEndElement( xmlOutFile );
+
+    result = sp1common::Files::writeXmlStartElement( xmlOutFile,
+      "backgroundColor" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "r", "0" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "g", "0" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "b", "0" );
+    result = sp1common::Files::writeXmlEndElement( xmlOutFile );
+
+    result = sp1common::Files::writeXmlEndElement( xmlOutFile, "colors" );
+
+    result = sp1common::Files::writeXmlStartElement( xmlOutFile,
+      "camera" );
+    result = sp1common::Files::writeXmlCloseElement( xmlOutFile );
+
+    result = sp1common::Files::writeXmlStartElement( xmlOutFile,
+      "eye" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "x", "577.183" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "y", "1106.67" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "z", "290.011" );
+    result = sp1common::Files::writeXmlEndElement( xmlOutFile );
+
+    result = sp1common::Files::writeXmlStartElement( xmlOutFile,
+      "center" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "x", "479.859" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "y", "-26.1715" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "z", "670.239" );
+    result = sp1common::Files::writeXmlEndElement( xmlOutFile );
+
+    result = sp1common::Files::writeXmlStartElement( xmlOutFile,
+      "up" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "x", "0.0183558" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "y", "-0.319558" );
+    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+      "z", "-0.947389" );
+    result = sp1common::Files::writeXmlEndElement( xmlOutFile );
+
+    result = sp1common::Files::writeXmlEndElement( xmlOutFile, "camera" );
+
+    result = sp1common::Files::writeXmlEndElement( xmlOutFile, "data" );
+    result = sp1common::Files::writeXmlEndElement( xmlOutFile, "configuration" );
+    result = sp1common::Files::writeXmlEndDocument( xmlOutFile );
 
     return result;
   }

@@ -25,6 +25,28 @@ namespace vishnu
     setAcceptDrops( true );
   }
 
+  void PropertiesTableWidget::checkPrimaryKeys(
+    const std::vector< std::string >& commonProperties )
+  {
+    for( int row = 0; row < rowCount( ); ++row )
+    {
+      //Columns 0, 2 -> name, pk
+      QLabel* label = static_cast< QLabel* >( cellWidget( row, 0 ) );
+      QCheckBox* primaryKey = static_cast< QCheckBox* >( cellWidget( row, 2 ) );
+
+      if ( std::find(commonProperties.begin(), commonProperties.end(),
+        label->text( ).toStdString( ) ) != commonProperties.end())
+      {
+        cellWidget( row, 2 )->setEnabled(true);
+      }
+      else
+      {
+        primaryKey->setChecked( false );
+        cellWidget( row, 2 )->setDisabled(true);
+      }
+    }
+  }
+
   void PropertiesTableWidget::addProperties(
     const std::vector< std::string >& properties )
   {
@@ -33,35 +55,27 @@ namespace vishnu
       std::vector< std::string > tableProperties;
       for (int i = 0; i < rowCount(); ++i )
       {
-        tableProperties.push_back( item( i, 0 )->text( ).toStdString( ) );
+        std::string propertyName = static_cast< QLabel* >( cellWidget( i, 0 )
+          )->text( ).toStdString( );
+
+        tableProperties.push_back( propertyName );
       }
 
-      if ( std::find(tableProperties.begin( ), tableProperties.end( ),
+      if ( std::find( tableProperties.begin( ), tableProperties.end( ),
         property ) == tableProperties.end( ) )
       {
         int row = this->rowCount();
         int columns = columnCount();
 
-        QWidgetList* widgetList = new QWidgetList();
-        widgetList->push_back( new QLabel( QString::fromStdString( property ) ) );
-        QCheckBox* usePropertyCheckBox = new QCheckBox( );
-        usePropertyCheckBox->setChecked(true);
-        widgetList->push_back( usePropertyCheckBox );
-        widgetList->push_back( new QCheckBox( ) );
-        QComboBox* dataTypeComboBox = new QComboBox( );
-        for (const auto& dataType : sp1common::dataTypeToVector( ) )
-        {
-           dataTypeComboBox->addItem( QString::fromStdString( dataType ) );
-        }
-        widgetList->push_back( dataTypeComboBox );
+        PropertiesWidget* propertiesWidget = new PropertiesWidget( property,
+          true, false, sp1common::DataType::Undefined );
 
         insertRow(row);
         for( int column = 0; column < columns; ++column )
         {
           setItem( row, column, new QTableWidgetItem( ) );
-          setCellWidget( row, column, widgetList->at( column ) );
+          setCellWidget( row, column, propertiesWidget->getWidget( column ) );
         }
-        //_ui->propertiesTableWidget->show();
       }
     }
   }
@@ -99,8 +113,7 @@ namespace vishnu
       QComboBox* dataTypeComboBox = static_cast< QComboBox* >( cellWidget(
         row, 3 ) );
       sp1common::DataType dataType = sp1common::toDataType(
-        dataTypeComboBox->itemData( dataTypeComboBox->currentIndex( )
-      ).toString( ).toStdString( ) );
+        dataTypeComboBox->currentText( ).toStdString( ) );
 
       PropertyPtr property( new Property( name, use, primaryKey, dataType) );
       properties.push_back( property );
@@ -108,5 +121,4 @@ namespace vishnu
 
     return properties;
   }
-
 }

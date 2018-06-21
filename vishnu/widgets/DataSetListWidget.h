@@ -40,6 +40,8 @@ namespace vishnu
 
     DataSets getDataSets( );
 
+    std::vector< std::string > getCommonProperties( );
+
     protected:
 
     void dragEnterEvent( QDragEnterEvent* event );

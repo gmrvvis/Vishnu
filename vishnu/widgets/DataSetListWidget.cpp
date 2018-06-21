@@ -48,7 +48,10 @@ namespace vishnu
     std::string basename = fileInfo.baseName( ).toStdString( );
     basename.erase( std::remove_if( basename.begin( ), basename.end( ),
       isspace ), basename.end( ) );
-    basename.resize (10);
+    if (basename.length() > MAX_DATASET_NAME_LENGTH )
+    {
+      basename.resize ( MAX_DATASET_NAME_LENGTH );
+    }
 
     std::string name;
     std::string path = filePath.toStdString( );
@@ -61,7 +64,7 @@ namespace vishnu
       //Check if it's a valid name
       QRegularExpression regularExpression("[A-Za-z0-9]{1,10}$");
       QString dataSetName = RegExpInputDialog::getText(this, "DataSet name",
-        "Enter DataSet name for file: " + filePath, QString::fromStdString( tempName ),
+        "Enter DataSet name: " + filePath, QString::fromStdString( tempName ),
         regularExpression, &validName);
       if ( !validName )
       {
@@ -145,6 +148,27 @@ namespace vishnu
     }
 
     return dataSets;
+  }
+
+  std::vector< std::string > DataSetListWidget::getCommonProperties( )
+  {
+    std::vector< std::string > commonProperties;
+    for ( const auto& dataset : getDataSets( ) )
+    {
+      std::vector< std::string > dataSetHeaders = dataset.second->getHeaders( );
+
+      if ( !commonProperties.empty( ) )
+      {
+        commonProperties = sp1common::Vectors::intersect( commonProperties,
+          dataSetHeaders );
+      }
+      else
+      {
+        commonProperties = dataSetHeaders;
+      }
+    }
+
+    return commonProperties;
   }
 
   void DataSetListWidget::dragEnterEvent( QDragEnterEvent* event )

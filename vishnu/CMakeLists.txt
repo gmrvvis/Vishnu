@@ -19,12 +19,13 @@ set( VISHNU_SOURCES
   main.cpp
   Application.cpp
   widgets/DataSetListWidget.cpp
-  widgets/PropertiesTableWidget.cpp
-  widgets/ZEQGroupListWidget.cpp
   widgets/DataSetWidget.cpp
+  widgets/PropertiesTableWidget.cpp
+  widgets/PropertiesWidget.cpp
+  widgets/ZEQGroupListWidget.cpp
+  widgets/ZEQGroupWidget.cpp
   Property.cpp
   DataSet.cpp
-  widgets/ZEQGroupWidget.cpp
   RegExpInputDialog.cpp
 )
 
@@ -36,12 +37,13 @@ set( VISHNU_HEADERS
   resources.qrc
   Definitions.hpp
   widgets/DataSetListWidget.h
-  widgets/PropertiesTableWidget.h
-  widgets/ZEQGroupListWidget.h
   widgets/DataSetWidget.h
+  widgets/PropertiesTableWidget.h
+  widgets/PropertiesWidget.h
+  widgets/ZEQGroupListWidget.h
+  widgets/ZEQGroupWidget.h
   Property.h
   DataSet.h
-  widgets/ZEQGroupWidget.h
   RegExpInputDialog.h
 )
 

@@ -8,11 +8,11 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 cmake_minimum_required( VERSION 3.1 )
 set( PROJECT_VERSION_MAJOR "0" )
-set( PROJECT_VERSION_MINOR "1" )
-set( PROJECT_VERSION_PATCH "1" )
+set( PROJECT_VERSION_MINOR "2" )
+set( PROJECT_VERSION_PATCH "0" )
 set( PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH} )
 project( vishnu VERSION ${PROJECT_VERSION} )
-set( vishnu_VERSION_ABI 2 )
+set( vishnu_VERSION_ABI 3 )
 
 # Disable in source building
 if( "${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}" )

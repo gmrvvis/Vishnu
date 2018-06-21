@@ -14,6 +14,7 @@
 #include <QTableWidget>
 
 #include <sp1common/sp1common.h>
+#include "PropertiesWidget.h"
 #include "../Property.h"
 
 namespace vishnu
@@ -30,6 +31,8 @@ namespace vishnu
   public:
 
     explicit PropertiesTableWidget( QWidget* parent = Q_NULLPTR );
+
+    void checkPrimaryKeys( const std::vector< std::string >& commonProperties );
 
     void addProperties( const std::vector< std::string >& properties );
 
