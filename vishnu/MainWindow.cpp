@@ -1,5 +1,4 @@
 #include "MainWindow.h"
-#include "ui_MainWindow.h"
 
 #include <QFileDialog>
 #include <QGridLayout>
@@ -22,10 +21,7 @@ namespace vishnu
   MainWindow::MainWindow( sp1common::Args args,
     QWidget *parent )
     : QMainWindow( parent )
-    , _ui( new Ui::MainWindow )
   {
-    _ui->setupUi( this );
-
     //MenuBar
     QMenu *fileMenu = new QMenu(tr("&File"));
     QAction *quitAction = fileMenu->addAction(tr("E&xit"));
@@ -57,10 +53,12 @@ namespace vishnu
     _workingDirectory = args.get( "-wd" );
     _zeqSession = args.get( "-z" );
 
+    qRegisterMetaType<StringVector>("StringVector");
+
     QObject::connect( this, SIGNAL( signalSyncGroup( const QString&,
-      const QString&, const QString&, const std::vector< std::string >&,
+      const QString&, const QString&, const StringVector&,
       const QColor& ) ), SLOT( syncGroup( const QString&, const QString&,
-      const QString&, const std::vector< std::string >&, const QColor& ) ),
+      const QString&, const StringVector&, const QColor& ) ),
       Qt::QueuedConnection );
 
     QObject::connect( this, SIGNAL( signalChangeGroupName( const QString&,
@@ -77,21 +75,24 @@ namespace vishnu
     //ZeqSession
     initZeqSession( );
 
+    //Central Widget
+    setCentralWidget( new QWidget( ) );
+
     QGridLayout* gridLayout = new QGridLayout( );
-    _ui->centralWidget->setLayout( gridLayout );
+    centralWidget()->setLayout( gridLayout );
 
     //DataSetListWidget
-    _dataSetListWidget = new DataSetListWidget( );
+    _dataSetListWidget.reset( new DataSetListWidget( ) );
 
     QObject::connect( addDataSetAction, SIGNAL( triggered( ) ), this,
       SLOT( addDataSetItem( ) ) );
 
-    QObject::connect( _dataSetListWidget,
+    QObject::connect( _dataSetListWidget.get( ),
       SIGNAL( addDataSetEvent( const std::string& ) ), this,
       SLOT( addDataSetItem( const std::string& ) ) );
 
     //PropertiesTableWidget
-    _propertiesTableWidget = new PropertiesTableWidget( );
+    _propertiesTableWidget.reset( new PropertiesTableWidget( ) );
 
     //Applications
     loadClint();
@@ -108,7 +109,7 @@ namespace vishnu
     }
 
     //Groups
-    _zeqGroupListWidget = new ZEQGroupListWidget( );
+    _zeqGroupListWidget.reset( new ZEQGroupListWidget( ) );
 
     //Add all widgets to grid
     QSizePolicy dsSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
@@ -119,20 +120,21 @@ namespace vishnu
     prSizePolicy.setHorizontalStretch( 1 );
     _propertiesTableWidget->setSizePolicy( prSizePolicy );
 
-    QSizePolicy groupsSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
+    QSizePolicy groupsSizePolicy( QSizePolicy::Preferred,
+      QSizePolicy::Expanding );
     groupsSizePolicy.setHorizontalStretch( 1 );
     _zeqGroupListWidget->setSizePolicy( groupsSizePolicy );
 
     //DataSets && Applications
     QHBoxLayout* topHBoxLayout = new QHBoxLayout();
-    topHBoxLayout->addWidget( _dataSetListWidget, 0 );
+    topHBoxLayout->addWidget( _dataSetListWidget.get( ), 0 );
     topHBoxLayout->addLayout( appsVBoxLayout, 1 );
     gridLayout->addLayout( topHBoxLayout, 0, 0, Qt::AlignTop );
 
     //Properties && ZEQ Groups
     QHBoxLayout* bottomHBoxLayout = new QHBoxLayout( );
-    bottomHBoxLayout->addWidget( _propertiesTableWidget, 0 );
-    bottomHBoxLayout->addWidget( _zeqGroupListWidget, 1 );
+    bottomHBoxLayout->addWidget( _propertiesTableWidget.get( ), 0 );
+    bottomHBoxLayout->addWidget( _zeqGroupListWidget.get( ), 1 );
     gridLayout->addLayout( bottomHBoxLayout, 1, 0, Qt::AlignTop );
 
     /*std::vector<std::string> ids;
@@ -146,11 +148,14 @@ namespace vishnu
     changeGroupName("GROUP2#!#DCEXPLORER", "newName");
     syncGroup("GROUP2#!#PYRAMIDAL", "otherName", "PYRAMIDAL", ids, QColor(255, 65, 77));
     removeGroup("GROUP3#!#PYRAMIDAL");*/
+
+    //Status bar
+    statusBar()->showMessage("");
   }
 
   MainWindow::~MainWindow( )
   {
-    delete _ui;
+    //delete _ui;
     for ( const auto& appplication : _applications )
     {
       if ( appplication.second->isOpen( ) )
@@ -206,7 +211,7 @@ namespace vishnu
   }
 
   void MainWindow::syncGroup( const QString& key, const QString& name,
-    const QString& owner, const std::vector< std::string >& ids,
+    const QString& owner, const StringVector& ids,
     const QColor& color )
   {
     ZEQGroupWidget* zeqGroupWidget = _zeqGroupListWidget->syncGroup(
@@ -214,14 +219,16 @@ namespace vishnu
 
     if ( zeqGroupWidget )
     {
-      QObject::connect( zeqGroupWidget, SIGNAL( signalChangeGroupName( const QString&, const QString& ) ), this,
-        SLOT( changeGroupName( const QString&, const QString& ) ) );
+      QObject::connect( zeqGroupWidget, SIGNAL( signalChangeGroupName(
+        const QString&, const QString& ) ), this, SLOT( changeGroupName(
+        const QString&, const QString& ) ) );
 
-      QObject::connect( zeqGroupWidget, SIGNAL( signalChangeGroupColor( const QString&, const QColor& ) ), this,
-        SLOT( changeGroupColor( const QString&, const QColor& ) ) );
+      QObject::connect( zeqGroupWidget, SIGNAL( signalChangeGroupColor(
+        const QString&, const QColor& ) ), this, SLOT( changeGroupColor(
+        const QString&, const QColor& ) ) );
 
-      QObject::connect( zeqGroupWidget, SIGNAL( signalRemoveSelectedGroup( ) ), this,
-        SLOT( removeSelectedGroup( ) ) );
+      QObject::connect( zeqGroupWidget, SIGNAL( signalRemoveSelectedGroup( ) ),
+        this, SLOT( removeSelectedGroup( ) ) );
     }
   }
 
@@ -313,15 +320,26 @@ namespace vishnu
       + dir.absolutePath( ).toStdString( ) );
 
     bool result = false;
-
     bool pkInUse = false;
-
     std::vector< std::string > primaryKeys;
+    std::vector< bool > use;
     std::vector< std::string > propertyNames;
     std::vector< std::string > propertyDataTypes;
+    std::string xAxis;
+    std::string yAxis;
+    std::string zAxis;
+    std::string xyzAxis;
+    //bool geometricDataField = false;
 
     for ( auto const& property : _propertiesTableWidget->getProperties( ) )
     {
+      /*if ( sp1common::Strings::lower( property->getName( ) )
+        == GEOMETRIC_DATA_FIELD )
+      {
+        geometricDataField = true;
+      }*/
+
+      use.push_back( property->getUse( ) );
       if ( property->getUse( ) )
       {
         if ( property->getPrimaryKey( ) )
@@ -354,14 +372,50 @@ namespace vishnu
             property->getDataType( ) ) );
         }
       }
+      AxisType axisType = property->getAxisType( );
+      switch( axisType )
+      {
+        case AxisType::None:
+          //Do nothing (avoid warning)
+          break;
+        case AxisType::X:
+          xAxis = property->getName( );
+          break;
+        case AxisType::Y:
+          yAxis = property->getName( );
+          break;
+        case AxisType::Z:
+          zAxis = property->getName( );
+          break;
+        case AxisType::XYZ:
+          xyzAxis = property->getName( );
+          break;
+      }
     }
 
     if ( !pkInUse )
     {
-       sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
-         "There must be at least one primary key in properties table.", false );
+      const char *message = "There must be at least one primary key in "
+        "properties table.";
 
-       return false;
+      QMessageBox::question( this, APPLICATION_NAME, message, QMessageBox::Ok );
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
+        message, false );
+
+      return false;
+    }
+
+    if ( xyzAxis.empty( ) && ( xAxis.empty( ) || yAxis.empty( )
+      || zAxis.empty( ) ) )
+    {
+      const char *message = "There must be at least one property selected as "
+        "XYZ axis or three properties as X, Y and Z axis in properties table.";
+
+      QMessageBox::question( this, APPLICATION_NAME, message, QMessageBox::Ok );
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
+        message, false );
+
+      return false;
     }
 
     /*std::string primaryKeyName = sp1common::Strings::joinAndTrim( primaryKeys,
@@ -373,13 +427,17 @@ namespace vishnu
 
     std::string headers = sp1common::Strings::join( propertyNames, "," );
     //headers = primaryKeysJoined + "," + headers;
-    headers = primaryKeyName + "," + headers;
+    headers = primaryKeyName + "," + headers + "\n";
 
     result = sp1common::Files::writeCsv( csvOutFile, headers );
     if ( !result )
     {
+      const char *message = "Can't create CSV file.";
+
+      QMessageBox::question( this, APPLICATION_NAME, message, QMessageBox::Ok );
       sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
-        "Can't create CSV file.", false );
+        message, false );
+
       return false;
     }
 
@@ -391,7 +449,8 @@ namespace vishnu
           dataSet.second->getPath( ) );
 
         std::vector< unsigned int > primaryKeyIndices;
-        std::vector< std::string > dataSetHeaders = dataSet.second->getHeaders( );
+        std::vector< std::string > dataSetHeaders =
+          dataSet.second->getHeaders( );
         for ( unsigned int i = 0; i < dataSetHeaders.size( ); ++i )
         {
           if ( std::find( primaryKeys.begin( ), primaryKeys.end( ),
@@ -419,14 +478,16 @@ namespace vishnu
             }
             else
             {
-              line += ( line.empty( ) )
-                ? csvRow.at( col )
-                : "," + csvRow.at( col );
+              if ( use[ col ] )
+              {
+                line += ( line.empty( ) ) ? csvRow.at( col )
+                  : "," + csvRow.at( col );
+              }
             }
           }
 
           // /*dataset name + */ primary key, rest of fields
-          line = /*dataSet.first + */ pkLine + "," + line;
+          line = /*dataSet.first + */ pkLine + "," + line + "\n";
           result = sp1common::Files::writeCsv( csvOutFile, line, true );
           if ( !result )
           {
@@ -469,12 +530,20 @@ namespace vishnu
       "features" );
     result = sp1common::Files::writeXmlAttribute( xmlOutFile,
       "idColumn", primaryKeyName );
-    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
-      "positionXColumn", "" );
-    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
-      "positionYColumn", "" );
-    result = sp1common::Files::writeXmlAttribute( xmlOutFile,
-      "positionZColumn", "" );
+    if ( !xyzAxis.empty( ) )
+    {
+      result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+        "positionXYZColumn", xyzAxis );
+    }
+    else
+    {
+      result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+        "positionXColumn", xAxis );
+      result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+        "positionYColumn", yAxis );
+      result = sp1common::Files::writeXmlAttribute( xmlOutFile,
+        "positionZColumn", zAxis );
+    }
     result = sp1common::Files::writeXmlCloseElement( xmlOutFile );
 
     for ( unsigned int i = 0; i < propertyNames.size( ); ++i )

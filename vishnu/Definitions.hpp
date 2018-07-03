@@ -19,6 +19,8 @@
 #define STR_X "X"
 #define STR_Y "Y"
 #define STR_Z "Z"
-#define STR_XYZ ""
+#define STR_XYZ "XYZ"
+
+#define GEOMETRIC_DATA_FIELD "obj"
 
 #endif

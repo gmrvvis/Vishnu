@@ -31,7 +31,6 @@ set( VISHNU_SOURCES
 
 set( VISHNU_HEADERS
   ${PROJECT_BINARY_DIR}/include/vishnu/version.h
-  MainWindow.ui
   MainWindow.h
   Application.h
   resources.qrc

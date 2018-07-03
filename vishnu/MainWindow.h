@@ -11,6 +11,9 @@
 #include <QProcess>
 #include <QMutex>
 
+#include <QStatusBar>
+#include <QMenuBar>
+#include <QWidget>
 #include <QToolBar>
 #include <QListWidgetItem>
 #include <QDir>
@@ -23,6 +26,9 @@
 #include <manco/manco.h>
 #include <sp1common/sp1common.h>
 
+typedef std::vector< std::string > StringVector;
+Q_DECLARE_METATYPE( StringVector );
+
 namespace vishnu
 {
   namespace Ui
@@ -33,11 +39,9 @@ namespace vishnu
   typedef std::shared_ptr< Application > ApplicationPtr;
   typedef std::map< std::string, ApplicationPtr > Applications;
 
-  //typedef std::shared_ptr< SyncGroup > SyncGroupPtr;
-  //typedef std::map< std::string, SyncGroupPtr > SyncGroups;
-
-  //typedef std::shared_ptr< WidgetsGroup > WidgetsGroupPtr;
-  //typedef std::map< std::string, WidgetsGroupPtr > WidgetsGroups;
+  typedef std::shared_ptr< DataSetListWidget > DataSetListWidgetPtr;
+  typedef std::shared_ptr< PropertiesTableWidget > PropertiesTableWidgetPtr;
+  typedef std::shared_ptr< ZEQGroupListWidget > ZEQGroupListWidgetPtr;
 
   class MainWindow : public QMainWindow
   {
@@ -64,7 +68,7 @@ namespace vishnu
       void removeDataSetItem( );
 
       void syncGroup( const QString& key, const QString& name,
-       const QString& owner, const std::vector< std::string >& ids,
+       const QString& owner, const StringVector& ids,
        const QColor& color );
       void changeGroupName( const QString& key, const QString& name );
       void changeGroupColor( const QString& key, const QColor& color );
@@ -73,21 +77,19 @@ namespace vishnu
 
   private:
 
-      vishnu::Ui::MainWindow *_ui;
+      //vishnu::Ui::MainWindow *_ui;
       std::string _zeqSession;
       std::string _workingDirectory;
       bool _closingProcesses;
       Applications _applications;
-      //SyncGroups _syncGroups;
-      //WidgetsGroups _widgetsGroups;
 
       QAction* addDataSetAction;
       QAction* removeDataSetAction;
       QAction* removeGroupAction;
 
-      DataSetListWidget* _dataSetListWidget;
-      PropertiesTableWidget* _propertiesTableWidget;
-      ZEQGroupListWidget* _zeqGroupListWidget;
+      DataSetListWidgetPtr _dataSetListWidget;
+      PropertiesTableWidgetPtr _propertiesTableWidget;
+      ZEQGroupListWidgetPtr _zeqGroupListWidget;
 
       void initZeqSession( );
       void receivedSyncGroup( zeroeq::gmrv::ConstSyncGroupPtr o );
@@ -97,7 +99,7 @@ namespace vishnu
 
     signals:
       void signalSyncGroup( const QString&, const QString&, const QString&,
-        const std::vector< std::string >&, const QColor& );
+        const StringVector&, const QColor& );
       void signalChangeGroupName( const QString&, const QString& );
       void signalChangeGroupColor( const QString&, const QColor& );
       void signalDestroyGroup( const QString& );

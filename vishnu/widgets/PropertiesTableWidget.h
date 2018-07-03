@@ -40,6 +40,21 @@ namespace vishnu
 
     Properties getProperties( );
 
+  private slots:
+
+      void axisTypeChanged( QString text );
+
+  private:
+
+      bool _checkingProperty;
+
+      void refillAxisTypeComboBox( QComboBox* combo,
+        const AxisType& axisType, const std::vector< AxisType >& toExclude );
+
+      void changeToNoneOrXOrYOrZ( const std::vector< AxisType >& selectedAxis );
+
+      void changeToXYZ( const std::vector< AxisType >& selectedAxis );
+
   };
 
 }

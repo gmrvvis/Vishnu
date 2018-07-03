@@ -10,6 +10,7 @@
 namespace vishnu
 {
   PropertiesTableWidget::PropertiesTableWidget( QWidget* /*parent*/ )
+    : _checkingProperty( false )
   {
     setColumnCount( 5 );
     setColumnWidth( 0, 220 );
@@ -65,8 +66,8 @@ namespace vishnu
       if ( std::find( tableProperties.begin( ), tableProperties.end( ),
         property ) == tableProperties.end( ) )
       {
-        int row = this->rowCount();
-        int columns = columnCount();
+        int row = this->rowCount( );
+        int columns = columnCount( );
 
         PropertiesWidget* propertiesWidget = new PropertiesWidget( property,
           true, false, sp1common::DataType::Undefined, AxisType::None );
@@ -77,7 +78,121 @@ namespace vishnu
           setItem( row, column, new QTableWidgetItem( ) );
           setCellWidget( row, column, propertiesWidget->getWidget( column ) );
         }
+
+        QObject::connect( propertiesWidget->getWidget( 4 ),
+          SIGNAL( currentIndexChanged( QString ) ), this,
+          SLOT( axisTypeChanged( QString ) ) );
       }
+    }
+  }
+
+  void PropertiesTableWidget::refillAxisTypeComboBox( QComboBox* combo,
+    const AxisType& axisType, const std::vector< AxisType >& toExclude )
+  {
+    combo->clear( );
+    for ( const auto& at : axisTypesToVector( toExclude ) )
+    {
+      combo->addItem( QString::fromStdString( at ) );
+    }
+    combo->setCurrentText( QString::fromStdString( toString( axisType ) ) );
+  }
+
+  void PropertiesTableWidget::changeToNoneOrXOrYOrZ(
+    const std::vector< AxisType >& selectedAxis )
+  {
+    for (int i = 0; i < rowCount(); ++i )
+    {
+      QComboBox* axisCB = static_cast< QComboBox* >(
+        cellWidget( i, 4 ) );
+      AxisType axisType = toAxisType(
+        axisCB->currentText( ).toStdString( ) );
+
+      std::vector< AxisType > toExclude = selectedAxis;
+      sp1common::Vectors::remove( toExclude, axisType );
+
+      if ( ( ( sp1common::Vectors::find( toExclude, AxisType::X ) != -1 )
+        || ( sp1common::Vectors::find( toExclude, AxisType::Y ) != -1 )
+        || ( sp1common::Vectors::find( toExclude, AxisType::Z ) != -1 ) )
+        && ( sp1common::Vectors::find( toExclude, AxisType::XYZ ) == -1 ) )
+      {
+        toExclude.push_back( AxisType::XYZ );
+      }
+
+      refillAxisTypeComboBox( axisCB, axisType, toExclude );
+    }
+  }
+
+  void PropertiesTableWidget::changeToXYZ(
+    const std::vector< AxisType >& selectedAxis )
+  {
+    //Loop over properties removing X, Y, Z and XYZ options
+    for (int i = 0; i < rowCount(); ++i )
+    {
+      QComboBox* axisCB = static_cast< QComboBox* >(
+        cellWidget( i, 4 ) );
+      AxisType axisType = toAxisType(
+        axisCB->currentText( ).toStdString( ) );
+
+      std::vector< AxisType > toExclude = selectedAxis;
+      sp1common::Vectors::remove( toExclude, axisType );
+
+      if ( sp1common::Vectors::find( toExclude, AxisType::XYZ ) != -1 )
+      {
+        toExclude.push_back( AxisType::X );
+        toExclude.push_back( AxisType::Y );
+        toExclude.push_back( AxisType::Z );
+      }
+
+      refillAxisTypeComboBox( axisCB, axisType, toExclude );
+    }
+  }
+
+  void PropertiesTableWidget::axisTypeChanged( QString text )
+  {
+    if ( !_checkingProperty  )
+    {
+      _checkingProperty = true;
+
+      /* First:
+       Loop over properties in order to get selected items, must be one of:
+      - All "blank" (ignored)
+      - X and/or Y and/or Z (non repeated)
+      - XYZ (non repeated)
+       */
+      std::vector< AxisType > selectedAxis;
+      for (int i = 0; i < rowCount(); ++i )
+      {
+        QComboBox* cb = static_cast< QComboBox* >( cellWidget( i, 4 ) );
+        AxisType at = toAxisType( cb->currentText( ).toStdString( ) );
+        if ( at != AxisType::None )
+        {
+          selectedAxis.push_back( at );
+        }
+      }
+
+      /* Second:
+       Get sender combobox and loop over all combos excluding some results
+      */
+      AxisType senderAxisType = toAxisType( text.toStdString( ) );
+      switch ( senderAxisType )
+      {
+        case AxisType::None:
+          changeToNoneOrXOrYOrZ( selectedAxis );
+          break;
+        case AxisType::X:
+          changeToNoneOrXOrYOrZ( selectedAxis );
+          break;
+        case AxisType::Y:
+          changeToNoneOrXOrYOrZ( selectedAxis );
+          break;
+        case AxisType::Z:
+          changeToNoneOrXOrYOrZ( selectedAxis );
+          break;
+        case AxisType::XYZ:
+          changeToXYZ( selectedAxis );
+          break;
+      }
+      _checkingProperty = false;
     }
   }
 

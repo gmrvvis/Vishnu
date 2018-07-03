@@ -73,14 +73,31 @@ namespace vishnu
     return result;
   }
 
-  inline static std::vector<std::string> axisTypesToVector( )
+  inline static std::vector< std::string > axisTypesToVector(
+    std::vector< AxisType > exclude = std::vector< AxisType >( ) )
   {
-    std::vector<std::string> vector;
+    std::vector< std::string > vector;
     vector.push_back( toString( AxisType::None ) );
-    vector.push_back( toString( AxisType::X ) );
-    vector.push_back( toString( AxisType::Y ) );
-    vector.push_back( toString( AxisType::Z ) );
-    vector.push_back( toString( AxisType::XYZ ) );
+    if ( std::find( exclude.begin( ), exclude.end( ), AxisType::X )
+      == exclude.end( ) )
+    {
+      vector.push_back( toString( AxisType::X ) );
+    }
+    if ( std::find( exclude.begin( ), exclude.end( ), AxisType::Y )
+      == exclude.end( ) )
+    {
+      vector.push_back( toString( AxisType::Y ) );
+    }
+    if ( std::find( exclude.begin( ), exclude.end( ), AxisType::Z )
+      == exclude.end( ) )
+    {
+      vector.push_back( toString( AxisType::Z ) );
+    }
+    if ( std::find( exclude.begin( ), exclude.end( ), AxisType::XYZ )
+      == exclude.end( ) )
+    {
+      vector.push_back( toString( AxisType::XYZ ) );
+    }
     return vector;
   }
 }

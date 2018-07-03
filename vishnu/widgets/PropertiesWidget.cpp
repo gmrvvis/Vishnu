@@ -37,9 +37,6 @@ namespace vishnu
     QObject::connect( _primaryKey, SIGNAL( toggled( bool ) ), this,
       SLOT( primaryKeyChanged( bool ) ) );
 
-    QObject::connect( _axisType, SIGNAL( currentTextChanged( QString ) ), this,
-      SLOT( axisTypeChanged( QString ) ) );
-
   }
 
   std::string PropertiesWidget::getName( void ) const
@@ -92,7 +89,7 @@ namespace vishnu
     }
     for (const auto& dt : sp1common::dataTypesToVector( ) )
     {
-      _dataType->addItem( QString::fromStdString( dt ) );
+      _dataType->addItem( QString::fromStdString( dt ) );      
     }
   }
 
@@ -178,33 +175,6 @@ namespace vishnu
       {
         _use->setChecked( state );
       }
-    }
-  }
-
-  void PropertiesWidget::axisTypeChanged( QString text )
-  {
-    //TODO: switch text, loop over all properties changing comboboxes
-    AxisType axisType = toAxisType( text.toStdString( ) );
-    switch ( axisType )
-    {
-      case AxisType::None:
-        //Check removed option, and re-enable on other properties
-        //If X, Y or Z removed, enable removed option on all properties and 
-        //check if 3 are removed to enable XYZ
-        //If XYZ removed, enable X, Y, Z and XYZ on all properties
-        break;
-      case AxisType::X:
-        //Loop over properties removing X and XYZ options
-        break;
-      case AxisType::Y:
-        //Loop over properties removing Y and XYZ options
-        break;
-      case AxisType::Z:
-        //Loop over properties removing Z and XYZ options
-        break;
-      case AxisType::XYZ:
-        //Loop over properties removing X, Y, Z and XYZ options
-        break;
     }
   }
 

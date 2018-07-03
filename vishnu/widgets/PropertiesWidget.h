@@ -49,8 +49,6 @@ namespace vishnu
 
     void primaryKeyChanged( bool state );
 
-    void axisTypeChanged( QString text );
-
   private:
 
     QLabel* _name = nullptr;
