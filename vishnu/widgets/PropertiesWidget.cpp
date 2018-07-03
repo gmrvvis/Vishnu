@@ -20,20 +20,25 @@ namespace vishnu
 
   PropertiesWidget::PropertiesWidget( const std::string& name, const bool& use,
         const bool& primaryKey, const sp1common::DataType& dataType,
-        QWidget* /*parent*/ )
+        const AxisType& axisType, QWidget* /*parent*/ )
   {    
 
     fillDataTypes( );
+    fillAxisTypes( );
     setName( name );
     setUse( use );
     setPrimaryKey( primaryKey );
     setDataType( dataType );
+    setAxisType( axisType );
 
     QObject::connect( _use, SIGNAL( toggled( bool ) ), this,
       SLOT( useChanged( bool ) ) );
 
     QObject::connect( _primaryKey, SIGNAL( toggled( bool ) ), this,
       SLOT( primaryKeyChanged( bool ) ) );
+
+    QObject::connect( _axisType, SIGNAL( currentTextChanged( QString ) ), this,
+      SLOT( axisTypeChanged( QString ) ) );
 
   }
 
@@ -106,6 +111,33 @@ namespace vishnu
     }
   }
 
+  void PropertiesWidget::fillAxisTypes( void )
+  {
+    if ( _axisType == nullptr )
+    {
+      _axisType = new QComboBox( );
+    }
+    for ( const auto& at : axisTypesToVector( ) )
+    {
+      _axisType->addItem( QString::fromStdString( at ) );
+    }
+  }
+
+  AxisType PropertiesWidget::getAxisType( void ) const
+  {
+    return toAxisType( _axisType->currentText( ).toStdString( ) );
+  }
+
+  void PropertiesWidget::setAxisType( const AxisType& axisType )
+  {
+    int index = _axisType->findData( QString::fromStdString(
+      toString( axisType ) ) );
+    if ( index != -1 )
+    {
+      _axisType->setCurrentIndex( index );
+    }
+  }
+
   QWidget* PropertiesWidget::getWidget( const int& index )
   {
     switch( index )
@@ -118,6 +150,8 @@ namespace vishnu
         return _primaryKey;
       case 3:
         return _dataType;
+      case 4:
+        return _axisType;
       default:
         sp1common::Error::throwError(sp1common::Error::ErrorType::Error,
           "Invalid property index", true );
@@ -144,6 +178,33 @@ namespace vishnu
       {
         _use->setChecked( state );
       }
+    }
+  }
+
+  void PropertiesWidget::axisTypeChanged( QString text )
+  {
+    //TODO: switch text, loop over all properties changing comboboxes
+    AxisType axisType = toAxisType( text.toStdString( ) );
+    switch ( axisType )
+    {
+      case AxisType::None:
+        //Check removed option, and re-enable on other properties
+        //If X, Y or Z removed, enable removed option on all properties and 
+        //check if 3 are removed to enable XYZ
+        //If XYZ removed, enable X, Y, Z and XYZ on all properties
+        break;
+      case AxisType::X:
+        //Loop over properties removing X and XYZ options
+        break;
+      case AxisType::Y:
+        //Loop over properties removing Y and XYZ options
+        break;
+      case AxisType::Z:
+        //Loop over properties removing Z and XYZ options
+        break;
+      case AxisType::XYZ:
+        //Loop over properties removing X, Y, Z and XYZ options
+        break;
     }
   }
 

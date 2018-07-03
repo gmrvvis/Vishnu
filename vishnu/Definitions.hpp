@@ -15,4 +15,10 @@
   #define SUPERUSER "gksudo"
 #endif
 
+#define STR_EMPTY ""
+#define STR_X "X"
+#define STR_Y "Y"
+#define STR_Z "Z"
+#define STR_XYZ ""
+
 #endif

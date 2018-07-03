@@ -11,14 +11,15 @@ namespace vishnu
 {
   PropertiesTableWidget::PropertiesTableWidget( QWidget* /*parent*/ )
   {
-    setColumnCount( 4 );
-    setColumnWidth( 0, 320 );
+    setColumnCount( 5 );
+    setColumnWidth( 0, 220 );
     setColumnWidth( 1, 80 );
     setColumnWidth( 2, 100 );
     setColumnWidth( 3, 150 );
+    setColumnWidth( 4, 100 );
     horizontalHeader()->setStretchLastSection( true );
     QStringList headers;
-    headers << "Property name" << "Use" << "Primary Key" << "Data type";
+    headers << "Property name" << "Use" << "Primary Key" << "Data type" << "Axis type";
     setHorizontalHeaderLabels( headers );
     setSortingEnabled( false );
     verticalHeader( )->setVisible( false );
@@ -68,7 +69,7 @@ namespace vishnu
         int columns = columnCount();
 
         PropertiesWidget* propertiesWidget = new PropertiesWidget( property,
-          true, false, sp1common::DataType::Undefined );
+          true, false, sp1common::DataType::Undefined, AxisType::None );
 
         insertRow(row);
         for( int column = 0; column < columns; ++column )
@@ -114,8 +115,13 @@ namespace vishnu
         row, 3 ) );
       sp1common::DataType dataType = sp1common::toDataType(
         dataTypeComboBox->currentText( ).toStdString( ) );
+      QComboBox* axisTypeComboBox = static_cast< QComboBox* >( cellWidget(
+        row, 4 ) );
+      AxisType axisType = toAxisType( 
+        axisTypeComboBox->currentText( ).toStdString( ) );
 
-      PropertyPtr property( new Property( name, use, primaryKey, dataType) );
+      PropertyPtr property( new Property( name, use, primaryKey, dataType, 
+        axisType ) );
       properties.push_back( property );
     }
 

@@ -425,7 +425,8 @@ namespace vishnu
             }
           }
 
-          line = dataSet.first + pkLine + "," + line;
+          // /*dataset name + */ primary key, rest of fields
+          line = /*dataSet.first + */ pkLine + "," + line;
           result = sp1common::Files::writeCsv( csvOutFile, line, true );
           if ( !result )
           {
