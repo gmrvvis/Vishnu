@@ -8,7 +8,7 @@
     <file>icons/unchecked.png</file>
     <file>icons/blank.png</file>
     <file>icons/logoPyramidal.png</file>
-    <file>icons/logoDCExplorer.ico</file>
-    <file>icons/logoClint.jpeg</file>
+    <file>icons/logoDCExplorer.png</file>
+    <file>icons/logoClint.png</file>
   </qresource>
 </RCC>

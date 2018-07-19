@@ -19,7 +19,7 @@ using namespace vishnu;
 int main( int argc, char *argv[] )
 {
   QApplication app( argc, argv );
-  QApplication::setApplicationVersion( QString::fromStdString( 
+  QApplication::setApplicationVersion( QString::fromStdString(
     Version::getString( ) ) );
   QApplication::setApplicationName( APPLICATION_NAME );
   QApplication::setOrganizationName( ORGANIZATION_NAME );
@@ -38,7 +38,7 @@ int main( int argc, char *argv[] )
   //bool detach = false;
   if ( unixSharedMemory.attach( ) == false )
   {
-    /*detach = */unixSharedMemory.detach( );
+    unixSharedMemory.detach( );
   }
   unixSharedMemory.detach( );
   #endif
@@ -78,4 +78,6 @@ int main( int argc, char *argv[] )
 
   window.show( );
   return app.exec( );
+
+  //sp1common::Zip::unZip("/media/DATA/data/peque.seg", "/media/DATA/data/test");
 }

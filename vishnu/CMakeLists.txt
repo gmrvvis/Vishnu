@@ -16,6 +16,7 @@ configure_file( ${CMAKE_SOURCE_DIR}/CMake/common/cpp/version.cpp
 set( VISHNU_SOURCES
   ${PROJECT_BINARY_DIR}/src/version.cpp
   MainWindow.cpp
+  DataSetWindow.cpp
   main.cpp
   Application.cpp
   widgets/DataSetListWidget.cpp
@@ -32,6 +33,7 @@ set( VISHNU_SOURCES
 set( VISHNU_HEADERS
   ${PROJECT_BINARY_DIR}/include/vishnu/version.h
   MainWindow.h
+  DataSetWindow.h
   Application.h
   resources.qrc
   Definitions.hpp

@@ -31,11 +31,6 @@ Q_DECLARE_METATYPE( StringVector );
 
 namespace vishnu
 {
-  namespace Ui
-  {
-    class MainWindow;
-  }
-
   typedef std::shared_ptr< Application > ApplicationPtr;
   typedef std::map< std::string, ApplicationPtr > Applications;
 

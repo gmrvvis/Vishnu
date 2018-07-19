@@ -667,7 +667,7 @@ namespace vishnu
 
     ApplicationPtr appplication( new Application(
       sp1common::ApplicationType::CLINT, displayName, cmd, args,
-      QIcon(":/icons/logoClint.jpeg"), _workingDirectory ) );
+      QIcon(":/icons/logoClint.png"), _workingDirectory ) );
 
     std::string owner = sp1common::toString(
       sp1common::ApplicationType::CLINT ) + instanceId;
@@ -702,7 +702,7 @@ namespace vishnu
 
     ApplicationPtr application( new Application(
       sp1common::ApplicationType::DCEXPLORER, displayName, cmd, args,
-      QIcon(":/icons/logoDCExplorer.ico"), _workingDirectory ) );
+      QIcon(":/icons/logoDCExplorer.png"), _workingDirectory ) );
 
     std::string owner = sp1common::toString(
       sp1common::ApplicationType::DCEXPLORER ) + instanceId;
