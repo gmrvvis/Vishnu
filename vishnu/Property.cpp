@@ -4,7 +4,7 @@ namespace vishnu
 {
   Property::Property( const std::string& name, const bool& use,
     const bool& primaryKey, const sp1common::DataType& dataType, 
-    const AxisType& axisType )
+    const sp1common::AxisType& axisType )
       : _name( name )
       , _use( use )
       , _primaryKey( primaryKey )
@@ -54,12 +54,12 @@ namespace vishnu
     _dataType = dataType;
   }
 
-  AxisType Property::getAxisType( void ) const
+  sp1common::AxisType Property::getAxisType( void ) const
   {
     return _axisType;
   }
 
-  void Property::setAxisType( const AxisType& axisType )
+  void Property::setAxisType( const sp1common::AxisType& axisType )
   {
     _axisType = axisType;
   }

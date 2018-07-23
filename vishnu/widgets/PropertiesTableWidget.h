@@ -49,11 +49,14 @@ namespace vishnu
       bool _checkingProperty;
 
       void refillAxisTypeComboBox( QComboBox* combo,
-        const AxisType& axisType, const std::vector< AxisType >& toExclude );
+        const sp1common::AxisType& axisType,
+        const std::vector< sp1common::AxisType >& toExclude );
 
-      void changeToNoneOrXOrYOrZ( const std::vector< AxisType >& selectedAxis );
+      void changeToNoneOrXOrYOrZ(
+        const std::vector< sp1common::AxisType >& selectedAxis );
 
-      void changeToXYZ( const std::vector< AxisType >& selectedAxis );
+      void changeToXYZ(
+        const std::vector< sp1common::AxisType >& selectedAxis );
 
   };
 

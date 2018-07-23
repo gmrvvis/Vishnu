@@ -17,8 +17,9 @@
 using namespace vishnu;
 
 int main( int argc, char *argv[] )
-{
+{  
   QApplication app( argc, argv );
+
   QApplication::setApplicationVersion( QString::fromStdString(
     Version::getString( ) ) );
   QApplication::setApplicationName( APPLICATION_NAME );
@@ -35,7 +36,6 @@ int main( int argc, char *argv[] )
   #ifdef __linux__
   // On unix, shared memory is not freed upon crash
   QSharedMemory unixSharedMemory( sharedMemorykey );
-  //bool detach = false;
   if ( unixSharedMemory.attach( ) == false )
   {
     unixSharedMemory.detach( );
@@ -60,10 +60,11 @@ int main( int argc, char *argv[] )
     return 1;
   }
 
+  QResource::registerResource( "resources.rcc" );
+
   sp1common::Args args( argc, argv );
 
-  vishnu::MainWindow window( args );
-  QResource::registerResource( "resources.rcc" );
+  MainWindow window( args );
   window.setGeometry( QRect( 0, 0, APPLICATION_WIDTH, APPLICATION_HEIGHT ) );
 
   QRect screenGeometry = QApplication::desktop()->screenGeometry();
@@ -78,6 +79,4 @@ int main( int argc, char *argv[] )
 
   window.show( );
   return app.exec( );
-
-  //sp1common::Zip::unZip("/media/DATA/data/peque.seg", "/media/DATA/data/test");
 }

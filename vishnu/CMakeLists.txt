@@ -46,7 +46,6 @@ set( VISHNU_HEADERS
   Property.h
   DataSet.h
   RegExpInputDialog.h
-  Enums.hpp
 )
 
 set( VISHNU_LINK_LIBRARIES

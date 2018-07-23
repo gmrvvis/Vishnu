@@ -14,12 +14,16 @@ namespace vishnu
 
     public:
 
-      DataSet( const std::string& path,
+      DataSet( const std::string& path, const bool& checked,
         const std::vector< std::string >& headers );
 
       std::string getPath( void ) const;
 
       void setPath( std::string path );
+
+      bool getChecked( void ) const;
+
+      void setChecked( bool checked );
 
       std::vector< std::string > getHeaders( void ) const;
 
@@ -28,6 +32,8 @@ namespace vishnu
     private:
 
       std::string _path;
+
+      bool _checked;
 
       std::vector< std::string > _headers;
 

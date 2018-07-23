@@ -5,8 +5,6 @@
 
 #include <sp1common/sp1common.h>
 
-#include "Enums.hpp"
-
 namespace vishnu
 {
 
@@ -15,8 +13,9 @@ namespace vishnu
 
     public:
 
-      Property( const std::string& name, const bool& use, const bool&primaryKey,
-        const sp1common::DataType& dataType, const AxisType& axisType );
+      Property( const std::string& name, const bool& use,
+        const bool& primaryKey, const sp1common::DataType& dataType,
+        const sp1common::AxisType& axisType );
 
       std::string getName( void ) const;
 
@@ -34,9 +33,9 @@ namespace vishnu
 
       void setDataType( const sp1common::DataType& dataType );
 
-      AxisType getAxisType( void ) const;
+      sp1common::AxisType getAxisType( void ) const;
 
-      void setAxisType( const AxisType& axisType );
+      void setAxisType( const sp1common::AxisType& axisType );
 
     private:
 
@@ -48,7 +47,7 @@ namespace vishnu
 
       sp1common::DataType _dataType;
 
-      AxisType _axisType;
+      sp1common::AxisType _axisType;
 
   };
 

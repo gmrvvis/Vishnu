@@ -2,9 +2,10 @@
 
 namespace vishnu
 {
-  DataSet::DataSet( const std::string& path,
+  DataSet::DataSet( const std::string& path, const bool& checked,
     const std::vector< std::string >& headers )
       : _path( path )
+      , _checked( checked )
       , _headers( headers )
   {
 
@@ -18,6 +19,16 @@ namespace vishnu
   void DataSet::setPath( std::string path )
   {
     _path = path;
+  }
+
+  bool DataSet::getChecked( void ) const
+  {
+    return _checked;
+  }
+
+  void DataSet::setChecked( bool checked )
+  {
+    _checked = checked;
   }
 
   std::vector< std::string > DataSet::getHeaders( void ) const

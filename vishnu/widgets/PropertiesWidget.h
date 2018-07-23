@@ -8,8 +8,6 @@
 #include <QComboBox>
 #include <sp1common/sp1common.h>
 
-#include "../Enums.hpp"
-
 namespace vishnu
 {
 
@@ -22,7 +20,7 @@ namespace vishnu
 
     explicit PropertiesWidget( const std::string& name, const bool& use,
       const bool& primaryKey, const sp1common::DataType& dataType,
-      const AxisType& axisType, QWidget* parent = Q_NULLPTR );
+      const sp1common::AxisType& axisType, QWidget* parent = Q_NULLPTR );
 
     std::string getName( void ) const;
     void setName( const std::string& name );
@@ -38,8 +36,8 @@ namespace vishnu
     void setDataType( const sp1common::DataType& dataType );
 
     void fillAxisTypes( void );
-    AxisType getAxisType( void ) const;
-    void setAxisType( const AxisType& axisType );
+    sp1common::AxisType getAxisType( void ) const;
+    void setAxisType( const sp1common::AxisType& axisType );
 
     QWidget* getWidget( const int& index );
 

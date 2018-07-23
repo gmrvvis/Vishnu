@@ -15,8 +15,7 @@
 
 namespace vishnu
 {
-  DataSetListWidget::DataSetListWidget( QWidget* parent )
-    : QListWidget( parent )
+  DataSetListWidget::DataSetListWidget( QWidget* /*parent*/ )
   {    
     setSelectionMode( QAbstractItemView::SingleSelection );
     setDragDropMode( QAbstractItemView::DragDrop );
@@ -24,41 +23,7 @@ namespace vishnu
     setAcceptDrops( true );
   }
 
-
-  void DataSetListWidget::createDataSetFromCSV( const std::string& path,
-    DataSetWidgets& dataSetWidgets )
-  {
-    bool notUsedPath = true;
-    for ( int i = 0; i < count( ); ++i )
-    {
-      DataSetWidget* dataSetWidget = static_cast< DataSetWidget* >(
-        itemWidget( item( i ) ) );
-      if ( dataSetWidget->getPath( ) == path )
-      {
-        QMessageBox::warning( this, APPLICATION_NAME,
-          tr("This file is already loaded.") );
-        notUsedPath = false;
-        break;
-      }
-    }
-
-    if ( notUsedPath )
-    {
-      //Add to dataset
-      DataSetWidgetPtr dataSetWidget( new DataSetWidget( path ) );
-      dataSetWidget->setListWidgetItem( new QListWidgetItem( this ) );
-
-      QListWidgetItem* listWidgetItem = dataSetWidget->getListWidgetItem( );
-      addItem( listWidgetItem );
-      listWidgetItem->setSizeHint( dataSetWidget->sizeHint ( ) );
-      setItemWidget( listWidgetItem, dataSetWidget );
-
-      dataSetWidgets.push_back( dataSetWidget );
-    }
-  }
-
-  DataSetWidgets DataSetListWidget::addDataSets(
-    const std::vector< std::string >& dropped )
+  DataSetWidgets DataSetListWidget::addDataSet( const std::string& dropped )
   {
     DataSetWidgets dataSetWidgets;
 
@@ -66,10 +31,7 @@ namespace vishnu
 
     if ( !dropped.empty( ) )
     {
-      for (unsigned int i = 0; i < dropped.size( ); ++i )
-      {
-        filePaths << QString::fromStdString( dropped.at( i ) );
-      }
+      filePaths << QString::fromStdString( dropped );
     }
     else
     {
@@ -82,28 +44,64 @@ namespace vishnu
       return dataSetWidgets;
     }
 
-    filePaths.removeDuplicates( );
-
-    for ( int i = 0; i < filePaths.count( ); ++i )
+    for ( int i=0; i<filePaths.count(); ++i )
     {
       QString filePath = filePaths.at( i );
+      QFileInfo fileInfo( filePath );
+
+      //Format basename to 10 chars without spaces
+      std::string basename = fileInfo.baseName( ).toStdString( );
+      basename.erase( std::remove_if( basename.begin( ), basename.end( ),
+        isspace ), basename.end( ) );
+      if (basename.length() > MAX_DATASET_NAME_LENGTH )
+      {
+        basename.resize ( MAX_DATASET_NAME_LENGTH );
+      }
+
+      std::string name;
       std::string path = filePath.toStdString( );
+      std::string tempName = basename;
+      bool validName = false;
+      bool notUsedName = true;
 
-      std::string extension = sp1common::Strings::lower(
-        QFileInfo( filePath ).completeSuffix( ).toStdString( ) );
-
-      if ( extension == STR_SEG )
+      do
       {
+        //Check if it's a valid name
+        QRegularExpression regularExpression("[A-Za-z0-9]{1,10}$");
+        QString dataSetName = RegExpInputDialog::getText(this, "DataSet name",
+          "Enter DataSet name: " + filePath, QString::fromStdString( tempName ),
+          regularExpression, &validName);
+        if ( validName )
+        {
+          name = dataSetName.toStdString( );
 
-      }
-      else if ( extension == STR_JSON )
-      {
+          //Check if name doesn't exist
+          notUsedName = true;
+          for( int j = 0; j < count( ); ++j )
+          {
+            DataSetWidget* widget = static_cast< DataSetWidget* >(
+              itemWidget( item( j ) ) );
+            if ( widget->getName( ) == name )
+            {
+              QMessageBox::warning( this, APPLICATION_NAME,
+                tr("Invalid name. This name already exists.") );
+              notUsedName = false;
+              break;
+            }
+          }
+        }
+      } while( !validName || !notUsedName );
 
-      }
-      else if ( extension == STR_CSV )
-      {
-        createDataSetFromCSV( path, dataSetWidgets );
-      }
+      //Add to dataset
+      DataSetWidgetPtr dataSetWidget( new DataSetWidget( name, path ) );
+      dataSetWidget->setListWidgetItem( new QListWidgetItem( this ) );
+
+      QListWidgetItem* listWidgetItem = dataSetWidget->getListWidgetItem( );
+      addItem( listWidgetItem );
+      listWidgetItem->setSizeHint( dataSetWidget->sizeHint ( ) );
+      setItemWidget( listWidgetItem, dataSetWidget.get( ) );
+
+      dataSetWidgets.push_back( dataSetWidget );
     }
 
     return dataSetWidgets;
@@ -149,8 +147,10 @@ namespace vishnu
       DataSetWidget* dsw = static_cast< DataSetWidget* >(
         itemWidget( item( row ) ) );
 
-      DataSetPtr dataSet( new DataSet( dsw->getPath( ), dsw->getHeaders( ) ) );
-      dataSets[ dsw->getPath() ] = dataSet;
+      DataSetPtr dataSet( new DataSet( dsw->getPath( ), dsw->getChecked( ),
+        dsw->getHeaders( ) ) );
+      dataSets[ dsw->getName() ] = dataSet;
+
     }
 
     return dataSets;
@@ -197,24 +197,24 @@ namespace vishnu
 
   void DataSetListWidget::dropEvent( QDropEvent* event )
   {
-    std::vector< std::string > files;
-    for ( const QUrl& url : event->mimeData( )->urls( ) )
+    for( const QUrl& url : event->mimeData()->urls( ) )
     {
       QString filePath = url.toLocalFile();
 
       std::string extension = sp1common::Strings::lower(
-        QFileInfo( filePath ).completeSuffix( ).toStdString( ) );
+        QFileInfo(filePath).completeSuffix( ).toStdString( ) );
 
-      if ( sp1common::Vectors::find( { STR_CSV, STR_JSON, STR_SEG },
-        extension ) != -1 )
+      if ( extension == "csv" )
       {
-        files.push_back( filePath.toStdString( ) );
+        sp1common::Debug::consoleMessage( "Dropped file: "
+          + filePath.toStdString( ) );
+        emit addDataSetEvent( filePath.toStdString( ) );
       }
-    }
-    if ( !files.empty( ) )
-    {
-      sp1common::Debug::consoleMessage( "Dropped files" );
-      emit addDataSetsEvent( files );
+      else
+      {
+        sp1common::Debug::consoleMessage( "Ignoring invalid file: "
+          + filePath.toStdString( ) );
+      }
     }
   }
 }

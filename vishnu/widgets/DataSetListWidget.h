@@ -23,35 +23,48 @@ namespace vishnu
   typedef std::shared_ptr< DataSet > DataSetPtr;
   typedef std::map< std::string, DataSetPtr > DataSets;
 
+  //typedef std::shared_ptr< DataSetWidget > DataSetWidgetPtr;
+  typedef DataSetWidget* DataSetWidgetPtr;
+  typedef std::vector< DataSetWidgetPtr > DataSetWidgets;
+
   class DataSetListWidget : public QListWidget
   {
 
     Q_OBJECT
 
-  public:
+    public:
 
-    explicit DataSetListWidget( QWidget* parent = Q_NULLPTR );
+      explicit DataSetListWidget( QWidget* parent = Q_NULLPTR );
 
-    DataSetWidget* addDataSet( const std::string& dropped = std::string( ) );
+      DataSetWidgets addDataSets( const std::vector< std::string >& dropped =
+        std::vector< std::string >( ) );
 
-    std::vector< std::string > getPropertiesToRemove( );
+      std::vector< std::string > getPropertiesToRemove( );
 
-    void removeCurrentDataSet( );
+      void removeCurrentDataSet( );
 
-    DataSets getDataSets( );
+      DataSets getDataSets( );
 
-    std::vector< std::string > getCommonProperties( );
+      std::vector< std::string > getCommonProperties( );
 
     protected:
 
-    void dragEnterEvent( QDragEnterEvent* event );
-    void dragMoveEvent( QDragMoveEvent* event );
-    void dragLeaveEvent( QDragLeaveEvent* event );
-    void dropEvent( QDropEvent* event );
+      void dragEnterEvent( QDragEnterEvent* event );
 
-  signals:
+      void dragMoveEvent( QDragMoveEvent* event );
 
-    void addDataSetEvent( const std::string& filePath );
+      void dragLeaveEvent( QDragLeaveEvent* event );
+
+      void dropEvent( QDropEvent* event );
+
+    signals:
+
+      void addDataSetsEvent( const std::vector< std::string >& files );
+
+    private:
+
+      void createDataSetFromCSV( const std::string& path,
+        DataSetWidgets& dataSetWidgets );
 
   };
 

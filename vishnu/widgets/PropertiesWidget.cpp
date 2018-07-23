@@ -20,7 +20,7 @@ namespace vishnu
 
   PropertiesWidget::PropertiesWidget( const std::string& name, const bool& use,
         const bool& primaryKey, const sp1common::DataType& dataType,
-        const AxisType& axisType, QWidget* /*parent*/ )
+        const sp1common::AxisType& axisType, QWidget* /*parent*/ )
   {    
 
     fillDataTypes( );
@@ -114,18 +114,18 @@ namespace vishnu
     {
       _axisType = new QComboBox( );
     }
-    for ( const auto& at : axisTypesToVector( ) )
+    for ( const auto& at : sp1common::axisTypesToVector( ) )
     {
       _axisType->addItem( QString::fromStdString( at ) );
     }
   }
 
-  AxisType PropertiesWidget::getAxisType( void ) const
+  sp1common::AxisType PropertiesWidget::getAxisType( void ) const
   {
-    return toAxisType( _axisType->currentText( ).toStdString( ) );
+    return sp1common::toAxisType( _axisType->currentText( ).toStdString( ) );
   }
 
-  void PropertiesWidget::setAxisType( const AxisType& axisType )
+  void PropertiesWidget::setAxisType( const sp1common::AxisType& axisType )
   {
     int index = _axisType->findData( QString::fromStdString(
       toString( axisType ) ) );

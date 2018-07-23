@@ -70,7 +70,8 @@ namespace vishnu
         int columns = columnCount( );
 
         PropertiesWidget* propertiesWidget = new PropertiesWidget( property,
-          true, false, sp1common::DataType::Undefined, AxisType::None );
+          true, false, sp1common::DataType::Undefined,
+          sp1common::AxisType::None );
 
         insertRow(row);
         for( int column = 0; column < columns; ++column )
@@ -87,7 +88,8 @@ namespace vishnu
   }
 
   void PropertiesTableWidget::refillAxisTypeComboBox( QComboBox* combo,
-    const AxisType& axisType, const std::vector< AxisType >& toExclude )
+    const sp1common::AxisType& axisType,
+    const std::vector< sp1common::AxisType >& toExclude )
   {
     combo->clear( );
     for ( const auto& at : axisTypesToVector( toExclude ) )
@@ -98,24 +100,24 @@ namespace vishnu
   }
 
   void PropertiesTableWidget::changeToNoneOrXOrYOrZ(
-    const std::vector< AxisType >& selectedAxis )
+    const std::vector< sp1common::AxisType >& selectedAxis )
   {
     for (int i = 0; i < rowCount(); ++i )
     {
       QComboBox* axisCB = static_cast< QComboBox* >(
         cellWidget( i, 4 ) );
-      AxisType axisType = toAxisType(
+      sp1common::AxisType axisType = sp1common::toAxisType(
         axisCB->currentText( ).toStdString( ) );
 
-      std::vector< AxisType > toExclude = selectedAxis;
+      std::vector< sp1common::AxisType > toExclude = selectedAxis;
       sp1common::Vectors::remove( toExclude, axisType );
 
-      if ( ( ( sp1common::Vectors::find( toExclude, AxisType::X ) != -1 )
-        || ( sp1common::Vectors::find( toExclude, AxisType::Y ) != -1 )
-        || ( sp1common::Vectors::find( toExclude, AxisType::Z ) != -1 ) )
-        && ( sp1common::Vectors::find( toExclude, AxisType::XYZ ) == -1 ) )
+      if ( ( ( sp1common::Vectors::find( toExclude, sp1common::AxisType::X ) != -1 )
+        || ( sp1common::Vectors::find( toExclude, sp1common::AxisType::Y ) != -1 )
+        || ( sp1common::Vectors::find( toExclude, sp1common::AxisType::Z ) != -1 ) )
+        && ( sp1common::Vectors::find( toExclude, sp1common::AxisType::XYZ ) == -1 ) )
       {
-        toExclude.push_back( AxisType::XYZ );
+        toExclude.push_back( sp1common::AxisType::XYZ );
       }
 
       refillAxisTypeComboBox( axisCB, axisType, toExclude );
@@ -123,24 +125,24 @@ namespace vishnu
   }
 
   void PropertiesTableWidget::changeToXYZ(
-    const std::vector< AxisType >& selectedAxis )
+    const std::vector< sp1common::AxisType >& selectedAxis )
   {
     //Loop over properties removing X, Y, Z and XYZ options
     for (int i = 0; i < rowCount(); ++i )
     {
       QComboBox* axisCB = static_cast< QComboBox* >(
         cellWidget( i, 4 ) );
-      AxisType axisType = toAxisType(
+      sp1common::AxisType axisType = sp1common::toAxisType(
         axisCB->currentText( ).toStdString( ) );
 
-      std::vector< AxisType > toExclude = selectedAxis;
+      std::vector< sp1common::AxisType > toExclude = selectedAxis;
       sp1common::Vectors::remove( toExclude, axisType );
 
-      if ( sp1common::Vectors::find( toExclude, AxisType::XYZ ) != -1 )
+      if ( sp1common::Vectors::find( toExclude, sp1common::AxisType::XYZ ) != -1 )
       {
-        toExclude.push_back( AxisType::X );
-        toExclude.push_back( AxisType::Y );
-        toExclude.push_back( AxisType::Z );
+        toExclude.push_back( sp1common::AxisType::X );
+        toExclude.push_back( sp1common::AxisType::Y );
+        toExclude.push_back( sp1common::AxisType::Z );
       }
 
       refillAxisTypeComboBox( axisCB, axisType, toExclude );
@@ -159,12 +161,13 @@ namespace vishnu
       - X and/or Y and/or Z (non repeated)
       - XYZ (non repeated)
        */
-      std::vector< AxisType > selectedAxis;
+      std::vector< sp1common::AxisType > selectedAxis;
       for (int i = 0; i < rowCount(); ++i )
       {
         QComboBox* cb = static_cast< QComboBox* >( cellWidget( i, 4 ) );
-        AxisType at = toAxisType( cb->currentText( ).toStdString( ) );
-        if ( at != AxisType::None )
+        sp1common::AxisType at = sp1common::toAxisType(
+          cb->currentText( ).toStdString( ) );
+        if ( at != sp1common::AxisType::None )
         {
           selectedAxis.push_back( at );
         }
@@ -173,22 +176,23 @@ namespace vishnu
       /* Second:
        Get sender combobox and loop over all combos excluding some results
       */
-      AxisType senderAxisType = toAxisType( text.toStdString( ) );
+      sp1common::AxisType senderAxisType =
+        sp1common::toAxisType( text.toStdString( ) );
       switch ( senderAxisType )
       {
-        case AxisType::None:
+        case sp1common::AxisType::None:
           changeToNoneOrXOrYOrZ( selectedAxis );
           break;
-        case AxisType::X:
+        case sp1common::AxisType::X:
           changeToNoneOrXOrYOrZ( selectedAxis );
           break;
-        case AxisType::Y:
+        case sp1common::AxisType::Y:
           changeToNoneOrXOrYOrZ( selectedAxis );
           break;
-        case AxisType::Z:
+        case sp1common::AxisType::Z:
           changeToNoneOrXOrYOrZ( selectedAxis );
           break;
-        case AxisType::XYZ:
+        case sp1common::AxisType::XYZ:
           changeToXYZ( selectedAxis );
           break;
       }
@@ -232,7 +236,7 @@ namespace vishnu
         dataTypeComboBox->currentText( ).toStdString( ) );
       QComboBox* axisTypeComboBox = static_cast< QComboBox* >( cellWidget(
         row, 4 ) );
-      AxisType axisType = toAxisType( 
+      sp1common::AxisType axisType = sp1common::toAxisType(
         axisTypeComboBox->currentText( ).toStdString( ) );
 
       PropertyPtr property( new Property( name, use, primaryKey, dataType, 
