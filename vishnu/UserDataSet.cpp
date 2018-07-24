@@ -1,44 +1,81 @@
-#include "DataSet.h"
+#include "UserDataSet.h"
 
 namespace vishnu
 {
-  DataSet::DataSet( const std::string& path, const bool& checked,
-    const std::vector< std::string >& headers )
-      : _path( path )
-      , _checked( checked )
-      , _headers( headers )
+  UserDataSet::UserDataSet( )
   {
 
   }
 
-  std::string DataSet::getPath( void ) const
+  UserDataSet::UserDataSet( const std::string& name, const std::string& csvPath,
+    const std::string& xmlPath, const bool& selected )
+      : _name( name )
+      , _csvPath( csvPath )
+      , _xmlPath( xmlPath )
+      , _selected( selected )
   {
-    return _path;
+
   }
 
-  void DataSet::setPath( std::string path )
+  UserDataSet::~UserDataSet( )
   {
-    _path = path;
+
   }
 
-  bool DataSet::getChecked( void ) const
+  std::string UserDataSet::getName( void ) const
   {
-    return _checked;
+    return _name;
   }
 
-  void DataSet::setChecked( bool checked )
+  void UserDataSet::setName( const std::string& name )
   {
-    _checked = checked;
+    _name = name;
   }
 
-  std::vector< std::string > DataSet::getHeaders( void ) const
+  std::string UserDataSet::getCsvPath( void ) const
   {
-    return _headers;
+    return _csvPath;
   }
 
-  void DataSet::setHeaders( const std::vector< std::string >& headers )
+  void UserDataSet::setCsvPath( const std::string& csvPath )
   {
-    _headers = headers;
+    _csvPath = csvPath;
+  }
+
+  std::string UserDataSet::getXmlPath( void ) const
+  {
+    return _xmlPath;
+  }
+
+  void UserDataSet::setXmlPath( const std::string& xmlPath )
+  {
+    _xmlPath = xmlPath;
+  }
+
+  bool UserDataSet::getSelected( void ) const
+  {
+    return _selected;
+  }
+
+  void UserDataSet::setSelected( const bool& selected )
+  {
+    _selected = selected;
+  }
+
+  void UserDataSet::deserialize( const QJsonObject &jsonObject )
+  {
+    _name = jsonObject[ "name" ].toString( ).toStdString( );
+    _csvPath = jsonObject[ "csvPath" ].toString( ).toStdString( );
+    _xmlPath = jsonObject[ "xmlPath" ].toString( ).toStdString( );
+    _selected = jsonObject[ "selected" ].toBool( );
+  }
+
+  void UserDataSet::serialize( QJsonObject &jsonObject ) const
+  {
+    jsonObject[ "name" ] = QString::fromStdString( _name );
+    jsonObject[ "csvPath" ] = QString::fromStdString( _csvPath );
+    jsonObject[ "xmlPath" ] = QString::fromStdString( _xmlPath );
+    jsonObject[ "selected" ] = _selected;
   }
 
 }

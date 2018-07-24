@@ -19,8 +19,7 @@
 #include <QDir>
 
 #include "Application.h"
-//#include "widgets/DataSetListWidget.h"
-//#include "widgets/PropertiesTableWidget.h"
+#include "widgets/UserDataSetListWidget.h"
 #include "widgets/ZEQGroupListWidget.h"
 
 #include <manco/manco.h>
@@ -33,9 +32,7 @@ namespace vishnu
 {
   typedef std::shared_ptr< Application > ApplicationPtr;
   typedef std::map< std::string, ApplicationPtr > Applications;
-
-  //typedef std::shared_ptr< DataSetListWidget > DataSetListWidgetPtr;
-  //typedef std::shared_ptr< PropertiesTableWidget > PropertiesTableWidgetPtr;
+  typedef std::shared_ptr< UserDataSetListWidget > UserDataSetListWidgetPtr;
   typedef std::shared_ptr< ZEQGroupListWidget > ZEQGroupListWidgetPtr;
 
   class MainWindow : public QMainWindow
@@ -72,7 +69,6 @@ namespace vishnu
 
   private:
 
-      //vishnu::Ui::MainWindow *_ui;
       std::string _zeqSession;
       std::string _workingDirectory;
       bool _closingProcesses;
@@ -80,8 +76,7 @@ namespace vishnu
 
       QAction* removeGroupAction;
 
-      //DataSetListWidgetPtr _dataSetListWidget;
-      //PropertiesTableWidgetPtr _propertiesTableWidget;
+      UserDataSetListWidgetPtr _userDataSetListWidget;
       ZEQGroupListWidgetPtr _zeqGroupListWidget;
 
       void initZeqSession( );

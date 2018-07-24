@@ -7,6 +7,8 @@
 #define APPLICATION_WIDTH 1366
 #define APPLICATION_HEIGHT 768
 
+#define USER_DATA_FOLDER "userdata/"
+
 #define MAX_DATASET_NAME_LENGTH 10
 
 #if defined(_WIN32) || defined(WIN32)

@@ -3,7 +3,8 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QFileDialog>
-#include <QGridLayout>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QMessageBox>
 #include <QCloseEvent>
@@ -16,7 +17,7 @@
 
 #include "Definitions.hpp"
 #include "RegExpInputDialog.h"
-#include "widgets/DataSetWidget.h"
+#include "widgets/DataSetListWidget.h"
 
 #include "DataSetWindow.h"
 
@@ -84,13 +85,13 @@ namespace vishnu
     //Central Widget
     setCentralWidget( new QWidget( ) );
 
-    QGridLayout* gridLayout = new QGridLayout( );
-    centralWidget()->setLayout( gridLayout );
+    QHBoxLayout* mainHLayout = new QHBoxLayout( );
+    centralWidget()->setLayout( mainHLayout );
 
-    //DataSetListWidget
-    /*_dataSetListWidget.reset( new DataSetListWidget( ) );
+    //UserDataSetListWidget
+    _userDataSetListWidget.reset( new UserDataSetListWidget( ) );
 
-    QObject::connect( addDataSetAction, SIGNAL( triggered( ) ), this,
+    /*QObject::connect( addDataSetAction, SIGNAL( triggered( ) ), this,
       SLOT( addDataSetItem( ) ) );
 
     QObject::connect( _dataSetListWidget.get( ),
@@ -131,17 +132,20 @@ namespace vishnu
     groupsSizePolicy.setHorizontalStretch( 1 );
     _zeqGroupListWidget->setSizePolicy( groupsSizePolicy );
 
-    //DataSets && Applications
-    QHBoxLayout* topHBoxLayout = new QHBoxLayout();
-    //topHBoxLayout->addWidget( _dataSetListWidget.get( ), 0 );
-    topHBoxLayout->addLayout( appsVBoxLayout, 1 );
-    gridLayout->addLayout( topHBoxLayout, 0, 0, Qt::AlignTop );
+    //User DataSets
+    QVBoxLayout* userDSLayout = new QVBoxLayout( );
+    userDSLayout->addWidget( _userDataSetListWidget.get( ), 0 );
+    mainHLayout->addLayout( userDSLayout, 0 );
 
-    //Properties && ZEQ Groups
-    QHBoxLayout* bottomHBoxLayout = new QHBoxLayout( );
-    //bottomHBoxLayout->addWidget( _propertiesTableWidget.get( ), 0 );
-    bottomHBoxLayout->addWidget( _zeqGroupListWidget.get( ), 1 );
-    gridLayout->addLayout( bottomHBoxLayout, 1, 0, Qt::AlignTop );
+    //Applications
+    QVBoxLayout* appsLayout = new QVBoxLayout();
+    appsLayout->addLayout( appsVBoxLayout, 0 );
+    mainHLayout->addLayout( appsLayout, 1 );
+
+    //ZEQ Groups
+    QVBoxLayout* zeqLayout = new QVBoxLayout( );
+    zeqLayout->addWidget( _zeqGroupListWidget.get( ), 0 );
+    mainHLayout->addLayout( zeqLayout, 2 );
 
     /*std::vector<std::string> ids;
     ids.push_back("test");
@@ -204,9 +208,11 @@ namespace vishnu
     int y = ( screenGeometry.height() - dataSetWindow->height( ) ) / 2;
     dataSetWindow->move( x, y );
 
-    dataSetWindow->setMinimumSize( 300, 0 );
+    dataSetWindow->setMinimumSize( 800, 600 );
+    dataSetWindow->setMaximumSize( 800, 600 );
     dataSetWindow->setWindowIcon( QIcon( ":/icons/logoVishnu.png") );
-    dataSetWindow->setWindowTitle( QApplication::applicationName( ) );
+    dataSetWindow->setWindowTitle( QApplication::applicationName( )
+      + QString(" - Create new dataset"));
 
     dataSetWindow->setModal( true );
     dataSetWindow->exec( );

@@ -72,7 +72,8 @@ int main( int argc, char *argv[] )
   int y = ( screenGeometry.height() - window.height( ) ) / 2;
   window.move( x, y );
 
-  window.setMinimumSize( 300, 0 );
+  window.setMinimumSize( 1000, 330 );
+  window.setMaximumSize( 1000, 330 );
   window.setWindowIcon( QIcon( ":/icons/logoVishnu.png") );
   window.setIconSize( QSize( 32, 32 ) );
   window.setWindowTitle( QApplication::applicationName( ) );

@@ -1,5 +1,5 @@
-#ifndef VISHNU_DATASETLISTWIDGET_H
-#define VISHNU_DATASETLISTWIDGET_H
+#ifndef VISHNU_USERDATASETLISTWIDGET_H
+#define VISHNU_USERDATASETLISTWIDGET_H
 
 #include <string>
 #include <vector>
@@ -14,47 +14,43 @@
 
 #include <sp1common/sp1common.h>
 
-#include "DataSetWidget.h"
-#include "../DataSet.h"
+#include "UserDataSetWidget.h"
+#include "../UserDataSet.h"
 
 namespace vishnu
 {
 
-  typedef std::shared_ptr< DataSet > DataSetPtr;
-  typedef std::map< std::string, DataSetPtr > DataSets;
+  typedef std::shared_ptr< UserDataSet > UserDataSetPtr;
+  typedef std::map< std::string, UserDataSetPtr > UserDataSets;
 
-  typedef std::shared_ptr< DataSetWidget > DataSetWidgetPtr;
-  typedef std::vector< DataSetWidgetPtr > DataSetWidgets;
+  typedef std::shared_ptr< UserDataSetWidget > UserDataSetWidgetPtr;
+  typedef std::vector< UserDataSetWidgetPtr > UserDataSetWidgets;
 
-  class DataSetListWidget : public QListWidget
+  class UserDataSetListWidget : public QListWidget
   {
 
     Q_OBJECT
 
   public:
 
-    explicit DataSetListWidget( QWidget* parent = Q_NULLPTR );
+    explicit UserDataSetListWidget( QWidget* parent = Q_NULLPTR );
 
-    DataSetWidgets addDataSet( const std::string& dropped = std::string( ) );
-
-    std::vector< std::string > getPropertiesToRemove( );
+    UserDataSetWidgets addUserDataSet( const std::string& name,
+      const std::string& csvPath, const std::string& xmlPath,
+      const bool& selected );
 
     void removeCurrentDataSet( );
 
-    DataSets getDataSets( );
-
-    std::vector< std::string > getCommonProperties( );
+    UserDataSets getDataSets( );
 
     protected:
 
-    void dragEnterEvent( QDragEnterEvent* event );
     void dragMoveEvent( QDragMoveEvent* event );
     void dragLeaveEvent( QDragLeaveEvent* event );
-    void dropEvent( QDropEvent* event );
 
   signals:
 
-    void addDataSetEvent( const std::string& filePath );
+    void addUserDataSetEvent( const std::string& filePath );
 
   };
 

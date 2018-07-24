@@ -1,4 +1,4 @@
-#include "DataSetListWidget.h"
+#include "UserDataSetListWidget.h"
 
 #include <algorithm>
 
@@ -15,7 +15,7 @@
 
 namespace vishnu
 {
-  DataSetListWidget::DataSetListWidget( QWidget* /*parent*/ )
+  UserDataSetListWidget::UserDataSetListWidget( QWidget* /*parent*/ )
   {    
     setSelectionMode( QAbstractItemView::SingleSelection );
     setDragDropMode( QAbstractItemView::DragDrop );
@@ -23,132 +23,76 @@ namespace vishnu
     setAcceptDrops( true );
   }
 
-  DataSetWidgets DataSetListWidget::addDataSet( const std::string& dropped )
+  UserDataSetWidgets UserDataSetListWidget::addUserDataSet(
+    const std::string& name, const std::string& csvPath,
+    const std::string& xmlPath, const bool& selected )
   {
-    DataSetWidgets dataSetWidgets;
+    UserDataSetWidgets dataSetWidgets;
+/*
+    //Format basename to 10 chars without spaces
+    std::string name;
+    std::string tempName = std::string( );
+    bool validName = false;
+    bool notUsedName = true;
 
-    QStringList filePaths;
-
-    if ( !dropped.empty( ) )
+    do
     {
-      filePaths << QString::fromStdString( dropped );
-    }
-    else
-    {
-      filePaths = QFileDialog::getOpenFileNames( this,
-        QString( "Choose CSV file" ), QString( "" ),
-        QString( "CSV-Files(*.csv);;JSON-Files(*.json);;SEG-Files(*.seg)" ) );
-    }
-    if ( filePaths.isEmpty( ) )
-    {
-      return dataSetWidgets;
-    }
-
-    for ( int i=0; i<filePaths.count(); ++i )
-    {
-      QString filePath = filePaths.at( i );
-      QFileInfo fileInfo( filePath );
-
-      //Format basename to 10 chars without spaces
-      std::string basename = fileInfo.baseName( ).toStdString( );
-      basename.erase( std::remove_if( basename.begin( ), basename.end( ),
-        isspace ), basename.end( ) );
-      if (basename.length() > MAX_DATASET_NAME_LENGTH )
+      //Check if it's a valid name
+      QRegularExpression regularExpression("[A-Za-z0-9]{1,10}$");
+      QString dataSetName = RegExpInputDialog::getText(this, "DataSet name",
+        "Enter DataSet name: " + filePath, QString::fromStdString( tempName ),
+        regularExpression, &validName);
+      if ( validName )
       {
-        basename.resize ( MAX_DATASET_NAME_LENGTH );
-      }
-
-      std::string name;
-      std::string path = filePath.toStdString( );
-      std::string tempName = basename;
-      bool validName = false;
-      bool notUsedName = true;
-
-      do
-      {
-        //Check if it's a valid name
-        QRegularExpression regularExpression("[A-Za-z0-9]{1,10}$");
-        QString dataSetName = RegExpInputDialog::getText(this, "DataSet name",
-          "Enter DataSet name: " + filePath, QString::fromStdString( tempName ),
-          regularExpression, &validName);
-        if ( validName )
+        name = dataSetName.toStdString( );
+        //Check if name doesn't exist
+        notUsedName = true;
+        for( int j = 0; j < count( ); ++j )
         {
-          name = dataSetName.toStdString( );
-
-          //Check if name doesn't exist
-          notUsedName = true;
-          for( int j = 0; j < count( ); ++j )
+          UserDataSetWidget* widget = static_cast< UserDataSetWidget* >(
+            itemWidget( item( j ) ) );
+          if ( widget->getName( ) == name )
           {
-            DataSetWidget* widget = static_cast< DataSetWidget* >(
-              itemWidget( item( j ) ) );
-            if ( widget->getName( ) == name )
-            {
-              QMessageBox::warning( this, APPLICATION_NAME,
-                tr("Invalid name. This name already exists.") );
-              notUsedName = false;
-              break;
-            }
+            QMessageBox::warning( this, APPLICATION_NAME,
+              tr("Invalid name. This name already exists.") );
+            notUsedName = false;
+            break;
           }
         }
-      } while( !validName || !notUsedName );
+      }
+    } while( !validName || !notUsedName );
+*/
+    //Add to dataset
+    UserDataSetWidgetPtr dataSetWidget( new UserDataSetWidget( name, csvPath,
+      xmlPath, selected ) );
+    dataSetWidget->setListWidgetItem( new QListWidgetItem( this ) );
 
-      //Add to dataset
-      DataSetWidgetPtr dataSetWidget( new DataSetWidget( name, path ) );
-      dataSetWidget->setListWidgetItem( new QListWidgetItem( this ) );
+    QListWidgetItem* listWidgetItem = dataSetWidget->getListWidgetItem( );
+    addItem( listWidgetItem );
+    listWidgetItem->setSizeHint( dataSetWidget->sizeHint ( ) );
+    setItemWidget( listWidgetItem, dataSetWidget.get( ) );
 
-      QListWidgetItem* listWidgetItem = dataSetWidget->getListWidgetItem( );
-      addItem( listWidgetItem );
-      listWidgetItem->setSizeHint( dataSetWidget->sizeHint ( ) );
-      setItemWidget( listWidgetItem, dataSetWidget.get( ) );
-
-      dataSetWidgets.push_back( dataSetWidget );
-    }
+    dataSetWidgets.push_back( dataSetWidget );
 
     return dataSetWidgets;
   }
 
-  std::vector< std::string > DataSetListWidget::getPropertiesToRemove( )
-  {
-    DataSetWidget* currentDsw = static_cast<DataSetWidget*>(
-      itemWidget( currentItem( ) ) );
-
-    std::vector< std::string > propertiesToRemove = currentDsw->getHeaders( );
-
-    for( int row = 0; row < count( ); ++row )
-    {
-      QListWidgetItem* listItem = item( row );
-      if ( listItem != currentItem( ) )
-      {
-        DataSetWidget* dsw = static_cast< DataSetWidget* >(
-          itemWidget( listItem ) );
-        std::vector< std::string > properties = dsw->getHeaders( );
-        for ( const auto& property: properties )
-        {
-          propertiesToRemove.erase( std::remove( propertiesToRemove.begin( ),
-            propertiesToRemove.end( ), property ), propertiesToRemove.end( ) );
-        }
-      }
-    }
-
-    return propertiesToRemove;
-  }
-
-  void DataSetListWidget::removeCurrentDataSet( )
+  void UserDataSetListWidget::removeCurrentDataSet( )
   {    
     takeItem( row( currentItem( ) ) );
   }
 
-  DataSets DataSetListWidget::getDataSets( )
+  UserDataSets UserDataSetListWidget::getDataSets( )
   {
-    DataSets dataSets;
+    UserDataSets dataSets;
 
     for( int row = 0; row < count( ); ++row )
     {
-      DataSetWidget* dsw = static_cast< DataSetWidget* >(
+      UserDataSetWidget* dsw = static_cast< UserDataSetWidget* >(
         itemWidget( item( row ) ) );
 
-      DataSetPtr dataSet( new DataSet( dsw->getPath( ), dsw->getChecked( ),
-        dsw->getHeaders( ) ) );
+      UserDataSetPtr dataSet( new UserDataSet( dsw->getName( ),
+        dsw->getCsvPath( ), dsw->getXmlPath( ), dsw->getSelected( ) ) );
       dataSets[ dsw->getName() ] = dataSet;
 
     }
@@ -156,65 +100,13 @@ namespace vishnu
     return dataSets;
   }
 
-  std::vector< std::string > DataSetListWidget::getCommonProperties( )
-  {
-    std::vector< std::string > commonProperties;
-    for ( const auto& dataset : getDataSets( ) )
-    {
-      std::vector< std::string > dataSetHeaders = dataset.second->getHeaders( );
-
-      if ( !commonProperties.empty( ) )
-      {
-        commonProperties = sp1common::Vectors::intersect( commonProperties,
-          dataSetHeaders );
-      }
-      else
-      {
-        commonProperties = dataSetHeaders;
-      }
-    }
-
-    return commonProperties;
-  }
-
-  void DataSetListWidget::dragEnterEvent( QDragEnterEvent* event )
-  {
-    if ( event->mimeData()->hasUrls( ) )
-    {
-      event->acceptProposedAction();
-    }
-  }
-
-  void DataSetListWidget::dragMoveEvent( QDragMoveEvent* event )
+  void UserDataSetListWidget::dragMoveEvent( QDragMoveEvent* event )
   {
     event->acceptProposedAction();
   }
 
-  void DataSetListWidget::dragLeaveEvent( QDragLeaveEvent* event )
+  void UserDataSetListWidget::dragLeaveEvent( QDragLeaveEvent* event )
   {
     event->accept();
-  }
-
-  void DataSetListWidget::dropEvent( QDropEvent* event )
-  {
-    for( const QUrl& url : event->mimeData()->urls( ) )
-    {
-      QString filePath = url.toLocalFile();
-
-      std::string extension = sp1common::Strings::lower(
-        QFileInfo(filePath).completeSuffix( ).toStdString( ) );
-
-      if ( extension == "csv" )
-      {
-        sp1common::Debug::consoleMessage( "Dropped file: "
-          + filePath.toStdString( ) );
-        emit addDataSetEvent( filePath.toStdString( ) );
-      }
-      else
-      {
-        sp1common::Debug::consoleMessage( "Ignoring invalid file: "
-          + filePath.toStdString( ) );
-      }
-    }
   }
 }

@@ -1,5 +1,7 @@
-#ifndef VISHNU_DATASET_H
-#define VISHNU_DATASET_H
+#ifndef VISHNU_USERDATASET_H
+#define VISHNU_USERDATASET_H
+
+#include <QJsonObject>
 
 #include <string>
 #include <vector>
@@ -9,34 +11,37 @@
 namespace vishnu
 {
 
-  class DataSet
+  class UserDataSet
   {
 
     public:
 
-      DataSet( const std::string& path, const bool& checked,
-        const std::vector< std::string >& headers );
+      UserDataSet( );
+      UserDataSet( const std::string& name, const std::string& csvPath,
+        const std::string& xmlPath, const bool& selected );
+      ~UserDataSet( );
 
-      std::string getPath( void ) const;
+      std::string getName( void ) const;
+      void setName( const std::string& name );
 
-      void setPath( std::string path );
+      std::string getCsvPath( void ) const;
+      void setCsvPath( const std::string& csvPath );
 
-      bool getChecked( void ) const;
+      std::string getXmlPath( void ) const;
+      void setXmlPath( const std::string& xmlPath );
 
-      void setChecked( bool checked );
+      bool getSelected( void ) const;
+      void setSelected( const bool& selected );
 
-      std::vector< std::string > getHeaders( void ) const;
-
-      void setHeaders( const std::vector< std::string >& headers );
+      void deserialize( const QJsonObject &jsonObject );
+      void serialize( QJsonObject &jsonObject ) const;
 
     private:
 
-      std::string _path;
-
-      bool _checked;
-
-      std::vector< std::string > _headers;
-
+      std::string _name;
+      std::string _csvPath;
+      std::string _xmlPath;
+      bool _selected;
   };
 
 }

@@ -1,4 +1,4 @@
-#include "DataSetWidget.h"
+#include "UserDataSetWidget.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -16,12 +16,12 @@
 namespace vishnu
 {
 
-  DataSetWidget::DataSetWidget( const std::string& name,
-    const std::string& path, QWidget* /*parent*/ )
+  UserDataSetWidget::UserDataSetWidget( const std::string& name,
+    const std::string& csvPath, const std::string& xmlPath,
+    const bool& selected, QWidget* /*parent*/ )
   {
     QHBoxLayout *hLayout = new QHBoxLayout( this );
 
-    //From left to right
     //DataSet image
     QLabel* dataSetImage = new QLabel( );
     dataSetImage->setStyleSheet("width: 32px; height: 32px;");
@@ -34,35 +34,37 @@ namespace vishnu
     hLayout->addLayout( vLayout1, 0);
     hLayout->addSpacing(30);
 
-    //Name and path
+    //Name, paths and selected checkbox
     setName( name );
     QObject::connect( _name, SIGNAL( clicked() ), this,
       SLOT( clickName( ) ) );
-    setPath( path );
+    setCsvPath( csvPath );
+    setXmlPath( xmlPath );
+    setSelected( selected );
 
     QVBoxLayout *vLayout2 = new QVBoxLayout( );
     vLayout2->addWidget( _name, 0, 0);
-    vLayout2->addWidget( _path, 1, 0);
+    vLayout2->addWidget( _csvPath, 1, 0);
+    vLayout2->addWidget( _xmlPath, 2, 0);
     hLayout->addLayout( vLayout2, 1);
     hLayout->addSpacing(30);
 
     //DataSet CheckBox
-    _checkbox.setChecked( true ); //default checked
+    _selected.setChecked( true ); //default checked
     std::stringstream checkBoxStyleSheet;
     checkBoxStyleSheet << "QCheckBox::indicator { width: 32px; height: 32px; }"
       << "QCheckBox::indicator:checked { background-image:url(:/icons/checked.png); }"
       << "QCheckBox::indicator:unchecked { background-image:url(:/icons/unchecked.png); }";
-    _checkbox.setStyleSheet( QString::fromStdString( checkBoxStyleSheet.str( ) ) );
+    _selected.setStyleSheet( QString::fromStdString( checkBoxStyleSheet.str( ) ) );
 
     QVBoxLayout *vLayout3 = new QVBoxLayout( );
-    vLayout3->addWidget( &_checkbox, 0, 0);
+    vLayout3->addWidget( &_selected, 0, 0);
     hLayout->addLayout( vLayout3, 0);
     hLayout->addSpacing(30);
 
     //DataSet remove image
     QLabel* removeDataSetImage = new QLabel( );
     removeDataSetImage->setStyleSheet("width: 32px; height: 32px;");
-    //removeDataSetImage->setScaledContents( true );
     QPixmap removeDataSetPixmap( ":/icons/close.png" );
     removeDataSetImage->setPixmap( removeDataSetPixmap );
     _remove = new QPushButton( );
@@ -75,24 +77,20 @@ namespace vishnu
     hLayout->addLayout( vLayout4, 0);
 
     QPalette pal(palette());
-    //pal.setColor(QPalette:, Qt::black);
     pal.setColor(QPalette::Base, QColor( "#c3e6fc" ));
     setAutoFillBackground(true);
     setPalette(pal);
     show();
 
     setLayout( hLayout );
-    //setStyleSheet("border: 1px solid red");
-
-    _headers = sp1common::Files::readCsvHeaders( path );
   }
 
-  std::string DataSetWidget::getName( ) const
+  std::string UserDataSetWidget::getName( ) const
   {
     return _name->text( ).toStdString( );
   }
 
-  void DataSetWidget::setName( const std::string& name )
+  void UserDataSetWidget::setName( const std::string& name )
   {
     if ( _name == nullptr)
     {
@@ -102,37 +100,51 @@ namespace vishnu
     _name->setStyleSheet("font-weight: bold; font-size: 20px");
   }
 
-  std::string DataSetWidget::getPath( ) const
+  std::string UserDataSetWidget::getCsvPath( ) const
   {
-    return _path->text( ).toStdString( );
+    return _csvPath->text( ).toStdString( );
   }
 
-  void DataSetWidget::setPath( const std::string& path )
+  void UserDataSetWidget::setCsvPath( const std::string& csvPath )
   {
-    if ( _path == nullptr)
+    if ( _csvPath == nullptr)
     {
-      _path = new QLabel( );
+      _csvPath = new QLabel( );
     }
-    _path->setText( QString::fromStdString( path ) );
+    _csvPath->setText( QString::fromStdString( csvPath ) );
   }
 
-  bool DataSetWidget::getChecked( ) const
+  std::string UserDataSetWidget::getXmlPath( ) const
   {
-    return _checkbox.isChecked( );
+    return _xmlPath->text( ).toStdString( );
   }
 
-  void DataSetWidget::setChecked( const bool& checked )
+  void UserDataSetWidget::setXmlPath( const std::string& xmlPath )
   {
-    _checkbox.setChecked( checked );
+    if ( _xmlPath == nullptr)
+    {
+      _xmlPath = new QLabel( );
+    }
+    _xmlPath->setText( QString::fromStdString( xmlPath ) );
   }
 
-  void DataSetWidget::clickRemove( void )
+  bool UserDataSetWidget::getSelected( ) const
+  {
+    return _selected.isChecked( );
+  }
+
+  void UserDataSetWidget::setSelected( const bool& selected )
+  {
+    _selected.setChecked( selected );
+  }
+
+  void UserDataSetWidget::clickRemove( void )
   {
     _listWidgetItem->listWidget()->setCurrentItem( _listWidgetItem );
     emit removeSelected();
   }
 
-  void DataSetWidget::clickName( void )
+  void UserDataSetWidget::clickName( void )
   {
     std::string tempName = _name->text( ).toStdString( );
     std::string name;
@@ -160,7 +172,7 @@ namespace vishnu
       for(int i = 0; i < listWidget->count(); ++i)
       {
         QListWidgetItem* item = listWidget->item( i );
-        DataSetWidget* widget = static_cast< DataSetWidget* >(
+        UserDataSetWidget* widget = static_cast< UserDataSetWidget* >(
           listWidget->itemWidget( item ) );
         if ( ( widget->getName( ) == name )
           && ( widget != this ) )
@@ -175,29 +187,19 @@ namespace vishnu
     _name->setText( QString::fromStdString( name ) );
   }
 
-  void DataSetWidget::clickPath( void )
-  {
-    emit updatePath( );
-  }
-
-  void DataSetWidget::clickCheckBox( void )
+  void UserDataSetWidget::clickCheckBox( void )
   {
     emit updateCheckBox( );
   }
 
-  QListWidgetItem* DataSetWidget::getListWidgetItem() const
+  QListWidgetItem* UserDataSetWidget::getListWidgetItem() const
   {
     return _listWidgetItem;
   }
 
-  void DataSetWidget::setListWidgetItem( QListWidgetItem* listWidgetItem )
+  void UserDataSetWidget::setListWidgetItem( QListWidgetItem* listWidgetItem )
   {
     _listWidgetItem = listWidgetItem;
-  }
-
-  std::vector< std::string > DataSetWidget::getHeaders( )
-  {
-    return _headers;
   }
 
 }
