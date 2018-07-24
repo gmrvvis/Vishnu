@@ -67,7 +67,6 @@ namespace vishnu
   void DataSetWindow::addDataSetItems(
     const std::vector< std::string >& dropped )
   {
-    std::cout << "addDataSetItems: " << dropped.size( ) << std::endl;
     DataSetWidgets dataSetWidgets = _dataSetListWidget->addDataSets( dropped );
 
     for ( const auto& dataSetWidget : dataSetWidgets )

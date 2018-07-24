@@ -15,12 +15,14 @@ namespace vishnu
     setColumnCount( 5 );
     setColumnWidth( 0, 220 );
     setColumnWidth( 1, 80 );
-    setColumnWidth( 2, 100 );
-    setColumnWidth( 3, 150 );
+    setColumnWidth( 2, 150 );
+    setColumnWidth( 3, 100 );
     setColumnWidth( 4, 100 );
+
     horizontalHeader()->setStretchLastSection( true );
     QStringList headers;
-    headers << "Property name" << "Use" << "Primary Key" << "Data type" << "Axis type";
+    headers << "Property name" << "Use" << "Primary Key" << "Data type"
+      << "Axis type";
     setHorizontalHeaderLabels( headers );
     setSortingEnabled( false );
     verticalHeader( )->setVisible( false );
@@ -80,9 +82,15 @@ namespace vishnu
           setCellWidget( row, column, propertiesWidget->getWidget( column ) );
         }
 
+        //Axis Type
         QObject::connect( propertiesWidget->getWidget( 4 ),
           SIGNAL( currentIndexChanged( QString ) ), this,
           SLOT( axisTypeChanged( QString ) ) );
+
+        //DataType
+        QObject::connect( propertiesWidget->getWidget( 3 ),
+          SIGNAL( currentIndexChanged( QString ) ), this,
+          SLOT( dataTypeChanged( QString ) ) );
       }
     }
   }
@@ -162,7 +170,7 @@ namespace vishnu
       - XYZ (non repeated)
        */
       std::vector< sp1common::AxisType > selectedAxis;
-      for (int i = 0; i < rowCount(); ++i )
+      for (int i = 0; i < rowCount( ); ++i )
       {
         QComboBox* cb = static_cast< QComboBox* >( cellWidget( i, 4 ) );
         sp1common::AxisType at = sp1common::toAxisType(
@@ -197,6 +205,35 @@ namespace vishnu
           break;
       }
       _checkingProperty = false;
+    }
+  }
+
+  void PropertiesTableWidget::dataTypeChanged( QString text )
+  {
+    if ( sp1common::toDataType( text.toStdString( ) )
+      == sp1common::DataType::Geometric )
+    {
+        QComboBox* cbSender = static_cast< QComboBox* >( sender( ) );
+        if ( !_checkingProperty  )
+        {
+          _checkingProperty = true;
+
+          for (int i = 0; i < rowCount( ); ++i )
+          {
+            QComboBox* cb = static_cast< QComboBox* >( cellWidget( i, 3 ) );
+            if ( cb != cbSender )
+            {
+              if ( sp1common::toDataType( cb->currentText( ).toStdString( ) )
+                == sp1common::DataType::Geometric )
+              {
+                cb->setCurrentText( QString::fromStdString( toString(
+                  sp1common::DataType::Undefined ) ) );
+              }
+            }
+          }
+
+          _checkingProperty = false;
+        }
     }
   }
 

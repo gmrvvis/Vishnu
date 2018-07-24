@@ -44,6 +44,8 @@ namespace vishnu
 
       void axisTypeChanged( QString text );
 
+      void dataTypeChanged( QString text );
+
   private:
 
       bool _checkingProperty;
