@@ -8,6 +8,7 @@
 #define APPLICATION_HEIGHT 768
 
 #define USER_DATA_FOLDER "userdata/"
+#define GEOMETRIC_DATA_FOLDER "geometricData/"
 
 #define MAX_DATASET_NAME_LENGTH 10
 
@@ -20,5 +21,7 @@
 #define STR_CSV "csv"
 #define STR_JSON "json"
 #define STR_SEG "seg"
+
+#define MISSING_DATA_FIELD "#!#Missing Data#!#"
 
 #endif

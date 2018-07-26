@@ -255,7 +255,82 @@ namespace vishnu
     }
   }
 
-  Properties PropertiesTableWidget::getProperties( )
+  sp1common::DataSetsPtr PropertiesTableWidget::getDataSets( void )
+  {
+    sp1common::DataSetsPtr dataSets( new sp1common::DataSets( ) );
+    sp1common::DataSetPtr dataSet( new sp1common::DataSet( ) );
+    sp1common::PropertyGroupsPtr propertyGroups(
+      new sp1common::PropertyGroups( ) );
+    std::string xAxis;
+    std::string yAxis;
+    std::string zAxis;
+    std::string xyzAxis;
+    for( int row = 0; row < rowCount( ); ++row )
+    {
+      std::string name = static_cast< QLabel* >( cellWidget( row, 0 )
+        )->text( ).toStdString( );
+      bool use = static_cast< QCheckBox* >( cellWidget( row, 1 )
+        )->isChecked( );
+      bool primaryKey = static_cast< QCheckBox* >( cellWidget( row, 2 )
+        )->isChecked( );
+      QComboBox* dataTypeComboBox = static_cast< QComboBox* >( cellWidget(
+        row, 3 ) );
+      sp1common::DataType dataType = sp1common::toDataType(
+        dataTypeComboBox->currentText( ).toStdString( ) );
+      QComboBox* axisTypeComboBox = static_cast< QComboBox* >( cellWidget(
+        row, 4 ) );
+      sp1common::AxisType axisType = sp1common::toAxisType(
+        axisTypeComboBox->currentText( ).toStdString( ) );
+
+      if ( primaryKey )
+      {
+        propertyGroups->addPrimaryKey( name );
+      }
+
+      if ( use )
+      {
+        propertyGroups->addUse( name );
+
+        dataSet->addProperty( sp1common::PropertyPtr(
+          new sp1common::Property( name, dataType,
+          sp1common::DataStructureType::None ) ) );
+      }
+
+      switch( axisType )
+      {
+        case sp1common::AxisType::X:
+          xAxis = name;
+          break;
+        case sp1common::AxisType::Y:
+          yAxis = name;
+          break;
+        case sp1common::AxisType::Z:
+          zAxis = name;
+          break;
+        case sp1common::AxisType::XYZ:
+          xyzAxis = name;
+          break;
+        default:
+          break;
+      }
+    }
+
+    if ( !xyzAxis.empty( ) )
+    {
+      propertyGroups->setAxes( xyzAxis );
+    }
+    else
+    {
+      propertyGroups->setAxes( xAxis, yAxis, zAxis );
+    }
+
+    dataSets->setDataSets( { dataSet } );
+    dataSets->setPropertyGroups( propertyGroups );
+
+    return dataSets;
+  }
+
+  /*Properties PropertiesTableWidget::getProperties( void )
   {
     Properties properties;
 
@@ -278,9 +353,9 @@ namespace vishnu
 
       PropertyPtr property( new Property( name, use, primaryKey, dataType, 
         axisType ) );
-      properties.push_back( property );
+      properties.emplace_back( property );
     }
 
     return properties;
-  }
+  }*/
 }

@@ -38,7 +38,8 @@ namespace vishnu
 
     void removeProperties( const std::vector< std::string >& properties );
 
-    Properties getProperties( );
+    //Properties getProperties( void );
+    sp1common::DataSetsPtr getDataSets( void );
 
   private slots:
 

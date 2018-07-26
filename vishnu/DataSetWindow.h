@@ -46,7 +46,7 @@ namespace vishnu
         //QAction* _removeDataSetAction;
 
         bool generateDataFiles( QDir dir );
-
+        bool generateDataFiles2( QDir dir );
 
   };
 
