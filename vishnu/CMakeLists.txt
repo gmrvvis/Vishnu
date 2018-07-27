@@ -27,6 +27,7 @@ set( VISHNU_SOURCES
   widgets/PropertiesWidget.cpp
   widgets/ZEQGroupListWidget.cpp
   widgets/ZEQGroupWidget.cpp
+  widgets/PathsWidget.cpp
   Property.cpp
   DataSet.cpp
   UserDataSets.cpp
@@ -49,6 +50,7 @@ set( VISHNU_HEADERS
   widgets/PropertiesWidget.h
   widgets/ZEQGroupListWidget.h
   widgets/ZEQGroupWidget.h
+  widgets/PathsWidget.h
   Property.h
   DataSet.h
   UserDataSets.h

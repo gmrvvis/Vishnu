@@ -282,15 +282,16 @@ namespace vishnu
       sp1common::AxisType axisType = sp1common::toAxisType(
         axisTypeComboBox->currentText( ).toStdString( ) );
 
-      if ( primaryKey )
-      {
-        propertyGroups->addPrimaryKey( name );
-      }
-
       if ( use )
       {
-        propertyGroups->addUse( name );
-
+        if ( primaryKey )
+        {
+          propertyGroups->addPrimaryKey( name );
+        }
+        else
+        {
+          propertyGroups->addUse( name );
+        }
         dataSet->addProperty( sp1common::PropertyPtr(
           new sp1common::Property( name, dataType,
           sp1common::DataStructureType::None ) ) );

@@ -17,7 +17,10 @@
 
 #include "Definitions.hpp"
 #include "RegExpInputDialog.h"
-#include "widgets/DataSetListWidget.h"
+
+#include "widgets/UserDataSetListWidget.h"
+#include "UserDataSets.h"
+#include "widgets/ZEQGroupListWidget.h"
 
 #include "DataSetWindow.h"
 
@@ -161,6 +164,8 @@ namespace vishnu
 
     //Status bar
     statusBar()->showMessage("");
+
+    reloadDataSets( );
   }
 
   MainWindow::~MainWindow( )
@@ -194,7 +199,27 @@ namespace vishnu
 
   void MainWindow::reloadDataSets( void )
   {
-    std::cout << "reload ds" << std::endl;
+    std::string userDataSetsFilename = USER_DATA_FOLDER + std::string( "/" )
+      + USER_DATASETS_FILENAME;
+
+    if ( sp1common::Files::fileExists( userDataSetsFilename ) )
+    {
+        UserDataSetsPtr userDataSets =
+          sp1common::JSON::deserialize< UserDataSets >( userDataSetsFilename );
+
+        _userDataSetListWidget.reset( new UserDataSetListWidget( ) );
+
+        for( const auto& userDataSet : userDataSets->getUserDataSets( ) )
+        {
+            UserDataSetWidgetPtr userDataSetWidget =
+              _userDataSetListWidget->addUserDataSet( userDataSet->getName( ),
+            userDataSet->getPath( ), userDataSet->getCsvFilename( ),
+            userDataSet->getXmlFilename( ), userDataSet->getSelected( ) );
+
+           QObject::connect( userDataSetWidget.get( ),
+             SIGNAL( removeSelected( ) ), this, SLOT( slotRemoveUserDataSet( ) ) );
+        }
+    }
   }
 
   void MainWindow::addDataSet( void )
@@ -219,6 +244,12 @@ namespace vishnu
 
     reloadDataSets( );
   }
+
+  void MainWindow::slotRemoveUserDataSet( void )
+  {
+    _userDataSetListWidget->removeCurrentDataSet( );
+  }
+
 
 
 

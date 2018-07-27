@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+#include "widgets/PathsWidget.h"
 #include "widgets/DataSetListWidget.h"
 #include "widgets/PropertiesTableWidget.h"
 
@@ -32,11 +33,12 @@ namespace vishnu
         void slotCreateButton( void );
         void slotCancelButton( void );
         void addDataSetItems( const std::vector< std::string >& dropped =
-          std::vector< std::string>( ) );
-        void removeDataSetItem( );
+          std::vector< std::string >( ) );
+        void slotRemoveDataSet( );
 
       private:
         QToolBar* _toolBar;
+        PathsWidgetPtr _pathsWidget;
         DataSetListWidgetPtr _dataSetListWidget;
         PropertiesTableWidgetPtr _propertiesTableWidget;
         QPushButton* _cancelButton;

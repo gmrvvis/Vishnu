@@ -16,9 +16,12 @@
 namespace vishnu
 {
 
-  UserDataSetWidget::UserDataSetWidget( const std::string& name,
-    const std::string& csvPath, const std::string& xmlPath,
+  UserDataSetWidget::UserDataSetWidget( const QString& name,
+    const QString& path, const QString& csvFilename, const QString& xmlFilename,
     const bool& selected, QWidget* /*parent*/ )
+      : _path( path )
+      , _csvFilename( csvFilename )
+      , _xmlFilename( xmlFilename )
   {
     QHBoxLayout *hLayout = new QHBoxLayout( this );
 
@@ -38,8 +41,8 @@ namespace vishnu
     setName( name );
     QObject::connect( _name, SIGNAL( clicked() ), this,
       SLOT( clickName( ) ) );
-    setCsvPath( csvPath );
-    setXmlPath( xmlPath );
+    setCsvPath( path, csvFilename );
+    setXmlPath( path, xmlFilename );
     setSelected( selected );
 
     QVBoxLayout *vLayout2 = new QVBoxLayout( );
@@ -85,47 +88,64 @@ namespace vishnu
     setLayout( hLayout );
   }
 
-  std::string UserDataSetWidget::getName( ) const
+  QString UserDataSetWidget::getName( ) const
   {
-    return _name->text( ).toStdString( );
+    return _name->text( );
   }
 
-  void UserDataSetWidget::setName( const std::string& name )
+  void UserDataSetWidget::setName( const QString& name )
   {
     if ( _name == nullptr)
     {
       _name = new sp1common::ClickableLabel( );
     }
-    _name->setText( QString::fromStdString( name ) );
+    _name->setText( name );
     _name->setStyleSheet("font-weight: bold; font-size: 20px");
   }
 
-  std::string UserDataSetWidget::getCsvPath( ) const
+  QString UserDataSetWidget::getPath( ) const
   {
-    return _csvPath->text( ).toStdString( );
+    return _path;
   }
 
-  void UserDataSetWidget::setCsvPath( const std::string& csvPath )
+  QString UserDataSetWidget::getCsvFilename( ) const
+  {
+    return _csvFilename;
+  }
+
+  QString UserDataSetWidget::getCsvPath( ) const
+  {
+    return _csvPath->text( );
+  }
+
+  void UserDataSetWidget::setCsvPath( const QString& path,
+    const QString& csvFilename )
   {
     if ( _csvPath == nullptr)
     {
       _csvPath = new QLabel( );
     }
-    _csvPath->setText( QString::fromStdString( csvPath ) );
+    _csvPath->setText( path + "/" + csvFilename );
   }
 
-  std::string UserDataSetWidget::getXmlPath( ) const
+  QString UserDataSetWidget::getXmlFilename( ) const
   {
-    return _xmlPath->text( ).toStdString( );
+    return _xmlFilename;
   }
 
-  void UserDataSetWidget::setXmlPath( const std::string& xmlPath )
+  QString UserDataSetWidget::getXmlPath( ) const
+  {
+    return _xmlPath->text( );
+  }
+
+  void UserDataSetWidget::setXmlPath( const QString& path,
+    const QString& xmlFilename )
   {
     if ( _xmlPath == nullptr)
     {
       _xmlPath = new QLabel( );
     }
-    _xmlPath->setText( QString::fromStdString( xmlPath ) );
+    _xmlPath->setText( path + "/" + xmlFilename );
   }
 
   bool UserDataSetWidget::getSelected( ) const
@@ -146,8 +166,8 @@ namespace vishnu
 
   void UserDataSetWidget::clickName( void )
   {
-    std::string tempName = _name->text( ).toStdString( );
-    std::string name;
+    QString tempName = _name->text( );
+    QString name;
 
     bool validName = false;
     bool notUsedName = true;
@@ -157,14 +177,13 @@ namespace vishnu
       //Check if it's a valid name
       QRegularExpression regularExpression("[A-Za-z0-9]{1,10}$");
       QString dataSetName = RegExpInputDialog::getText(this, "DataSet name",
-        "Enter DataSet name", QString::fromStdString( tempName ),
-        regularExpression, &validName);
+        "Enter DataSet name", tempName, regularExpression, &validName);
       if ( !validName )
       {
         return;
       }
 
-      name = dataSetName.toStdString( );
+      name = dataSetName;
 
       //Check if name doesn't exist
       notUsedName = true;
@@ -184,7 +203,7 @@ namespace vishnu
       }
 
     } while( !notUsedName );
-    _name->setText( QString::fromStdString( name ) );
+    _name->setText( name );
   }
 
   void UserDataSetWidget::clickCheckBox( void )

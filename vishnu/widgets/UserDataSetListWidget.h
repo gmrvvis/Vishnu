@@ -1,11 +1,11 @@
 #ifndef VISHNU_USERDATASETLISTWIDGET_H
 #define VISHNU_USERDATASETLISTWIDGET_H
 
-#include <string>
 #include <vector>
 #include <map>
 #include <memory>
 
+#include <QString>
 #include <QIcon>
 #include <QLabel>
 #include <QCheckBox>
@@ -15,13 +15,11 @@
 #include <sp1common/sp1common.h>
 
 #include "UserDataSetWidget.h"
-#include "../UserDataSet.h"
+#include "../UserDataSets.h"
 
 namespace vishnu
 {
-
-  typedef std::shared_ptr< UserDataSet > UserDataSetPtr;
-  typedef std::map< std::string, UserDataSetPtr > UserDataSets;
+  typedef std::map< QString, UserDataSetPtr > UserDataSetMap;
 
   typedef std::shared_ptr< UserDataSetWidget > UserDataSetWidgetPtr;
   typedef std::vector< UserDataSetWidgetPtr > UserDataSetWidgets;
@@ -35,13 +33,15 @@ namespace vishnu
 
     explicit UserDataSetListWidget( QWidget* parent = Q_NULLPTR );
 
-    UserDataSetWidgets addUserDataSet( const std::string& name,
-      const std::string& csvPath, const std::string& xmlPath,
-      const bool& selected );
+    UserDataSetWidgetPtr addUserDataSet( const QString& name,
+      const QString& path, const QString& csvFilename,
+      const QString& xmlFilename, const bool& selected );
+
+    UserDataSetWidgetPtr addUserDataSet( const UserDataSetPtr& userDataSet );
 
     void removeCurrentDataSet( );
 
-    UserDataSets getDataSets( );
+    UserDataSetMap getDataSets( );
 
     protected:
 
@@ -50,7 +50,7 @@ namespace vishnu
 
   signals:
 
-    void addUserDataSetEvent( const std::string& filePath );
+    void addUserDataSetEvent( const QString& filePath );
 
   };
 

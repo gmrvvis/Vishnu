@@ -92,15 +92,15 @@ namespace vishnu
       std::string extension = sp1common::Strings::lower(
         QFileInfo( filePath ).completeSuffix( ).toStdString( ) );
 
-      if ( extension == STR_SEG )
+      if ( extension == STR_EXT_SEG )
       {
 
       }
-      else if ( extension == STR_JSON )
+      else if ( extension == STR_EXT_JSON )
       {
 
       }
-      else if ( extension == STR_CSV )
+      else if ( extension == STR_EXT_CSV )
       {
         createDataSetFromCSV( path, dataSetWidgets );
       }
@@ -205,7 +205,7 @@ namespace vishnu
       std::string extension = sp1common::Strings::lower(
         QFileInfo( filePath ).completeSuffix( ).toStdString( ) );
 
-      if ( sp1common::Vectors::find( { STR_CSV, STR_JSON, STR_SEG },
+      if ( sp1common::Vectors::find( { STR_EXT_CSV, STR_EXT_JSON, STR_EXT_SEG },
         extension ) != -1 )
       {
         files.push_back( filePath.toStdString( ) );

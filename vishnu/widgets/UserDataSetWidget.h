@@ -1,7 +1,7 @@
 #ifndef VISHNU_USERDATASETWIDGET_H
 #define VISHNU_USERDATASETWIDGET_H
 
-#include <string>
+#include <QString>
 #include <QListWidgetItem>
 #include <QIcon>
 #include <QLabel>
@@ -19,18 +19,16 @@ namespace vishnu
 
   public:
 
-    explicit UserDataSetWidget( const std::string& name,
-      const std::string& csvPath, const std::string& xmlPath,
+    explicit UserDataSetWidget( const QString& name, const QString& path,
+      const QString& csvFilename, const QString& xmlFilename,
       const bool& selected, QWidget* parent = Q_NULLPTR );
 
-    std::string getName( void ) const;
-    void setName( const std::string& name );
-
-    std::string getCsvPath( void ) const;
-    void setCsvPath( const std::string& csvPath );
-
-    std::string getXmlPath( void ) const;
-    void setXmlPath( const std::string& xmlPath );
+    QString getName( void ) const;
+    QString getPath( void ) const;
+    QString getCsvFilename( void ) const;
+    QString getCsvPath( void ) const;
+    QString getXmlFilename( void ) const;
+    QString getXmlPath( void ) const;
 
     bool getSelected( void ) const;
     void setSelected( const bool& selected );
@@ -53,11 +51,18 @@ namespace vishnu
   private:
 
     sp1common::ClickableLabel* _name = nullptr;
+    QString _path;
+    QString _csvFilename;
     QLabel* _csvPath = nullptr;
+    QString _xmlFilename;
     QLabel* _xmlPath = nullptr;
     QCheckBox _selected;
     QPushButton* _remove = nullptr;
     QListWidgetItem* _listWidgetItem = nullptr;
+
+    void setName( const QString& name );
+    void setCsvPath( const QString& path, const QString& csvFilename );
+    void setXmlPath( const QString& path, const QString& xmlFilename );
 
   };
 

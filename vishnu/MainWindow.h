@@ -48,6 +48,10 @@ namespace vishnu
       void closeEvent( QCloseEvent *event ) override;
 
     private slots:
+
+      void slotRemoveUserDataSet( void );
+
+
       void runApp( );
       void closeApp( int exitCode, QProcess::ExitStatus exitStatus );
       void loadClint();

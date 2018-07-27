@@ -7,11 +7,13 @@ namespace vishnu
 
   }
 
-  UserDataSet::UserDataSet( const std::string& name, const std::string& csvPath,
-    const std::string& xmlPath, const bool& selected )
+  UserDataSet::UserDataSet( const QString& name, const QString& path,
+    const QString& csvFilename, const QString& xmlFilename,
+    const bool& selected )
       : _name( name )
-      , _csvPath( csvPath )
-      , _xmlPath( xmlPath )
+      , _path( path )
+      , _csvFilename( csvFilename )
+      , _xmlFilename( xmlFilename )
       , _selected( selected )
   {
 
@@ -22,34 +24,45 @@ namespace vishnu
 
   }
 
-  std::string UserDataSet::getName( void ) const
+  QString UserDataSet::getName( void ) const
   {
     return _name;
   }
 
-  void UserDataSet::setName( const std::string& name )
+  void UserDataSet::setName( const QString& name )
   {
     _name = name;
   }
 
-  std::string UserDataSet::getCsvPath( void ) const
+
+  QString UserDataSet::getPath( void ) const
   {
-    return _csvPath;
+    return _path;
   }
 
-  void UserDataSet::setCsvPath( const std::string& csvPath )
+  void UserDataSet::setPath( const QString& path )
   {
-    _csvPath = csvPath;
+    _path = path;
   }
 
-  std::string UserDataSet::getXmlPath( void ) const
+  QString UserDataSet::getCsvFilename( void ) const
   {
-    return _xmlPath;
+    return _csvFilename;
   }
 
-  void UserDataSet::setXmlPath( const std::string& xmlPath )
+  void UserDataSet::setCsvFilename( const QString& csvFilename )
   {
-    _xmlPath = xmlPath;
+    _csvFilename = csvFilename;
+  }
+
+  QString UserDataSet::getXmlFilename( void ) const
+  {
+    return _xmlFilename;
+  }
+
+  void UserDataSet::setXmlFilename( const QString& xmlFilename )
+  {
+    _xmlFilename = xmlFilename;
   }
 
   bool UserDataSet::getSelected( void ) const
@@ -64,17 +77,19 @@ namespace vishnu
 
   void UserDataSet::deserialize( const QJsonObject &jsonObject )
   {
-    _name = jsonObject[ "name" ].toString( ).toStdString( );
-    _csvPath = jsonObject[ "csvPath" ].toString( ).toStdString( );
-    _xmlPath = jsonObject[ "xmlPath" ].toString( ).toStdString( );
+    _name = jsonObject[ "name" ].toString( );
+    _path = jsonObject[ "path" ].toString( );
+    _csvFilename = jsonObject[ "csvFilename" ].toString( );
+    _xmlFilename = jsonObject[ "xmlFilename" ].toString( );
     _selected = jsonObject[ "selected" ].toBool( );
   }
 
   void UserDataSet::serialize( QJsonObject &jsonObject ) const
   {
-    jsonObject[ "name" ] = QString::fromStdString( _name );
-    jsonObject[ "csvPath" ] = QString::fromStdString( _csvPath );
-    jsonObject[ "xmlPath" ] = QString::fromStdString( _xmlPath );
+    jsonObject[ "name" ] = _name;
+    jsonObject[ "path" ] = _path;
+    jsonObject[ "csvFilename" ] = _csvFilename;
+    jsonObject[ "xmlFilename" ] = _xmlFilename;
     jsonObject[ "selected" ] = _selected;
   }
 

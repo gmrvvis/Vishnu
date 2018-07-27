@@ -23,11 +23,11 @@ namespace vishnu
     setAcceptDrops( true );
   }
 
-  UserDataSetWidgets UserDataSetListWidget::addUserDataSet(
-    const std::string& name, const std::string& csvPath,
-    const std::string& xmlPath, const bool& selected )
+  UserDataSetWidgetPtr UserDataSetListWidget::addUserDataSet( const QString& name,
+    const QString& path, const QString& csvFilename, const QString& xmlFilename,
+    const bool& selected )
   {
-    UserDataSetWidgets dataSetWidgets;
+    //UserDataSetWidgets dataSetWidgets;
 /*
     //Format basename to 10 chars without spaces
     std::string name;
@@ -63,8 +63,8 @@ namespace vishnu
     } while( !validName || !notUsedName );
 */
     //Add to dataset
-    UserDataSetWidgetPtr dataSetWidget( new UserDataSetWidget( name, csvPath,
-      xmlPath, selected ) );
+    UserDataSetWidgetPtr dataSetWidget( new UserDataSetWidget( name, path,
+      csvFilename, xmlFilename, selected ) );
     dataSetWidget->setListWidgetItem( new QListWidgetItem( this ) );
 
     QListWidgetItem* listWidgetItem = dataSetWidget->getListWidgetItem( );
@@ -72,9 +72,17 @@ namespace vishnu
     listWidgetItem->setSizeHint( dataSetWidget->sizeHint ( ) );
     setItemWidget( listWidgetItem, dataSetWidget.get( ) );
 
-    dataSetWidgets.push_back( dataSetWidget );
+    //dataSetWidgets.emplace_back( dataSetWidget );
 
-    return dataSetWidgets;
+    return dataSetWidget;
+  }
+
+  UserDataSetWidgetPtr UserDataSetListWidget::addUserDataSet(
+    const UserDataSetPtr& userDataSet )
+  {
+    return addUserDataSet( userDataSet->getName( ), userDataSet->getPath( ),
+      userDataSet->getCsvFilename( ), userDataSet->getXmlFilename( ),
+      userDataSet->getSelected( ) );
   }
 
   void UserDataSetListWidget::removeCurrentDataSet( )
@@ -82,18 +90,18 @@ namespace vishnu
     takeItem( row( currentItem( ) ) );
   }
 
-  UserDataSets UserDataSetListWidget::getDataSets( )
+  UserDataSetMap UserDataSetListWidget::getDataSets( )
   {
-    UserDataSets dataSets;
+    UserDataSetMap dataSets;
 
     for( int row = 0; row < count( ); ++row )
     {
       UserDataSetWidget* dsw = static_cast< UserDataSetWidget* >(
         itemWidget( item( row ) ) );
 
-      UserDataSetPtr dataSet( new UserDataSet( dsw->getName( ),
-        dsw->getCsvPath( ), dsw->getXmlPath( ), dsw->getSelected( ) ) );
-      dataSets[ dsw->getName() ] = dataSet;
+      UserDataSetPtr dataSet( new UserDataSet( dsw->getName( ), dsw->getPath( ),
+        dsw->getCsvFilename( ), dsw->getXmlFilename( ), dsw->getSelected( ) ) );
+      dataSets[ dsw->getName( ) ] = dataSet;
 
     }
 

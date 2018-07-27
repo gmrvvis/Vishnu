@@ -9,6 +9,8 @@
 
 #define USER_DATA_FOLDER "userdata/"
 #define GEOMETRIC_DATA_FOLDER "geometricData/"
+#define DEFAULT_DATASET_FILENAME "dataSet"
+#define USER_DATASETS_FILENAME "userDataSets.json"
 
 #define MAX_DATASET_NAME_LENGTH 10
 
@@ -18,9 +20,10 @@
   #define SUPERUSER "gksudo"
 #endif
 
-#define STR_CSV "csv"
-#define STR_JSON "json"
-#define STR_SEG "seg"
+#define STR_EXT_CSV "csv"
+#define STR_EXT_JSON "json"
+#define STR_EXT_SEG "seg"
+#define STR_EXT_XML "xml"
 
 #define MISSING_DATA_FIELD "#!#Missing Data#!#"
 

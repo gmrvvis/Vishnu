@@ -3,8 +3,7 @@
 
 #include <QJsonObject>
 
-#include <string>
-#include <vector>
+#include <memory>
 
 #include "UserDataSet.h"
 
@@ -13,11 +12,8 @@
 namespace vishnu
 {
 
-  typedef std::shared_ptr< UserDataSet > UserDataSetPtr;
-  typedef std::vector< UserDataSetPtr > UserDataSetVector;
-
   class UserDataSets;
-  typedef std::unique_ptr< UserDataSets > UserDataSetsPtr;
+  typedef std::shared_ptr< UserDataSets > UserDataSetsPtr;
 
   class UserDataSets
   {

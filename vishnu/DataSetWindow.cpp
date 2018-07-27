@@ -31,6 +31,9 @@ namespace vishnu
     QVBoxLayout* widgetVBoxLayout = new QVBoxLayout();
     setLayout( widgetVBoxLayout );
 
+    //PathsWidget
+    _pathsWidget.reset( new PathsWidget( ) );
+
     //DataSetListWidget
     _dataSetListWidget.reset( new DataSetListWidget( ) );
 
@@ -56,8 +59,9 @@ namespace vishnu
 
     //Fill layout with toolbar, datasets, properties and buttons
     widgetVBoxLayout->addWidget( _toolBar, 0 );
-    widgetVBoxLayout->addWidget( _dataSetListWidget.get( ), 1 );
-    widgetVBoxLayout->addWidget( _propertiesTableWidget.get( ), 2 );
+    widgetVBoxLayout->addWidget( _pathsWidget.get( ), 1 );
+    widgetVBoxLayout->addWidget( _dataSetListWidget.get( ), 2 );
+    widgetVBoxLayout->addWidget( _propertiesTableWidget.get( ), 3 );
     widgetVBoxLayout->addLayout( buttonsHBoxLayout );
   }
 
@@ -83,7 +87,7 @@ namespace vishnu
     }
   }
 
-  void DataSetWindow::removeDataSetItem( )
+  void DataSetWindow::slotRemoveDataSet( )
   {
     std::vector< std::string > propertiesToRemove =
       _dataSetListWidget->getPropertiesToRemove( );
@@ -114,12 +118,16 @@ namespace vishnu
         return;
     }
 
+    //Create dataset
     if ( !generateDataFiles( vishnuTempDir ) )
     {
       sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
         "Can't create data files.", false );
       return;
     }
+
+    //Create user dataset
+
 
     close( );
   }
@@ -143,7 +151,8 @@ namespace vishnu
       resultDataSets->getPropertyGroups( );
     std::string csvOutFile = dir.absolutePath( ).toStdString( ) + "/data.csv";
 
-    std::vector< std::string > headers = propertyGroups->getUse( );
+    //Get headers (ordered, first pk headers, then non pk headers)
+    std::vector< std::string > headers = propertyGroups->getHeaders( );
     size_t headersSize = headers.size( );
 
     //Write headers to csv
@@ -199,7 +208,6 @@ namespace vishnu
           result = sp1common::Files::writeCsv( csvOutFile, line, true );
       }
     }
-
 
     sp1common::Properties properties = resultDataSet->getProperties( );
 
