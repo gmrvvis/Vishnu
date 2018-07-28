@@ -202,7 +202,7 @@ namespace vishnu
     std::string userDataSetsFilename = USER_DATA_FOLDER + std::string( "/" )
       + USER_DATASETS_FILENAME;
 
-    if ( sp1common::Files::fileExists( userDataSetsFilename ) )
+    if ( sp1common::Files::exist( userDataSetsFilename ) )
     {
         UserDataSetsPtr userDataSets =
           sp1common::JSON::deserialize< UserDataSets >( userDataSetsFilename );
@@ -233,8 +233,8 @@ namespace vishnu
     int y = ( screenGeometry.height() - dataSetWindow->height( ) ) / 2;
     dataSetWindow->move( x, y );
 
-    dataSetWindow->setMinimumSize( 800, 600 );
-    dataSetWindow->setMaximumSize( 800, 600 );
+    dataSetWindow->setMinimumSize( 800, 800 );
+    dataSetWindow->setMaximumSize( 800, 800 );
     dataSetWindow->setWindowIcon( QIcon( ":/icons/logoVishnu.png") );
     dataSetWindow->setWindowTitle( QApplication::applicationName( )
       + QString(" - Create new dataset"));
@@ -249,9 +249,6 @@ namespace vishnu
   {
     _userDataSetListWidget->removeCurrentDataSet( );
   }
-
-
-
 
   void MainWindow::syncGroup( const QString& key, const QString& name,
     const QString& owner, const std::vector< std::string >& ids,
@@ -292,10 +289,10 @@ namespace vishnu
     //Clicked on destroy group button -> Ask && publish ZEQ event
     std::string currentKey =
       _zeqGroupListWidget->getKey( _zeqGroupListWidget->currentItem( ) );
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::warning( this, "Remove group",
-      "Do you want to remove '" + QString::fromStdString( currentKey )
-      + "'' group?", QMessageBox::Yes|QMessageBox::No );
+    QMessageBox::StandardButton reply = QMessageBox::warning( this,
+      "Remove group", "Do you want to remove '"
+      + QString::fromStdString( currentKey ) + "'' group?",
+      QMessageBox::Yes|QMessageBox::No );
     if ( reply == QMessageBox::Yes )
     {
       _zeqGroupListWidget->removeCurrentGroup( );
@@ -314,18 +311,18 @@ namespace vishnu
     QProcess* qProcess = qobject_cast< QProcess* >( sender( ) );
     if ( exitStatus == QProcess::CrashExit )
     {
-      std::cerr << "Error: " << qProcess->program( ).toStdString( ) <<
-        " crashed!" << std::endl;
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+        qProcess->program( ).toStdString( ) + " crashed!", false );
     }
     else if ( exitCode != 0 )
     {
-      std::cerr << "Error: " << qProcess->program( ).toStdString( ) <<
-        " failed!" << std::endl;
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+        qProcess->program( ).toStdString( ) + " failed!", false );
     }
     else
     {
-      std::cout << qProcess->program( ).toStdString( ) <<
-        " closed successfully." << std::endl;
+      sp1common::Debug::consoleMessage( qProcess->program( ).toStdString( )
+        + " closed successfully." );
     }
 
     //Look for running app
@@ -459,7 +456,8 @@ namespace vishnu
     QPushButton* appButton = qobject_cast< QPushButton* >( sender( ) );
     if ( !appButton )
     {
-      std::cerr << "Error: App not found!" << std::endl;
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+       "Application not found!", true );
       return;
     }
 

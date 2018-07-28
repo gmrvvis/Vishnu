@@ -290,7 +290,7 @@ namespace vishnu
         }
         else
         {
-          propertyGroups->addUse( name );
+          propertyGroups->addNonPrimaryKey( name );
         }
         dataSet->addProperty( sp1common::PropertyPtr(
           new sp1common::Property( name, dataType,

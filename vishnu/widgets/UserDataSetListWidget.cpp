@@ -23,8 +23,9 @@ namespace vishnu
     setAcceptDrops( true );
   }
 
-  UserDataSetWidgetPtr UserDataSetListWidget::addUserDataSet( const QString& name,
-    const QString& path, const QString& csvFilename, const QString& xmlFilename,
+  UserDataSetWidgetPtr UserDataSetListWidget::addUserDataSet(
+    const std::string& name, const std::string& path,
+    const std::string& csvFilename, const std::string& xmlFilename,
     const bool& selected )
   {
     //UserDataSetWidgets dataSetWidgets;
@@ -39,8 +40,8 @@ namespace vishnu
     {
       //Check if it's a valid name
       QRegularExpression regularExpression("[A-Za-z0-9]{1,10}$");
-      QString dataSetName = RegExpInputDialog::getText(this, "DataSet name",
-        "Enter DataSet name: " + filePath, QString::fromStdString( tempName ),
+      std::string dataSetName = RegExpInputDialog::getText(this, "DataSet name",
+        "Enter DataSet name: " + filePath, std::string::fromStdString( tempName ),
         regularExpression, &validName);
       if ( validName )
       {

@@ -3,10 +3,12 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QMessageBox>
+#include <QToolButton>
 
 #include <map>
 
 #include "Definitions.hpp"
+#include "UserDataSets.h"
 
 namespace vishnu
 {
@@ -18,14 +20,18 @@ namespace vishnu
     _toolBar = new QToolBar( );
     _toolBar->setMovable( false );
     _toolBar->setIconSize( QSize( 32, 32 ) );
-    QAction* actionAddDataSet = new QAction( );
-    actionAddDataSet->setIcon( QIcon( ":/icons/addDataSet.png" ) );
-    actionAddDataSet->setText( "AddDataSet" );
-    actionAddDataSet->setToolTip( "Add Data Set" );
-    actionAddDataSet->setShortcut( QKeySequence( "Ctrl+O" ) );
-    QObject::connect( actionAddDataSet, SIGNAL( triggered() ), this,
-      SLOT( addDataSetItems( ) ) );
-    _toolBar->addAction( actionAddDataSet );
+
+    QToolButton* addFileButton = new QToolButton( );
+    addFileButton->setIconSize( QSize( 32, 32 ) );
+    addFileButton->setIcon( QIcon( ":/icons/addFile.png" ) );
+    addFileButton->setText( "Add File(s)" );
+    addFileButton->setToolTip( "Add File(s)" );
+    addFileButton->setShortcut( QKeySequence( "Ctrl+O" ) );
+    addFileButton->setToolButtonStyle( Qt::ToolButtonTextBesideIcon );
+    _toolBar->addWidget( addFileButton );
+
+    QObject::connect( addFileButton, SIGNAL( clicked( ) ), this,
+      SLOT( slotAddFiles( ) ) );
 
     //Widget Layout
     QVBoxLayout* widgetVBoxLayout = new QVBoxLayout();
@@ -40,26 +46,28 @@ namespace vishnu
     qRegisterMetaType< std::vector< std::string > >("StringVector");
 
     QObject::connect( _dataSetListWidget.get( ),
-      SIGNAL( addDataSetsEvent( const std::vector< std::string >& ) ), this,
-      SLOT( addDataSetItems( const std::vector< std::string >& ) ) );
+      SIGNAL( signalAddFiles( const std::vector< std::string >& ) ), this,
+      SLOT( slotAddFiles( const std::vector< std::string >& ) ) );
 
     //PropertiesTableWidget
     _propertiesTableWidget.reset( new PropertiesTableWidget( ) );
 
     //Buttons
-    QHBoxLayout* buttonsHBoxLayout = new QHBoxLayout();
     _cancelButton = new QPushButton("Cancel", this);
     QObject::connect( _cancelButton, SIGNAL( clicked( ) ), this,
       SLOT( slotCancelButton( ) ) );
     _createButton = new QPushButton("Create", this);
     QObject::connect( _createButton, SIGNAL( clicked( ) ), this,
       SLOT( slotCreateButton( ) ) );
-    buttonsHBoxLayout->addWidget( _cancelButton, 0 );
-    buttonsHBoxLayout->addWidget( _createButton, 1 );
+
+    QHBoxLayout* buttonsHBoxLayout = new QHBoxLayout( );
+    buttonsHBoxLayout->addStretch( 255 );
+    buttonsHBoxLayout->addWidget( _cancelButton, 0, Qt::AlignRight );
+    buttonsHBoxLayout->addWidget( _createButton, 0, Qt::AlignRight );
 
     //Fill layout with toolbar, datasets, properties and buttons
-    widgetVBoxLayout->addWidget( _toolBar, 0 );
-    widgetVBoxLayout->addWidget( _pathsWidget.get( ), 1 );
+    widgetVBoxLayout->addWidget( _pathsWidget.get( ), 0 );
+    widgetVBoxLayout->addWidget( _toolBar, 1 );
     widgetVBoxLayout->addWidget( _dataSetListWidget.get( ), 2 );
     widgetVBoxLayout->addWidget( _propertiesTableWidget.get( ), 3 );
     widgetVBoxLayout->addLayout( buttonsHBoxLayout );
@@ -70,7 +78,7 @@ namespace vishnu
 
   }
 
-  void DataSetWindow::addDataSetItems(
+  void DataSetWindow::slotAddFiles(
     const std::vector< std::string >& dropped )
   {
     DataSetWidgets dataSetWidgets = _dataSetListWidget->addDataSets( dropped );
@@ -102,32 +110,91 @@ namespace vishnu
 
   void DataSetWindow::slotCreateButton( void )
   {
-    //Destroy && create temporary folder
-    QString vishnuTempPath = QDir::tempPath( ) + "/" + "vishnu";
-    QDir vishnuTempDir( vishnuTempPath );
-    if ( vishnuTempDir.exists( ) )
-    {
-      vishnuTempDir.removeRecursively( );
-    }
+    //Create path
+    std::string path = _pathsWidget->getPath( );
+    QString qPath = QString::fromStdString( path );
+    QDir qDir( qPath );
 
-    if ( !vishnuTempDir.mkpath( vishnuTempPath ) )
+    std::string csvPath = qDir.absolutePath( ).toStdString( )
+      + _pathsWidget->getCsvFilename( );
+
+    std::string xmlPath = qDir.absolutePath( ).toStdString( )
+      + _pathsWidget->getXmlFilename( );
+
+    if ( !qDir.exists( ) )
     {
-        sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
-          "Can't create " + vishnuTempPath.toStdString( ) + " folder.",
-          false );
+      if ( !qDir.mkpath( qPath ) )
+      {
+        sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+          "Can't create " + path + " folder.", false );
         return;
+      }
+    }
+    else
+    {
+      if ( sp1common::Files::exist( csvPath ) )
+      {
+        QMessageBox::StandardButton overwriteCsv = QMessageBox::warning( this,
+          "CSV File exists", QString::fromStdString( csvPath )
+          + " already exists. Do you want to overwrite it?'",
+          QMessageBox::Yes | QMessageBox::No );
+          if ( overwriteCsv == QMessageBox::No )
+          {
+            return;
+          }
+          if ( sp1common::Files::remove( csvPath ) )
+          {
+            sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+              "Can't remove existing CSV file (" + csvPath + ").", false );
+            return;
+          }
+      }
+      if ( sp1common::Files::exist( xmlPath ) )
+      {
+        QMessageBox::StandardButton overwriteXml = QMessageBox::warning( this,
+          "XML File exists", QString::fromStdString( xmlPath )
+          + " already exists. Do you want to overwrite it?'",
+          QMessageBox::Yes | QMessageBox::No );
+          if ( overwriteXml == QMessageBox::No )
+          {
+            return;
+          }
+          if ( sp1common::Files::remove( xmlPath ) )
+          {
+            sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+              "Can't remove existing XML file (" + xmlPath + ").", false );
+            return;
+          }
+      }
     }
 
-    //Create dataset
-    if ( !generateDataFiles( vishnuTempDir ) )
+    sp1common::DataSetsPtr resultDataSets =
+      _propertiesTableWidget->getDataSets( );
+    sp1common::DataSetPtr resultDataSet =
+      resultDataSets->getDataSets( ).at( 0 );
+    sp1common::PropertyGroupsPtr propertyGroups =
+      resultDataSets->getPropertyGroups( );
+
+
+    //Create CSV
+    if ( !createCSV( csvPath, propertyGroups ) )
     {
-      sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
-        "Can't create data files.", false );
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+        "Can't create CSV file.", false );
+      return;
+    }
+
+    //Create XML
+    if ( !createXML( path, csvPath, xmlPath, resultDataSet, propertyGroups ) )
+    {
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+        "Can't create XML file.", false );
       return;
     }
 
     //Create user dataset
-
+    UserDataSetsPtr userDataSet;
+    //sp1common::JSON::serialize( "", )
 
     close( );
   }
@@ -137,33 +204,25 @@ namespace vishnu
     close( );
   }
 
-  bool DataSetWindow::generateDataFiles( QDir dir )
+  bool DataSetWindow::createCSV( const std::string& csvPath,
+    const sp1common::PropertyGroupsPtr& propertyGroups )
   {
-    sp1common::Debug::consoleMessage( "Generating app data files in folder: "
-      + dir.absolutePath( ).toStdString( ) );
-
     bool result = false;
-    sp1common::DataSetsPtr resultDataSets =
-      _propertiesTableWidget->getDataSets( );
-    sp1common::DataSetPtr resultDataSet =
-      resultDataSets->getDataSets( ).at( 0 );
-    sp1common::PropertyGroupsPtr propertyGroups =
-      resultDataSets->getPropertyGroups( );
-    std::string csvOutFile = dir.absolutePath( ).toStdString( ) + "/data.csv";
 
     //Get headers (ordered, first pk headers, then non pk headers)
     std::vector< std::string > headers = propertyGroups->getHeaders( );
     size_t headersSize = headers.size( );
 
     //Write headers to csv
-    std::string joinedHeaders = sp1common::Strings::join( headers, "," );
-    result = sp1common::Files::writeCsv( csvOutFile, joinedHeaders );
+    std::string joinedHeaders = sp1common::Strings::join(
+      headers, std::string( "," ) );
+    result = sp1common::Files::writeCsv( csvPath, joinedHeaders );
 
     //Loop over datasets
     for ( const auto& dataSet : _dataSetListWidget->getDataSets( ) )
     {
-      sp1common::Matrix csvData = sp1common::Files::readCsv(
-        dataSet.second->getPath( ) );
+      sp1common::Matrix csvData =
+        sp1common::Files::readCsv( dataSet.second->getPath( ) );
 
       //Remove csv columns not used
       std::vector< std::string > oldCsvHeaders = dataSet.second->getHeaders( );
@@ -205,53 +264,48 @@ namespace vishnu
                 : std::string( "," ) + MISSING_DATA_FIELD;
             }
           }
-          result = sp1common::Files::writeCsv( csvOutFile, line, true );
+          result = sp1common::Files::writeCsv( csvPath, line,
+            true );
       }
     }
+    return result;
+  }
+
+  bool DataSetWindow::createXML( const std::string& path,
+    const std::string& csvPath, const std::string& xmlPath,
+    const sp1common::DataSetPtr& resultDataSet,
+    const sp1common::PropertyGroupsPtr& propertyGroups )
+  {
+    bool result = false;
 
     sp1common::Properties properties = resultDataSet->getProperties( );
 
-    //Create XML file
-    std::string xmlOutFile = dir.absolutePath( ).toStdString( ) + "/data.xml";
-
     //Features
+    std::string joinedPrimaryKey = sp1common::Strings::joinAndTrim(
+      propertyGroups->getPrimaryKeys( ), std::string( "," ) );
+
+    std::vector< std::string > positionsXYZColumn = propertyGroups->getAxes( );
+
     sp1common::FeaturesVector featuresVector;
     for ( unsigned int i = 0; i < properties.size( ); ++i )
     {
       sp1common::PropertyPtr property = properties.at( i );
       featuresVector.emplace_back( sp1common::FeaturePtr(
         new sp1common::Feature(
-        QString::fromStdString( property->getName( ) ),
-        QString::fromStdString( property->getName( ) ),
+        property->getName( ),
+        property->getName( ),
         "mV",
         property->getDataType( ),
         property->getDataStructureType( ) ) ) );
     }
-    QStringList positionsXYZColumn;
-    if ( propertyGroups->getAxes( ).size( ) == 1 )
-    {
-       positionsXYZColumn
-         << QString::fromStdString( propertyGroups->getAxes( ).at( 0 ) );
-    }
-    else
-    {
-      positionsXYZColumn
-        << QString::fromStdString( propertyGroups->getAxes( ).at( 0 ) )
-        << QString::fromStdString( propertyGroups->getAxes( ).at( 1 ) )
-        << QString::fromStdString( propertyGroups->getAxes( ).at( 2 ) );
-    }
 
-    std::string joinedPrimaryKey = sp1common::Strings::joinAndTrim(
-      propertyGroups->getPrimaryKeys( ), "," );
-    sp1common::FeaturesPtr features( new sp1common::Features(
-      QString::fromStdString( joinedPrimaryKey ), positionsXYZColumn,
-      featuresVector));
+    sp1common::FeaturesPtr features( new sp1common::Features( joinedPrimaryKey,
+      positionsXYZColumn, featuresVector));
 
     //Set
     sp1common::Sets sets;
-    sets.emplace_back( sp1common::SetPtr( new sp1common::Set(
-      QString::fromStdString( csvOutFile ),
-      dir.absolutePath( ) + "/" + GEOMETRIC_DATA_FOLDER ) ) );
+    sets.emplace_back( sp1common::SetPtr( new sp1common::Set( csvPath,
+      path + std::string( "/" ) + GEOMETRIC_DATA_FOLDER ) ) );
 
     //Data
     sp1common::DataPtr dataPtr( new sp1common::Data( "customDataSet", "",
@@ -279,7 +333,151 @@ namespace vishnu
       "PyramidalExplorer", "0.2.0", "data", dataPtr, colors, camera ) );
 
     //PyramidalXML
-    QString dtd =
+    std::string dtd =
+      "<!DOCTYPE configuration SYSTEM \"http://gmrv.es/pyramidalexplorer/PyramidalExplorerData-0.2.0.dtd\">";
+    sp1common::PyramidalXMLPtr pyramidalXML(
+      new sp1common::PyramidalXML( dtd, configuration ) );
+
+    result = sp1common::XML::serialize( xmlPath, pyramidalXML );
+
+    return result;
+  }
+
+  bool DataSetWindow::generateDataFiles( QDir dir )
+  {
+    sp1common::Debug::consoleMessage( "Generating app data files in folder: "
+      + dir.absolutePath( ).toStdString( ) );
+
+    bool result = false;
+    sp1common::DataSetsPtr resultDataSets =
+      _propertiesTableWidget->getDataSets( );
+    sp1common::DataSetPtr resultDataSet =
+      resultDataSets->getDataSets( ).at( 0 );
+    sp1common::PropertyGroupsPtr propertyGroups =
+      resultDataSets->getPropertyGroups( );
+    std::string csvOutFile = dir.absolutePath( ).toStdString( )
+      + std::string( "/data.csv" );
+
+    //Get headers (ordered, first pk headers, then non pk headers)
+    std::vector< std::string > headers = propertyGroups->getHeaders( );
+    size_t headersSize = headers.size( );
+
+    //Write headers to csv
+    std::string joinedHeaders = sp1common::Strings::join(
+      headers, std::string( "," ) );
+    result = sp1common::Files::writeCsv( csvOutFile, joinedHeaders );
+
+    //Loop over datasets
+    for ( const auto& dataSet : _dataSetListWidget->getDataSets( ) )
+    {
+      sp1common::Matrix csvData =
+        sp1common::Files::readCsv( dataSet.second->getPath( ) );
+
+      //Remove csv columns not used
+      std::vector< std::string > oldCsvHeaders = dataSet.second->getHeaders( );
+      for ( unsigned int i = 0; i < oldCsvHeaders.size( ); ++i )
+      {
+        if ( !sp1common::Vectors::find( headers, oldCsvHeaders.at( i ) ) )
+        {
+          sp1common::Matrices::removeColumn( csvData, i );
+        }
+      }
+
+      //Loop over global headers and map results
+      std::map< int, std::string > csvHeaders;
+      for ( size_t i = 0; i < headersSize; ++i )
+      {
+        if ( sp1common::Vectors::find( csvData.at( 0 ), headers.at( i ) ) )
+        {
+          csvHeaders[ static_cast< int >( i ) ] = headers.at( i );
+        }
+      }
+
+      //Loop over all rows except headers
+      for ( size_t row = 1; row < csvData.size( ); ++row )
+      {
+          std::string line;
+          std::vector< std::string > csvRow = csvData.at( row );
+          //Loop over headers size instead of csv columns
+          for ( size_t col = 0; col < headersSize; ++col )
+          {
+            if ( csvHeaders.find( static_cast< int >( col ) )
+              != csvHeaders.end( ) )
+            {
+              line += ( line.empty( ) ) ? csvRow.at( col )
+                : std::string( "," ) + csvRow.at( col );
+            }
+            else
+            {
+              line += ( line.empty( ) ) ? MISSING_DATA_FIELD
+                : std::string( "," ) + MISSING_DATA_FIELD;
+            }
+          }
+          result = sp1common::Files::writeCsv( csvOutFile, line,
+            true );
+      }
+    }
+
+    sp1common::Properties properties = resultDataSet->getProperties( );
+
+    //Create XML file
+    std::string xmlOutFile = dir.absolutePath( ).toStdString( ) + "/data.xml";
+
+    //Features
+    std::string joinedPrimaryKey = sp1common::Strings::joinAndTrim(
+      propertyGroups->getPrimaryKeys( ), std::string( "," ) );
+
+    std::vector< std::string > positionsXYZColumn = propertyGroups->getAxes( );
+
+    sp1common::FeaturesVector featuresVector;
+    for ( unsigned int i = 0; i < properties.size( ); ++i )
+    {
+      sp1common::PropertyPtr property = properties.at( i );
+      featuresVector.emplace_back( sp1common::FeaturePtr(
+        new sp1common::Feature(
+        property->getName( ),
+        property->getName( ),
+        "mV",
+        property->getDataType( ),
+        property->getDataStructureType( ) ) ) );
+    }
+
+    sp1common::FeaturesPtr features( new sp1common::Features( joinedPrimaryKey,
+      positionsXYZColumn, featuresVector));
+
+    //Set
+    sp1common::Sets sets;
+    sets.emplace_back( sp1common::SetPtr( new sp1common::Set( csvOutFile,
+      dir.absolutePath( ).toStdString( ) + std::string( "/" )
+      + GEOMETRIC_DATA_FOLDER ) ) );
+
+    //Data
+    sp1common::DataPtr dataPtr( new sp1common::Data( "customDataSet", "",
+      features, sets ) );
+
+    //Colors
+    sp1common::XYZPtr additionalMeshesColor(
+      new sp1common::XYZ( "60", "60", "60" ) );
+    sp1common::XYZPtr backgroundColor(
+      new sp1common::XYZ( "0", "0", "0" ) );
+    sp1common::ColorsPtr colors(
+      new sp1common::Colors( additionalMeshesColor, backgroundColor ) );
+
+    //Camera
+    sp1common::XYZPtr eye(
+      new sp1common::XYZ( "577.183", "1106.67", "290.011" ) );
+    sp1common::XYZPtr center(
+      new sp1common::XYZ( "479.859", "-26.1715", "670.239" ) );
+    sp1common::XYZPtr up(
+      new sp1common::XYZ( "0.0183558", "-0.319558", "-0.947389" ) );
+    sp1common::CameraPtr camera( new sp1common::Camera( eye, center, up ) );
+
+    //Configuration
+    sp1common::ConfigurationPtr configuration( new sp1common::Configuration(
+      "PyramidalExplorer", "0.2.0", "data", dataPtr, colors, camera ) );
+
+    //PyramidalXML
+    std::string dtd =
       "<!DOCTYPE configuration SYSTEM \"http://gmrv.es/pyramidalexplorer/PyramidalExplorerData-0.2.0.dtd\">";
     sp1common::PyramidalXMLPtr pyramidalXML(
       new sp1common::PyramidalXML( dtd, configuration ) );

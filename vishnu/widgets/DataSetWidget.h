@@ -1,16 +1,23 @@
 #ifndef VISHNU_DATASETWIDGET_H
 #define VISHNU_DATASETWIDGET_H
 
-#include <string>
 #include <QListWidgetItem>
 #include <QIcon>
 #include <QLabel>
 #include <QCheckBox>
 #include <QPushButton>
+
+#include <string>
+#include <vector>
+
 #include <sp1common/sp1common.h>
 
 namespace vishnu
 {
+
+  class DataSetWidget;
+  typedef DataSetWidget* DataSetWidgetPtr;
+  typedef std::vector< DataSetWidgetPtr > DataSetWidgets;
 
   class DataSetWidget : public QWidget
   {

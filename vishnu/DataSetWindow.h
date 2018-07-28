@@ -14,12 +14,10 @@
 #include "widgets/DataSetListWidget.h"
 #include "widgets/PropertiesTableWidget.h"
 
-Q_DECLARE_METATYPE( std::vector< std::string > );
+Q_DECLARE_METATYPE( std::vector< std::string > )
 
 namespace vishnu
 {
-  typedef std::shared_ptr< DataSetListWidget > DataSetListWidgetPtr;
-  typedef std::shared_ptr< PropertiesTableWidget > PropertiesTableWidgetPtr;
 
   class DataSetWindow : public QDialog
   {
@@ -32,7 +30,7 @@ namespace vishnu
       private slots:
         void slotCreateButton( void );
         void slotCancelButton( void );
-        void addDataSetItems( const std::vector< std::string >& dropped =
+        void slotAddFiles( const std::vector< std::string >& dropped =
           std::vector< std::string >( ) );
         void slotRemoveDataSet( );
 
@@ -44,11 +42,13 @@ namespace vishnu
         QPushButton* _cancelButton;
         QPushButton* _createButton;
 
-        //QAction* _addDataSetsAction;
-        //QAction* _removeDataSetAction;
-
+        bool createCSV( const std::string& csvPath,
+          const sp1common::PropertyGroupsPtr& propertyGroups );
+        bool createXML( const std::string& path, const std::string& csvPath,
+          const std::string& xmlPath,
+          const sp1common::DataSetPtr& resultDataSet,
+          const sp1common::PropertyGroupsPtr& propertyGroups );
         bool generateDataFiles( QDir dir );
-        bool generateDataFiles2( QDir dir );
 
   };
 

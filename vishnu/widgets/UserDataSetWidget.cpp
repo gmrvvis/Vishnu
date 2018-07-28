@@ -16,9 +16,9 @@
 namespace vishnu
 {
 
-  UserDataSetWidget::UserDataSetWidget( const QString& name,
-    const QString& path, const QString& csvFilename, const QString& xmlFilename,
-    const bool& selected, QWidget* /*parent*/ )
+  UserDataSetWidget::UserDataSetWidget( const std::string& name,
+    const std::string& path, const std::string& csvFilename,
+    const std::string& xmlFilename, const bool& selected, QWidget* /*parent*/ )
       : _path( path )
       , _csvFilename( csvFilename )
       , _xmlFilename( xmlFilename )
@@ -88,64 +88,66 @@ namespace vishnu
     setLayout( hLayout );
   }
 
-  QString UserDataSetWidget::getName( ) const
+  std::string UserDataSetWidget::getName( ) const
   {
-    return _name->text( );
+    return _name->text( ).toStdString( );
   }
 
-  void UserDataSetWidget::setName( const QString& name )
+  void UserDataSetWidget::setName( const std::string& name )
   {
     if ( _name == nullptr)
     {
       _name = new sp1common::ClickableLabel( );
     }
-    _name->setText( name );
+    _name->setText( QString::fromStdString( name ) );
     _name->setStyleSheet("font-weight: bold; font-size: 20px");
   }
 
-  QString UserDataSetWidget::getPath( ) const
+  std::string UserDataSetWidget::getPath( ) const
   {
     return _path;
   }
 
-  QString UserDataSetWidget::getCsvFilename( ) const
+  std::string UserDataSetWidget::getCsvFilename( ) const
   {
     return _csvFilename;
   }
 
-  QString UserDataSetWidget::getCsvPath( ) const
+  std::string UserDataSetWidget::getCsvPath( ) const
   {
-    return _csvPath->text( );
+    return _csvPath->text( ).toStdString( );
   }
 
-  void UserDataSetWidget::setCsvPath( const QString& path,
-    const QString& csvFilename )
+  void UserDataSetWidget::setCsvPath( const std::string& path,
+    const std::string& csvFilename )
   {
     if ( _csvPath == nullptr)
     {
       _csvPath = new QLabel( );
     }
-    _csvPath->setText( path + "/" + csvFilename );
+    _csvPath->setText( QString::fromStdString( path + std::string( "/" )
+      + csvFilename ) );
   }
 
-  QString UserDataSetWidget::getXmlFilename( ) const
+  std::string UserDataSetWidget::getXmlFilename( ) const
   {
     return _xmlFilename;
   }
 
-  QString UserDataSetWidget::getXmlPath( ) const
+  std::string UserDataSetWidget::getXmlPath( ) const
   {
-    return _xmlPath->text( );
+    return _xmlPath->text( ).toStdString( );
   }
 
-  void UserDataSetWidget::setXmlPath( const QString& path,
-    const QString& xmlFilename )
+  void UserDataSetWidget::setXmlPath( const std::string& path,
+    const std::string& xmlFilename )
   {
     if ( _xmlPath == nullptr)
     {
       _xmlPath = new QLabel( );
     }
-    _xmlPath->setText( path + "/" + xmlFilename );
+    _xmlPath->setText( QString::fromStdString( path + std::string( "/" )
+      + xmlFilename ) );
   }
 
   bool UserDataSetWidget::getSelected( ) const
@@ -193,7 +195,7 @@ namespace vishnu
         QListWidgetItem* item = listWidget->item( i );
         UserDataSetWidget* widget = static_cast< UserDataSetWidget* >(
           listWidget->itemWidget( item ) );
-        if ( ( widget->getName( ) == name )
+        if ( ( widget->getName( ) == name.toStdString( ) )
           && ( widget != this ) )
         {
           QMessageBox::warning( this, APPLICATION_NAME,

@@ -20,8 +20,8 @@
 namespace vishnu
 {
 
-  typedef std::shared_ptr< Property > PropertyPtr;
-  typedef std::vector< PropertyPtr > Properties;
+  class PropertiesTableWidget;
+  typedef std::shared_ptr< PropertiesTableWidget > PropertiesTableWidgetPtr;
 
   class PropertiesTableWidget : public QTableWidget
   {

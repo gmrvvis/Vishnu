@@ -1,10 +1,10 @@
 #ifndef VISHNU_PATHSWIDGET_H
 #define VISHNU_PATHSWIDGET_H
 
-#include <QString>
 #include <QPushButton>
 #include <QLineEdit>
 
+#include <string>
 #include <memory>
 
 #include <sp1common/sp1common.h>
@@ -25,23 +25,29 @@ namespace vishnu
       PathsWidget( void );
       ~PathsWidget( void );
 
-      QString getPath( void ) const;
-      QString getCsvFilename( void ) const;
-      QString getXmlFilename( void ) const;
+      std::string getName( void ) const;
+      std::string getPath( void ) const;
+      std::string getJsonFilename( void ) const;
+      std::string getCsvFilename( void ) const;
+      std::string getXmlFilename( void ) const;
 
     private slots:
       void slotBrowsePath( void );
 
     private:
+      QLineEdit* _name = nullptr;
       QLineEdit* _path = nullptr;
       QPushButton* _browsePath = nullptr;
       QLineEdit* _csvFilename = nullptr;
+      QLineEdit* _jsonFilename = nullptr;
       QLineEdit* _xmlFilename = nullptr;
 
-      void setPath( const QString& path );
+      void setName( const std::string& name );
+      void setPath( const std::string& path );
       void setBrowsePath( void );
-      void setCsvFilename( const QString& csvFilename );
-      void setXmlFilename( const QString& xmlFilename );
+      void setCsvFilename( const std::string& csvFilename );
+      void setJsonFilename( const std::string& jsonFilename );
+      void setXmlFilename( const std::string& xmlFilename );
 
   };
 

@@ -50,16 +50,10 @@ namespace vishnu
     private slots:
 
       void slotRemoveUserDataSet( void );
-
-
       void runApp( );
       void closeApp( int exitCode, QProcess::ExitStatus exitStatus );
-      void loadClint();
-      void loadDCExplorer();
-      void loadPyramidal();
+
       void checkApps( );
-
-
       void reloadDataSets( void );
       void addDataSet( void );
 
@@ -70,6 +64,13 @@ namespace vishnu
       void changeGroupColor( const QString& key, const QColor& color );
       void removeSelectedGroup( );
       void removeGroup( const QString& key );
+
+  signals:
+    void signalSyncGroup( const QString&, const QString&, const QString&,
+      const std::vector< std::string >&, const QColor& );
+    void signalChangeGroupName( const QString&, const QString& );
+    void signalChangeGroupColor( const QString&, const QColor& );
+    void signalDestroyGroup( const QString& );
 
   private:
 
@@ -89,12 +90,10 @@ namespace vishnu
       void receivedChangeColorGroup( zeroeq::gmrv::ConstChangeColorGroupPtr o );
       void receivedDestroyGroup( zeroeq::gmrv::ConstDestroyGroupPtr o );
 
-    signals:
-      void signalSyncGroup( const QString&, const QString&, const QString&,
-        const std::vector< std::string >&, const QColor& );
-      void signalChangeGroupName( const QString&, const QString& );
-      void signalChangeGroupColor( const QString&, const QColor& );
-      void signalDestroyGroup( const QString& );
+      void loadClint();
+      void loadDCExplorer();
+      void loadPyramidal();
+
   };
 
 }

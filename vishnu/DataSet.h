@@ -3,11 +3,16 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <sp1common/sp1common.h>
 
 namespace vishnu
 {
+
+  class DataSet;
+  typedef std::shared_ptr< DataSet > DataSetPtr;
+  typedef std::map< std::string, DataSetPtr > DataSets;
 
   class DataSet
   {
@@ -19,7 +24,7 @@ namespace vishnu
 
       std::string getPath( void ) const;
 
-      void setPath( std::string path );
+      void setPath( const std::string& path );
 
       std::vector< std::string > getHeaders( void ) const;
 

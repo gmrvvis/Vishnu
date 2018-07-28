@@ -5,6 +5,8 @@
 #include <QPushButton>
 #include <QStringList>
 
+#include <string>
+
 #include <sp1common/sp1common.h>
 
 namespace vishnu
@@ -13,10 +15,8 @@ namespace vishnu
   {
     public:
       Application( const sp1common::ApplicationType& applicationType,
-        const std::string& displayName,
-        const std::string& shellCommand, 
-        const sp1common::Args& args,
-        const QIcon icon,
+        const std::string& displayName, const std::string& shellCommand,
+        const sp1common::Args& args, const QIcon icon,
         const std::string& workingDirectory = std::string( ) );
       ~Application( );
 

@@ -1,12 +1,14 @@
 #ifndef VISHNU_USERDATASETWIDGET_H
 #define VISHNU_USERDATASETWIDGET_H
 
-#include <QString>
 #include <QListWidgetItem>
 #include <QIcon>
 #include <QLabel>
 #include <QCheckBox>
 #include <QPushButton>
+
+#include <string>
+
 #include <sp1common/sp1common.h>
 
 namespace vishnu
@@ -19,16 +21,17 @@ namespace vishnu
 
   public:
 
-    explicit UserDataSetWidget( const QString& name, const QString& path,
-      const QString& csvFilename, const QString& xmlFilename,
-      const bool& selected, QWidget* parent = Q_NULLPTR );
+    explicit UserDataSetWidget( const std::string& name,
+      const std::string& path, const std::string& csvFilename,
+      const std::string& xmlFilename, const bool& selected,
+      QWidget* parent = Q_NULLPTR );
 
-    QString getName( void ) const;
-    QString getPath( void ) const;
-    QString getCsvFilename( void ) const;
-    QString getCsvPath( void ) const;
-    QString getXmlFilename( void ) const;
-    QString getXmlPath( void ) const;
+    std::string getName( void ) const;
+    std::string getPath( void ) const;
+    std::string getCsvFilename( void ) const;
+    std::string getCsvPath( void ) const;
+    std::string getXmlFilename( void ) const;
+    std::string getXmlPath( void ) const;
 
     bool getSelected( void ) const;
     void setSelected( const bool& selected );
@@ -51,18 +54,18 @@ namespace vishnu
   private:
 
     sp1common::ClickableLabel* _name = nullptr;
-    QString _path;
-    QString _csvFilename;
+    std::string _path;
+    std::string _csvFilename;
     QLabel* _csvPath = nullptr;
-    QString _xmlFilename;
+    std::string _xmlFilename;
     QLabel* _xmlPath = nullptr;
     QCheckBox _selected;
     QPushButton* _remove = nullptr;
     QListWidgetItem* _listWidgetItem = nullptr;
 
-    void setName( const QString& name );
-    void setCsvPath( const QString& path, const QString& csvFilename );
-    void setXmlPath( const QString& path, const QString& xmlFilename );
+    void setName( const std::string& name );
+    void setCsvPath( const std::string& path, const std::string& csvFilename );
+    void setXmlPath( const std::string& path, const std::string& xmlFilename );
 
   };
 

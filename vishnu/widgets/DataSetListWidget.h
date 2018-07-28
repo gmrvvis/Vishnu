@@ -20,12 +20,8 @@
 namespace vishnu
 {
 
-  typedef std::shared_ptr< DataSet > DataSetPtr;
-  typedef std::map< std::string, DataSetPtr > DataSets;
-
-  //typedef std::shared_ptr< DataSetWidget > DataSetWidgetPtr;
-  typedef DataSetWidget* DataSetWidgetPtr;
-  typedef std::vector< DataSetWidgetPtr > DataSetWidgets;
+  class DataSetListWidget;
+  typedef std::shared_ptr< DataSetListWidget > DataSetListWidgetPtr;
 
   class DataSetListWidget : public QListWidget
   {
@@ -59,7 +55,7 @@ namespace vishnu
 
     signals:
 
-      void addDataSetsEvent( const std::vector< std::string >& files );
+      void signalAddFiles( const std::vector< std::string >& files );
 
     private:
 

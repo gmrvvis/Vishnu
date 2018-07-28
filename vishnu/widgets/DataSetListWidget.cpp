@@ -86,11 +86,11 @@ namespace vishnu
 
     for ( int i = 0; i < filePaths.count( ); ++i )
     {
-      QString filePath = filePaths.at( i );
-      std::string path = filePath.toStdString( );
+      QString qFilePath = filePaths.at( i );
+      std::string filepath = qFilePath.toStdString( );
 
       std::string extension = sp1common::Strings::lower(
-        QFileInfo( filePath ).completeSuffix( ).toStdString( ) );
+        QFileInfo( qFilePath ).completeSuffix( ).toStdString( ) );
 
       if ( extension == STR_EXT_SEG )
       {
@@ -102,7 +102,7 @@ namespace vishnu
       }
       else if ( extension == STR_EXT_CSV )
       {
-        createDataSetFromCSV( path, dataSetWidgets );
+        createDataSetFromCSV( filepath, dataSetWidgets );
       }
     }
 
@@ -208,13 +208,13 @@ namespace vishnu
       if ( sp1common::Vectors::find( { STR_EXT_CSV, STR_EXT_JSON, STR_EXT_SEG },
         extension ) != -1 )
       {
-        files.push_back( filePath.toStdString( ) );
+        files.emplace_back( filePath.toStdString( ) );
       }
     }
     if ( !files.empty( ) )
     {
       sp1common::Debug::consoleMessage( "Dropped files" );
-      emit addDataSetsEvent( files );
+      emit signalAddFiles( files );
     }
   }
 }

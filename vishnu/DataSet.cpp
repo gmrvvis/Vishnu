@@ -15,7 +15,7 @@ namespace vishnu
     return _path;
   }
 
-  void DataSet::setPath( std::string path )
+  void DataSet::setPath( const std::string& path )
   {
     _path = path;
   }

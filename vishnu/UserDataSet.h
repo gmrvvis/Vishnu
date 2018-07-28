@@ -1,9 +1,9 @@
 #ifndef VISHNU_USERDATASET_H
 #define VISHNU_USERDATASET_H
 
-#include <QString>
 #include <QJsonObject>
 
+#include <string>
 #include <vector>
 #include <memory>
 
@@ -22,22 +22,22 @@ namespace vishnu
     public:
 
       UserDataSet( );
-      UserDataSet( const QString& name, const QString& path,
-        const QString& csvFilename, const QString& xmlFilename,
+      UserDataSet( const std::string& name, const std::string& path,
+        const std::string& csvFilename, const std::string& xmlFilename,
         const bool& selected );
       ~UserDataSet( );
 
-      QString getName( void ) const;
-      void setName( const QString& name );
+      std::string getName( void ) const;
+      void setName( const std::string& name );
 
-      QString getPath( void ) const;
-      void setPath( const QString& path );
+      std::string getPath( void ) const;
+      void setPath( const std::string& path );
 
-      QString getCsvFilename( void ) const;
-      void setCsvFilename( const QString& csvFilename );
+      std::string getCsvFilename( void ) const;
+      void setCsvFilename( const std::string& csvFilename );
 
-      QString getXmlFilename( void ) const;
-      void setXmlFilename( const QString& xmlFilename );
+      std::string getXmlFilename( void ) const;
+      void setXmlFilename( const std::string& xmlFilename );
 
       bool getSelected( void ) const;
       void setSelected( const bool& selected );
@@ -47,10 +47,10 @@ namespace vishnu
 
     private:
 
-      QString _name;
-      QString _path;
-      QString _csvFilename;
-      QString _xmlFilename;
+      std::string _name;
+      std::string _path;
+      std::string _csvFilename;
+      std::string _xmlFilename;
       bool _selected;
   };
 

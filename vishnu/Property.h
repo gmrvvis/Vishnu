@@ -2,11 +2,17 @@
 #define VISHNU_PROPERTY_H
 
 #include <string>
+#include <vector>
+#include <memory>
 
 #include <sp1common/sp1common.h>
 
 namespace vishnu
 {
+
+  class Property;
+  typedef std::shared_ptr< Property > PropertyPtr;
+  typedef std::vector< PropertyPtr > Properties;
 
   class Property
   {
