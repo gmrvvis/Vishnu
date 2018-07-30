@@ -39,9 +39,9 @@ namespace vishnu
 
       void removeCurrentDataSet( );
 
-      DataSets getDataSets( );
-
       std::vector< std::string > getCommonProperties( );
+
+      DataSets getDataSets( );
 
     protected:
 

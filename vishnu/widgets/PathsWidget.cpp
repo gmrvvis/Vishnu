@@ -146,6 +146,14 @@ namespace vishnu
     _xmlFilename->setText( QString::fromStdString( xmlFilename ) );
   }
 
+  UserDataSetPtr PathsWidget::getUserDataSet( void )
+  {
+    UserDataSetPtr userDataSet( new UserDataSet( _name->text( ).toStdString( ),
+      _path->text( ).toStdString( ), _csvFilename->text( ).toStdString( ),
+      _xmlFilename->text( ).toStdString( ), false ) );
+    return userDataSet;
+  }
+
   void PathsWidget::slotBrowsePath( void )
   {
     QString defPath =

@@ -2,8 +2,6 @@
 #define VISHNU_USERDATASETLISTWIDGET_H
 
 #include <string>
-#include <vector>
-#include <map>
 #include <memory>
 
 #include <QIcon>
@@ -19,38 +17,37 @@
 
 namespace vishnu
 {
-  typedef std::map< std::string, UserDataSetPtr > UserDataSetMap;
-
-  typedef std::shared_ptr< UserDataSetWidget > UserDataSetWidgetPtr;
-  typedef std::vector< UserDataSetWidgetPtr > UserDataSetWidgets;
 
   class UserDataSetListWidget : public QListWidget
   {
 
     Q_OBJECT
 
-  public:
+    public:
 
-    explicit UserDataSetListWidget( QWidget* parent = Q_NULLPTR );
+      explicit UserDataSetListWidget( QWidget* parent = Q_NULLPTR );
 
-    UserDataSetWidgetPtr addUserDataSet( const std::string& name,
-      const std::string& path, const std::string& csvFilename,
-      const std::string& xmlFilename, const bool& selected );
+      UserDataSetWidgetPtr addUserDataSet( const std::string& name,
+        const std::string& path, const std::string& csvFilename,
+        const std::string& xmlFilename, const bool& selected );
 
-    UserDataSetWidgetPtr addUserDataSet( const UserDataSetPtr& userDataSet );
+      //UserDataSetWidgetPtr addUserDataSet( const UserDataSetPtr& userDataSet );
 
-    void removeCurrentDataSet( );
+      void removeCurrentDataSet( );
 
-    UserDataSetMap getDataSets( );
+      UserDataSetMap getDataSets( );
+
+      void clearDataSets( void );
 
     protected:
 
-    void dragMoveEvent( QDragMoveEvent* event );
-    void dragLeaveEvent( QDragLeaveEvent* event );
+      void dragMoveEvent( QDragMoveEvent* event );
 
-  signals:
+      void dragLeaveEvent( QDragLeaveEvent* event );
 
-    void addUserDataSetEvent( const std::string& filePath );
+    signals:
+
+      void addUserDataSetEvent( const std::string& filePath );
 
   };
 

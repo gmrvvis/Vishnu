@@ -7,6 +7,8 @@
 #include <string>
 #include <memory>
 
+#include "../UserDataSet.h"
+
 #include <sp1common/sp1common.h>
 
 namespace vishnu
@@ -30,6 +32,8 @@ namespace vishnu
       std::string getJsonFilename( void ) const;
       std::string getCsvFilename( void ) const;
       std::string getXmlFilename( void ) const;
+
+      UserDataSetPtr getUserDataSet( void );
 
     private slots:
       void slotBrowsePath( void );

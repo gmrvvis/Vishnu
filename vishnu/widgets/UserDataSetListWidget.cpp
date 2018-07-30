@@ -71,20 +71,18 @@ namespace vishnu
     QListWidgetItem* listWidgetItem = dataSetWidget->getListWidgetItem( );
     addItem( listWidgetItem );
     listWidgetItem->setSizeHint( dataSetWidget->sizeHint ( ) );
-    setItemWidget( listWidgetItem, dataSetWidget.get( ) );
-
-    //dataSetWidgets.emplace_back( dataSetWidget );
+    setItemWidget( listWidgetItem, dataSetWidget );
 
     return dataSetWidget;
   }
 
-  UserDataSetWidgetPtr UserDataSetListWidget::addUserDataSet(
+  /*UserDataSetWidgetPtr UserDataSetListWidget::addUserDataSet(
     const UserDataSetPtr& userDataSet )
   {
     return addUserDataSet( userDataSet->getName( ), userDataSet->getPath( ),
       userDataSet->getCsvFilename( ), userDataSet->getXmlFilename( ),
       userDataSet->getSelected( ) );
-  }
+  }*/
 
   void UserDataSetListWidget::removeCurrentDataSet( )
   {    
@@ -107,6 +105,11 @@ namespace vishnu
     }
 
     return dataSets;
+  }
+
+  void UserDataSetListWidget::clearDataSets( void )
+  {
+    clear( );
   }
 
   void UserDataSetListWidget::dragMoveEvent( QDragMoveEvent* event )

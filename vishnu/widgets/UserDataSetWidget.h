@@ -8,11 +8,17 @@
 #include <QPushButton>
 
 #include <string>
+#include <vector>
+#include <memory>
 
 #include <sp1common/sp1common.h>
 
 namespace vishnu
 {
+
+  class UserDataSetWidget;
+  typedef UserDataSetWidget* UserDataSetWidgetPtr;
+  typedef std::vector< UserDataSetWidgetPtr > UserDataSetWidgets;
 
   class UserDataSetWidget : public QWidget
   {
@@ -41,15 +47,16 @@ namespace vishnu
 
   signals:
 
-    void removeSelected( void );
+    void signalCheckSelected( int checked );
+    void signalRemoveSelected( void );
     void updateName( void );
     void updateCheckBox( void );
 
   private slots:
 
     void clickName( void );
-    void clickCheckBox( void );
-    void clickRemove( void );
+    void slotCheck( int checked );
+    void slotRemove( void );
 
   private:
 
@@ -59,7 +66,7 @@ namespace vishnu
     QLabel* _csvPath = nullptr;
     std::string _xmlFilename;
     QLabel* _xmlPath = nullptr;
-    QCheckBox _selected;
+    QCheckBox* _selected = nullptr;
     QPushButton* _remove = nullptr;
     QListWidgetItem* _listWidgetItem = nullptr;
 

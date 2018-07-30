@@ -31,6 +31,11 @@ namespace vishnu
     _userDataSets = userDataSets;
   }
 
+  void UserDataSets::addUserDataSet( const UserDataSetPtr& userDataSet )
+  {
+    _userDataSets.emplace_back( userDataSet );
+  }
+
   void UserDataSets::deserialize( const QJsonObject &jsonObject )
   {
     QJsonArray userDataSets = jsonObject[ "userDataSets" ].toArray( );

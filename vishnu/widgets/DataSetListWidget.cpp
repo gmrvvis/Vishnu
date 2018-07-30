@@ -36,7 +36,7 @@ namespace vishnu
       if ( dataSetWidget->getPath( ) == path )
       {
         QMessageBox::warning( this, APPLICATION_NAME,
-          tr("This file is already loaded.") );
+          tr( "This file is already loaded." ) );
         notUsedPath = false;
         break;
       }

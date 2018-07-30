@@ -26,6 +26,7 @@ namespace vishnu
 
       UserDataSetVector getUserDataSets( void ) const;
       void setUserDataSets( const UserDataSetVector& userDataSets );
+      void addUserDataSet( const UserDataSetPtr& userDataSet );
 
       void deserialize( const QJsonObject &jsonObject );
       void serialize( QJsonObject &jsonObject ) const;

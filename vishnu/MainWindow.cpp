@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 
 #include <QApplication>
+#include <QCoreApplication>
 #include <QDesktopWidget>
 #include <QFileDialog>
 #include <QVBoxLayout>
@@ -94,16 +95,6 @@ namespace vishnu
     //UserDataSetListWidget
     _userDataSetListWidget.reset( new UserDataSetListWidget( ) );
 
-    /*QObject::connect( addDataSetAction, SIGNAL( triggered( ) ), this,
-      SLOT( addDataSetItem( ) ) );
-
-    QObject::connect( _dataSetListWidget.get( ),
-      SIGNAL( addDataSetEvent( const std::string& ) ), this,
-      SLOT( addDataSetItem( const std::string& ) ) );
-
-    //PropertiesTableWidget
-    _propertiesTableWidget.reset( new PropertiesTableWidget( ) );*/
-
     //Applications
     loadClint();
     loadDCExplorer();
@@ -165,12 +156,14 @@ namespace vishnu
     //Status bar
     statusBar()->showMessage("");
 
-    reloadDataSets( );
+    QObject::connect( this, SIGNAL( signalReloadDataSets( ) ), this,
+      SLOT( slotReloadDataSets( ) ) );
+
+    emit signalReloadDataSets( );
   }
 
   MainWindow::~MainWindow( )
   {
-    //delete _ui;
     for ( const auto& appplication : _applications )
     {
       if ( appplication.second->isOpen( ) )
@@ -183,7 +176,8 @@ namespace vishnu
   void MainWindow::closeEvent( QCloseEvent* e )
   {
     QMessageBox::StandardButton result = QMessageBox::question( this,
-      QString( APPLICATION_NAME ), QString( "Are you sure?\n" ),
+      QString( APPLICATION_NAME ),
+      QString( "Are you sure you want to quit?\n" ),
       QMessageBox::Yes | QMessageBox::No );
 
     if ( result != QMessageBox::Yes )
@@ -197,28 +191,33 @@ namespace vishnu
   }
 
 
-  void MainWindow::reloadDataSets( void )
+  void MainWindow::slotReloadDataSets( void )
   {
-    std::string userDataSetsFilename = USER_DATA_FOLDER + std::string( "/" )
-      + USER_DATASETS_FILENAME;
+    std::string userDataSetsFilename = qApp->applicationDirPath( ).toStdString( )
+        + std::string( "/" ) + USER_DATA_FOLDER + std::string( "/" )
+        + USER_DATASETS_FILENAME;
 
     if ( sp1common::Files::exist( userDataSetsFilename ) )
     {
-        UserDataSetsPtr userDataSets =
-          sp1common::JSON::deserialize< UserDataSets >( userDataSetsFilename );
+      UserDataSetsPtr userDataSets =
+        sp1common::JSON::deserialize< UserDataSets >( userDataSetsFilename );
 
-        _userDataSetListWidget.reset( new UserDataSetListWidget( ) );
+      _userDataSetListWidget->clearDataSets( );
 
-        for( const auto& userDataSet : userDataSets->getUserDataSets( ) )
-        {
-            UserDataSetWidgetPtr userDataSetWidget =
-              _userDataSetListWidget->addUserDataSet( userDataSet->getName( ),
-            userDataSet->getPath( ), userDataSet->getCsvFilename( ),
-            userDataSet->getXmlFilename( ), userDataSet->getSelected( ) );
+      /*UserDataSetWidgetPtr userDataSetWidget =
+        _userDataSetListWidget->addUserDataSet( "NAME", "PATH", "CSV", "XML",
+        false );*/
 
-           QObject::connect( userDataSetWidget.get( ),
-             SIGNAL( removeSelected( ) ), this, SLOT( slotRemoveUserDataSet( ) ) );
-        }
+      for( const auto& userDataSet : userDataSets->getUserDataSets( ) )
+      {
+        UserDataSetWidgetPtr userDataSetWidget =
+          _userDataSetListWidget->addUserDataSet( userDataSet->getName( ),
+        userDataSet->getPath( ), userDataSet->getCsvFilename( ),
+        userDataSet->getXmlFilename( ), userDataSet->getSelected( ) );
+
+       QObject::connect( userDataSetWidget, SIGNAL( signalRemoveSelected( ) ),
+         this, SLOT( slotRemoveUserDataSet( ) ) );
+      }
     }
   }
 
@@ -242,7 +241,7 @@ namespace vishnu
     dataSetWindow->setModal( true );
     dataSetWindow->exec( );
 
-    reloadDataSets( );
+    emit signalReloadDataSets( );
   }
 
   void MainWindow::slotRemoveUserDataSet( void )

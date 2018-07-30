@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <memory>
 
 #include <sp1common/sp1common.h>
@@ -15,6 +16,7 @@ namespace vishnu
   class UserDataSet;
   typedef std::shared_ptr< UserDataSet > UserDataSetPtr;
   typedef std::vector< UserDataSetPtr > UserDataSetVector;
+  typedef std::map< std::string, UserDataSetPtr > UserDataSetMap;
 
   class UserDataSet
   {

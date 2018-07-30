@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <memory>
 
 #include <sp1common/sp1common.h>

@@ -50,11 +50,11 @@ namespace vishnu
     private slots:
 
       void slotRemoveUserDataSet( void );
+      void slotReloadDataSets( void );
       void runApp( );
       void closeApp( int exitCode, QProcess::ExitStatus exitStatus );
 
       void checkApps( );
-      void reloadDataSets( void );
       void addDataSet( void );
 
       void syncGroup( const QString& key, const QString& name,
@@ -71,6 +71,7 @@ namespace vishnu
     void signalChangeGroupName( const QString&, const QString& );
     void signalChangeGroupColor( const QString&, const QColor& );
     void signalDestroyGroup( const QString& );
+    void signalReloadDataSets( );
 
   private:
 

@@ -53,15 +53,16 @@ namespace vishnu
     hLayout->addSpacing(30);
 
     //DataSet CheckBox
-    _selected.setChecked( true ); //default checked
     std::stringstream checkBoxStyleSheet;
     checkBoxStyleSheet << "QCheckBox::indicator { width: 32px; height: 32px; }"
       << "QCheckBox::indicator:checked { background-image:url(:/icons/checked.png); }"
       << "QCheckBox::indicator:unchecked { background-image:url(:/icons/unchecked.png); }";
-    _selected.setStyleSheet( QString::fromStdString( checkBoxStyleSheet.str( ) ) );
+    _selected->setStyleSheet( QString::fromStdString( checkBoxStyleSheet.str( ) ) );
+    /*QObject::connect( _selected, SIGNAL( stateChanged( int ) ), this,
+      SLOT( slotChecked( int ) ) );*/
 
     QVBoxLayout *vLayout3 = new QVBoxLayout( );
-    vLayout3->addWidget( &_selected, 0, 0);
+    vLayout3->addWidget( _selected, 0, 0);
     hLayout->addLayout( vLayout3, 0);
     hLayout->addSpacing(30);
 
@@ -72,8 +73,8 @@ namespace vishnu
     removeDataSetImage->setPixmap( removeDataSetPixmap );
     _remove = new QPushButton( );
     _remove->setIcon( QIcon( ":/icons/close.png" ) );
-    QObject::connect( _remove, SIGNAL( clicked() ), this,
-      SLOT( clickRemove( ) ) );
+    QObject::connect( _remove, SIGNAL( clicked( ) ), this,
+      SLOT( slotRemove( ) ) );
 
     QVBoxLayout *vLayout4 = new QVBoxLayout( );
     vLayout4->addWidget( _remove, 0, 0);
@@ -152,18 +153,28 @@ namespace vishnu
 
   bool UserDataSetWidget::getSelected( ) const
   {
-    return _selected.isChecked( );
+    return _selected->isChecked( );
   }
 
   void UserDataSetWidget::setSelected( const bool& selected )
   {
-    _selected.setChecked( selected );
+    if ( _selected == nullptr)
+    {
+      _selected = new QCheckBox( );
+    }
+    _selected->setChecked( selected );
   }
 
-  void UserDataSetWidget::clickRemove( void )
+  void UserDataSetWidget::slotRemove( void )
   {
-    _listWidgetItem->listWidget()->setCurrentItem( _listWidgetItem );
-    emit removeSelected();
+    _listWidgetItem->listWidget( )->setCurrentItem( _listWidgetItem );
+    emit signalRemoveSelected( );
+  }
+
+  void UserDataSetWidget::slotCheck( int checked )
+  {
+    _listWidgetItem->listWidget( )->setCurrentItem( _listWidgetItem );
+    emit signalCheckSelected( checked );
   }
 
   void UserDataSetWidget::clickName( void )
@@ -206,11 +217,6 @@ namespace vishnu
 
     } while( !notUsedName );
     _name->setText( name );
-  }
-
-  void UserDataSetWidget::clickCheckBox( void )
-  {
-    emit updateCheckBox( );
   }
 
   QListWidgetItem* UserDataSetWidget::getListWidgetItem() const
