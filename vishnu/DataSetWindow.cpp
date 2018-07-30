@@ -119,8 +119,8 @@ namespace vishnu
     std::string csvPath = qDir.absolutePath( ).toStdString( )
       + std::string( "/" ) + _pathsWidget->getCsvFilename( );
 
-    //std::string jsonPath = qDir.absolutePath( ).toStdString( )
-      //+ std::string( "/" ) + _pathsWidget->getJsonFilename( );
+    std::string jsonPath = qDir.absolutePath( ).toStdString( )
+      + std::string( "/" ) + _pathsWidget->getJsonFilename( );
 
     std::string xmlPath = qDir.absolutePath( ).toStdString( )
       + std::string( "/" ) + _pathsWidget->getXmlFilename( );
@@ -195,7 +195,16 @@ namespace vishnu
       return;
     }
 
-    //Create user dataset
+    //Create JSON
+    resultDataSets->getDataSets( ).at( 0 )->setPath( csvPath );
+    if ( !createJSON( jsonPath, resultDataSets ) )
+    {
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+        "Can't create JSON file.", false );
+      return;
+    }
+
+    //Create JSON DataSet (userdata)
     std::string userDataFolder = qApp->applicationDirPath( ).toStdString( )
         + std::string( "/" ) + USER_DATA_FOLDER + std::string( "/" );
     std::string userDataSetsFilename = userDataFolder + USER_DATASETS_FILENAME;
@@ -372,6 +381,12 @@ namespace vishnu
     result = sp1common::XML::serialize( xmlPath, pyramidalXML );
 
     return result;
+  }
+
+  bool DataSetWindow::createJSON( const std::string& jsonPath,
+    sp1common::DataSetsPtr& dataSets )
+  {
+    return sp1common::JSON::serialize( jsonPath, dataSets );
   }
 
   /*bool DataSetWindow::generateDataFiles( QDir dir )

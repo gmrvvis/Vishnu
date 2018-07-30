@@ -18,9 +18,11 @@ namespace vishnu
 
   UserDataSetWidget::UserDataSetWidget( const std::string& name,
     const std::string& path, const std::string& csvFilename,
-    const std::string& xmlFilename, const bool& selected, QWidget* /*parent*/ )
+    const std::string& jsonFilename, const std::string& xmlFilename,
+    const bool& selected, QWidget* /*parent*/ )
       : _path( path )
       , _csvFilename( csvFilename )
+      , _jsonFilename( jsonFilename )
       , _xmlFilename( xmlFilename )
   {
     QHBoxLayout *hLayout = new QHBoxLayout( this );
@@ -33,24 +35,34 @@ namespace vishnu
     dataSetImage->setPixmap( dataSetPixmap );
 
     QVBoxLayout *vLayout1 = new QVBoxLayout( );
-    vLayout1->addWidget( dataSetImage, 0, 0);
-    hLayout->addLayout( vLayout1, 0);
-    hLayout->addSpacing(30);
+    vLayout1->addWidget( dataSetImage, 0, 0 );
+    hLayout->addLayout( vLayout1, 0 );
+    hLayout->addSpacing( 30 );
 
     //Name, paths and selected checkbox
     setName( name );
     QObject::connect( _name, SIGNAL( clicked() ), this,
       SLOT( clickName( ) ) );
     setCsvPath( path, csvFilename );
+    setJsonPath( path, jsonFilename );
     setXmlPath( path, xmlFilename );
     setSelected( selected );
 
     QVBoxLayout *vLayout2 = new QVBoxLayout( );
-    vLayout2->addWidget( _name, 0, 0);
-    vLayout2->addWidget( _csvPath, 1, 0);
-    vLayout2->addWidget( _xmlPath, 2, 0);
-    hLayout->addLayout( vLayout2, 1);
-    hLayout->addSpacing(30);
+    vLayout2->addWidget( _name, 0, 0 );
+    //vLayout2->addWidget( _csvPath, 1, 0 );
+    //vLayout2->addWidget( _jsonPath, 2, 0 );
+    //vLayout2->addWidget( _xmlPath, 3, 0 );
+    hLayout->addLayout( vLayout2, 1 );
+    hLayout->addSpacing( 30 );
+
+    QVBoxLayout *vLayout3 = new QVBoxLayout( );
+    //vLayout3->addWidget( _name, 0, 0 );
+    vLayout3->addWidget( _csvPath, 1, 0 );
+    vLayout3->addWidget( _jsonPath, 2, 0 );
+    vLayout3->addWidget( _xmlPath, 3, 0 );
+    hLayout->addLayout( vLayout3, 2 );
+    hLayout->addSpacing( 30 );
 
     //DataSet CheckBox
     std::stringstream checkBoxStyleSheet;
@@ -58,12 +70,12 @@ namespace vishnu
       << "QCheckBox::indicator:checked { background-image:url(:/icons/checked.png); }"
       << "QCheckBox::indicator:unchecked { background-image:url(:/icons/unchecked.png); }";
     _selected->setStyleSheet( QString::fromStdString( checkBoxStyleSheet.str( ) ) );
-    /*QObject::connect( _selected, SIGNAL( stateChanged( int ) ), this,
-      SLOT( slotChecked( int ) ) );*/
+    QObject::connect( _selected, SIGNAL( toggled( bool ) ), this,
+      SLOT( slotCheck( bool ) ) );
 
-    QVBoxLayout *vLayout3 = new QVBoxLayout( );
-    vLayout3->addWidget( _selected, 0, 0);
-    hLayout->addLayout( vLayout3, 0);
+    QVBoxLayout *vLayout4 = new QVBoxLayout( );
+    vLayout4->addWidget( _selected, 0, 0);
+    hLayout->addLayout( vLayout4, 0);
     hLayout->addSpacing(30);
 
     //DataSet remove image
@@ -76,9 +88,9 @@ namespace vishnu
     QObject::connect( _remove, SIGNAL( clicked( ) ), this,
       SLOT( slotRemove( ) ) );
 
-    QVBoxLayout *vLayout4 = new QVBoxLayout( );
-    vLayout4->addWidget( _remove, 0, 0);
-    hLayout->addLayout( vLayout4, 0);
+    QVBoxLayout *vLayout5 = new QVBoxLayout( );
+    vLayout5->addWidget( _remove, 0, 0);
+    hLayout->addLayout( vLayout5, 0);
 
     QPalette pal(palette());
     pal.setColor(QPalette::Base, QColor( "#c3e6fc" ));
@@ -130,6 +142,27 @@ namespace vishnu
       + csvFilename ) );
   }
 
+  std::string UserDataSetWidget::getJsonFilename( void ) const
+  {
+    return _jsonFilename;
+  }
+
+  std::string UserDataSetWidget::getJsonPath( void ) const
+  {
+    return _jsonPath->text( ).toStdString( );
+  }
+
+  void UserDataSetWidget::setJsonPath( const std::string& path,
+    const std::string& jsonFilename )
+  {
+    if ( _jsonPath == nullptr)
+    {
+      _jsonPath = new QLabel( );
+    }
+    _jsonPath->setText( QString::fromStdString( path + std::string( "/" )
+      + jsonFilename ) );
+  }
+
   std::string UserDataSetWidget::getXmlFilename( ) const
   {
     return _xmlFilename;
@@ -151,6 +184,11 @@ namespace vishnu
       + xmlFilename ) );
   }
 
+  QCheckBox* UserDataSetWidget::getCheckBox( void ) const
+  {
+    return _selected;
+  }
+
   bool UserDataSetWidget::getSelected( ) const
   {
     return _selected->isChecked( );
@@ -167,12 +205,14 @@ namespace vishnu
 
   void UserDataSetWidget::slotRemove( void )
   {
+    std::cout << "slot remove" << std::endl;
     _listWidgetItem->listWidget( )->setCurrentItem( _listWidgetItem );
     emit signalRemoveSelected( );
   }
 
-  void UserDataSetWidget::slotCheck( int checked )
+  void UserDataSetWidget::slotCheck( bool checked )
   {
+    std::cout << "slot check: " << checked << std::endl;
     _listWidgetItem->listWidget( )->setCurrentItem( _listWidgetItem );
     emit signalCheckSelected( checked );
   }

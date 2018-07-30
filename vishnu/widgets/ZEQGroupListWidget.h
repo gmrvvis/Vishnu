@@ -22,30 +22,31 @@ namespace vishnu
 
     Q_OBJECT
 
-  public:
+    public:
 
-    explicit ZEQGroupListWidget( QWidget* parent = Q_NULLPTR );
+      explicit ZEQGroupListWidget( QWidget* parent = Q_NULLPTR );
 
-    ZEQGroupWidget* syncGroup( const std::string& key, const QString& name,
-      const QString& owner, const std::vector< std::string >& ids,
-      const QColor& color );
+      ZEQGroupWidget* syncGroup( const std::string& key, const QString& name,
+        const QString& owner, const std::vector< std::string >& ids,
+        const QColor& color );
 
-    void changeGroupName( const std::string& key, const QString& name );
+      void changeGroupName( const std::string& key, const QString& name );
 
-    void changeGroupColor( const std::string& key, const QColor& color );
+      void changeGroupColor( const std::string& key, const QColor& color );
 
-    void removeCurrentGroup( );
+      void removeCurrentGroup( );
 
-    void removeGroup( const std::string& key );
+      void removeGroup( const std::string& key );
 
-    std::string getKey( QListWidgetItem* listWidgetItem );
+      std::string getKey( QListWidgetItem* listWidgetItem );
 
-  private:
-        ZEQGroupWidget* findGroup( const std::string& key );
+    private:
 
-  signals:
+      ZEQGroupWidget* findGroup( const std::string& key );
 
-    void addDataSetEvent( const std::string& filePath );
+    signals:
+
+      void addDataSetEvent( const std::string& filePath );
 
   };
 

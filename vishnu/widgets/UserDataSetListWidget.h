@@ -29,9 +29,8 @@ namespace vishnu
 
       UserDataSetWidgetPtr addUserDataSet( const std::string& name,
         const std::string& path, const std::string& csvFilename,
-        const std::string& xmlFilename, const bool& selected );
-
-      //UserDataSetWidgetPtr addUserDataSet( const UserDataSetPtr& userDataSet );
+        const std::string& jsonFilename, const std::string& xmlFilename,
+        const bool& selected );
 
       void removeCurrentDataSet( );
 
@@ -48,6 +47,14 @@ namespace vishnu
     signals:
 
       void addUserDataSetEvent( const std::string& filePath );
+
+    private slots:
+
+      void slotCheckSelectedDataSets( bool checked );
+
+    private:
+
+      bool _checkingProperty;
 
   };
 

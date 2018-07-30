@@ -25,8 +25,8 @@ namespace vishnu
 
       UserDataSet( );
       UserDataSet( const std::string& name, const std::string& path,
-        const std::string& csvFilename, const std::string& xmlFilename,
-        const bool& selected );
+        const std::string& csvFilename, const std::string& jsonFilename,
+        const std::string& xmlFilename, const bool& selected );
       ~UserDataSet( );
 
       std::string getName( void ) const;
@@ -37,6 +37,9 @@ namespace vishnu
 
       std::string getCsvFilename( void ) const;
       void setCsvFilename( const std::string& csvFilename );
+
+      std::string getJsonFilename( void ) const;
+      void setJsonFilename( const std::string& jsonFilename );
 
       std::string getXmlFilename( void ) const;
       void setXmlFilename( const std::string& xmlFilename );
@@ -52,6 +55,7 @@ namespace vishnu
       std::string _name;
       std::string _path;
       std::string _csvFilename;
+      std::string _jsonFilename;
       std::string _xmlFilename;
       bool _selected;
   };

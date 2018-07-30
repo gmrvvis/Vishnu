@@ -16,6 +16,7 @@
 namespace vishnu
 {
   UserDataSetListWidget::UserDataSetListWidget( QWidget* /*parent*/ )
+    : _checkingProperty( false )
   {    
     setSelectionMode( QAbstractItemView::SingleSelection );
     setDragDropMode( QAbstractItemView::DragDrop );
@@ -26,7 +27,7 @@ namespace vishnu
   UserDataSetWidgetPtr UserDataSetListWidget::addUserDataSet(
     const std::string& name, const std::string& path,
     const std::string& csvFilename, const std::string& xmlFilename,
-    const bool& selected )
+    const std::string& jsonFilename, const bool& selected )
   {
     //UserDataSetWidgets dataSetWidgets;
 /*
@@ -65,7 +66,7 @@ namespace vishnu
 */
     //Add to dataset
     UserDataSetWidgetPtr dataSetWidget( new UserDataSetWidget( name, path,
-      csvFilename, xmlFilename, selected ) );
+      csvFilename, jsonFilename, xmlFilename, selected ) );
     dataSetWidget->setListWidgetItem( new QListWidgetItem( this ) );
 
     QListWidgetItem* listWidgetItem = dataSetWidget->getListWidgetItem( );
@@ -73,16 +74,11 @@ namespace vishnu
     listWidgetItem->setSizeHint( dataSetWidget->sizeHint ( ) );
     setItemWidget( listWidgetItem, dataSetWidget );
 
+    QObject::connect( dataSetWidget, SIGNAL( signalCheckSelected( bool ) ),
+      this, SLOT( slotCheckSelectedDataSets( bool ) ) );
+
     return dataSetWidget;
   }
-
-  /*UserDataSetWidgetPtr UserDataSetListWidget::addUserDataSet(
-    const UserDataSetPtr& userDataSet )
-  {
-    return addUserDataSet( userDataSet->getName( ), userDataSet->getPath( ),
-      userDataSet->getCsvFilename( ), userDataSet->getXmlFilename( ),
-      userDataSet->getSelected( ) );
-  }*/
 
   void UserDataSetListWidget::removeCurrentDataSet( )
   {    
@@ -99,7 +95,8 @@ namespace vishnu
         itemWidget( item( row ) ) );
 
       UserDataSetPtr dataSet( new UserDataSet( dsw->getName( ), dsw->getPath( ),
-        dsw->getCsvFilename( ), dsw->getXmlFilename( ), dsw->getSelected( ) ) );
+        dsw->getCsvFilename( ), dsw->getJsonFilename( ), dsw->getXmlFilename( ),
+        dsw->getSelected( ) ) );
       dataSets[ dsw->getName( ) ] = dataSet;
 
     }
@@ -120,5 +117,28 @@ namespace vishnu
   void UserDataSetListWidget::dragLeaveEvent( QDragLeaveEvent* event )
   {
     event->accept();
+  }
+
+  void UserDataSetListWidget::slotCheckSelectedDataSets( bool checked )
+  {
+    std::cout << "list: check" << std::endl;
+    if ( checked )
+    {
+      QCheckBox* cbSender = static_cast< QCheckBox* >( sender( ) );
+      for( int row = 0; row < count( ); ++row )
+      {
+        UserDataSetWidget* dsw = static_cast< UserDataSetWidget* >(
+          itemWidget( item( row ) ) );
+
+        if ( dsw->getCheckBox( ) != cbSender )
+        {
+          if ( dsw->getSelected( ) )
+          {
+            dsw->setSelected( false );
+          }
+        }
+      }
+    }
+    //emit signalCheckApps( );
   }
 }

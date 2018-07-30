@@ -53,10 +53,8 @@ namespace vishnu
     actionAddDataSet->setText( "AddDataSet" );
     actionAddDataSet->setToolTip( "Add Data Set" );
     actionAddDataSet->setShortcut( QKeySequence( "Ctrl+O" ) ); 
-    QObject::connect( actionAddDataSet, SIGNAL( triggered() ), this,
+    QObject::connect( actionAddDataSet, SIGNAL( triggered( ) ), this,
       SLOT( addDataSet( ) ) );
-    /*QObject::connect( actionAddDataSet, SIGNAL( triggered() ), this,
-      SLOT( addDataSetItem( ) ) );*/
     toolBar->addAction( actionAddDataSet );
     addToolBar(Qt::TopToolBarArea, toolBar);
     //End ToolBar
@@ -89,8 +87,8 @@ namespace vishnu
     //Central Widget
     setCentralWidget( new QWidget( ) );
 
-    QHBoxLayout* mainHLayout = new QHBoxLayout( );
-    centralWidget()->setLayout( mainHLayout );
+    QVBoxLayout* mainVLayout = new QVBoxLayout( );
+    centralWidget()->setLayout( mainVLayout );
 
     //UserDataSetListWidget
     _userDataSetListWidget.reset( new UserDataSetListWidget( ) );
@@ -129,19 +127,27 @@ namespace vishnu
     //User DataSets
     QVBoxLayout* userDSLayout = new QVBoxLayout( );
     userDSLayout->addWidget( _userDataSetListWidget.get( ), 0 );
-    mainHLayout->addLayout( userDSLayout, 0 );
+    mainVLayout->addLayout( userDSLayout, 0 );
+
+    //Apps and groups
+    QHBoxLayout* appsAndGroupsLayout = new QHBoxLayout( );
 
     //Applications
-    QVBoxLayout* appsLayout = new QVBoxLayout();
+    QVBoxLayout* appsLayout = new QVBoxLayout( );
     appsLayout->addLayout( appsVBoxLayout, 0 );
-    mainHLayout->addLayout( appsLayout, 1 );
+    //mainHLayout->addLayout( appsLayout, 1 );
 
     //ZEQ Groups
     QVBoxLayout* zeqLayout = new QVBoxLayout( );
     zeqLayout->addWidget( _zeqGroupListWidget.get( ), 0 );
-    mainHLayout->addLayout( zeqLayout, 2 );
+    //mainHLayout->addLayout( zeqLayout, 2 );
 
-    /*std::vector<std::string> ids;
+    appsAndGroupsLayout->addLayout( appsLayout, 0 );
+    appsAndGroupsLayout->addLayout( zeqLayout, 1 );
+    mainVLayout->addLayout( appsAndGroupsLayout, 1 );
+
+    //TEST GROUPS
+    std::vector<std::string> ids;
     ids.push_back("test");
     syncGroup("GROUP1#!#CLINT", "GROUP1", "CLINT", ids, QColor(255, 65, 77));
     syncGroup("GROUP1#!#DCEXPLORER", "GROUP2", "DCEXPLORER", ids, QColor(3, 255, 77));
@@ -151,7 +157,8 @@ namespace vishnu
     changeGroupColor("GROUP1#!#CLINT", QColor(0, 255, 0));
     changeGroupName("GROUP2#!#DCEXPLORER", "newName");
     syncGroup("GROUP2#!#PYRAMIDAL", "otherName", "PYRAMIDAL", ids, QColor(255, 65, 77));
-    removeGroup("GROUP3#!#PYRAMIDAL");*/
+    removeGroup("GROUP3#!#PYRAMIDAL");
+    //END TEST GROUPS
 
     //Status bar
     statusBar()->showMessage("");
@@ -204,21 +211,35 @@ namespace vishnu
 
       _userDataSetListWidget->clearDataSets( );
 
-      /*UserDataSetWidgetPtr userDataSetWidget =
-        _userDataSetListWidget->addUserDataSet( "NAME", "PATH", "CSV", "XML",
-        false );*/
-
       for( const auto& userDataSet : userDataSets->getUserDataSets( ) )
       {
         UserDataSetWidgetPtr userDataSetWidget =
           _userDataSetListWidget->addUserDataSet( userDataSet->getName( ),
         userDataSet->getPath( ), userDataSet->getCsvFilename( ),
-        userDataSet->getXmlFilename( ), userDataSet->getSelected( ) );
+        userDataSet->getJsonFilename( ), userDataSet->getXmlFilename( ),
+        userDataSet->getSelected( ) );
 
        QObject::connect( userDataSetWidget, SIGNAL( signalRemoveSelected( ) ),
          this, SLOT( slotRemoveUserDataSet( ) ) );
       }
     }
+    //TEST DATASET
+    UserDataSetWidgetPtr userDataSetWidget2 =
+      _userDataSetListWidget->addUserDataSet( "dataSet001",
+      "/media/DATA/data/test", "dataSet.csv", "dataSet.json", "dataSet.xml",
+      false );
+
+    QObject::connect( userDataSetWidget2, SIGNAL( signalRemoveSelected( ) ),
+      this, SLOT( slotRemoveUserDataSet( ) ) );
+
+    UserDataSetWidgetPtr userDataSetWidget3 =
+      _userDataSetListWidget->addUserDataSet( "dataSet502",
+      "/media/DATA/data/ds", "segmentations.csv", "test.json", "pyramidal.xml",
+      false );
+
+    QObject::connect( userDataSetWidget3, SIGNAL( signalRemoveSelected( ) ),
+      this, SLOT( slotRemoveUserDataSet( ) ) );
+    //END TEST DATASET
   }
 
   void MainWindow::addDataSet( void )
@@ -246,6 +267,7 @@ namespace vishnu
 
   void MainWindow::slotRemoveUserDataSet( void )
   {
+    //QDialog* d = new QDialog( this, );
     _userDataSetListWidget->removeCurrentDataSet( );
   }
 

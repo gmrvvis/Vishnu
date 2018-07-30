@@ -150,6 +150,7 @@ namespace vishnu
   {
     UserDataSetPtr userDataSet( new UserDataSet( _name->text( ).toStdString( ),
       _path->text( ).toStdString( ), _csvFilename->text( ).toStdString( ),
+      _jsonFilename->text( ).toStdString( ),
       _xmlFilename->text( ).toStdString( ), false ) );
     return userDataSet;
   }

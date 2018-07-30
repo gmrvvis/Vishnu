@@ -29,16 +29,19 @@ namespace vishnu
 
     explicit UserDataSetWidget( const std::string& name,
       const std::string& path, const std::string& csvFilename,
-      const std::string& xmlFilename, const bool& selected,
-      QWidget* parent = Q_NULLPTR );
+      const std::string& jsonFilename, const std::string& xmlFilename,
+      const bool& selected, QWidget* parent = Q_NULLPTR );
 
     std::string getName( void ) const;
     std::string getPath( void ) const;
     std::string getCsvFilename( void ) const;
     std::string getCsvPath( void ) const;
+    std::string getJsonFilename( void ) const;
+    std::string getJsonPath( void ) const;
     std::string getXmlFilename( void ) const;
     std::string getXmlPath( void ) const;
 
+    QCheckBox* getCheckBox( void ) const;
     bool getSelected( void ) const;
     void setSelected( const bool& selected );
 
@@ -47,7 +50,7 @@ namespace vishnu
 
   signals:
 
-    void signalCheckSelected( int checked );
+    void signalCheckSelected( bool checked );
     void signalRemoveSelected( void );
     void updateName( void );
     void updateCheckBox( void );
@@ -55,7 +58,7 @@ namespace vishnu
   private slots:
 
     void clickName( void );
-    void slotCheck( int checked );
+    void slotCheck( bool checked );
     void slotRemove( void );
 
   private:
@@ -64,6 +67,8 @@ namespace vishnu
     std::string _path;
     std::string _csvFilename;
     QLabel* _csvPath = nullptr;
+    std::string _jsonFilename;
+    QLabel* _jsonPath = nullptr;
     std::string _xmlFilename;
     QLabel* _xmlPath = nullptr;
     QCheckBox* _selected = nullptr;
@@ -72,6 +77,8 @@ namespace vishnu
 
     void setName( const std::string& name );
     void setCsvPath( const std::string& path, const std::string& csvFilename );
+    void setJsonPath( const std::string& path,
+      const std::string& jsonFilename );
     void setXmlPath( const std::string& path, const std::string& xmlFilename );
 
   };

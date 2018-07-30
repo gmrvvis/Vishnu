@@ -48,7 +48,8 @@ namespace vishnu
           const std::string& xmlPath,
           const sp1common::DataSetPtr& resultDataSet,
           const sp1common::PropertyGroupsPtr& propertyGroups );
-        //bool generateDataFiles( QDir dir );
+        bool createJSON( const std::string& jsonPath,
+          sp1common::DataSetsPtr& dataSets );
 
   };
 
