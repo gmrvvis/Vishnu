@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #ifndef VISHNU_PROPERTIESTABLEWIDGET_H
 #define VISHNU_PROPERTIESTABLEWIDGET_H
 
@@ -15,7 +23,6 @@
 
 #include <sp1common/sp1common.h>
 #include "PropertiesWidget.h"
-#include "../Property.h"
 
 namespace vishnu
 {
@@ -34,7 +41,8 @@ namespace vishnu
 
     void checkPrimaryKeys( const std::vector< std::string >& commonProperties );
 
-    void addProperties( const std::vector< std::string >& properties );
+    void addProperties( const sp1common::Properties& properties,
+      const sp1common::PropertyGroupsPtr& propertyGroups );
 
     void removeProperties( const std::vector< std::string >& properties );
 

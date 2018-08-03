@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #ifndef VISHNU_DATASETLISTWIDGET_H
 #define VISHNU_DATASETLISTWIDGET_H
 
@@ -15,7 +23,6 @@
 #include <sp1common/sp1common.h>
 
 #include "DataSetWidget.h"
-#include "../DataSet.h"
 
 namespace vishnu
 {
@@ -41,7 +48,12 @@ namespace vishnu
 
       std::vector< std::string > getCommonProperties( );
 
-      DataSets getDataSets( );
+      sp1common::DataSetsPtr getDataSets( void ) const;
+
+      sp1common::PropertyGroupsPtr getPropertyGroups( void ) const;
+
+      void setPropertyGroups(
+        const sp1common::PropertyGroupsPtr& propertyGroups );
 
     protected:
 
@@ -59,8 +71,17 @@ namespace vishnu
 
     private:
 
-      void createDataSetFromCSV( const std::string& path,
-        DataSetWidgets& dataSetWidgets );
+      void createDataSetsFromSEG( DataSetWidgets& dataSetWidgets,
+        const std::string& path );
+
+      void createDataSetsFromJSON( DataSetWidgets& dataSetWidgets,
+        const std::string& path );
+
+      void createDataSetFromCSV( DataSetWidgets& dataSetWidgets,
+        const std::string& path,
+        const sp1common::Properties& properties = sp1common::Properties( ) );
+
+      sp1common::PropertyGroupsPtr _propertyGroups;
 
   };
 

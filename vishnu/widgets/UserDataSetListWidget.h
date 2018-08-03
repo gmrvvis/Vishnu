@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #ifndef VISHNU_USERDATASETLISTWIDGET_H
 #define VISHNU_USERDATASETLISTWIDGET_H
 
@@ -13,7 +21,7 @@
 #include <sp1common/sp1common.h>
 
 #include "UserDataSetWidget.h"
-#include "../UserDataSets.h"
+#include "../model/UserDataSets.h"
 
 namespace vishnu
 {
@@ -32,10 +40,10 @@ namespace vishnu
         const std::string& jsonFilename, const std::string& xmlFilename,
         const bool& selected );
 
-      void removeCurrentDataSet( );
-
-      UserDataSetMap getDataSets( );
-
+      void removeCurrentDataSet( void );
+      void selectCurrentDataSet( void );
+      std::string getCurrentDataSetName( void );
+      UserDataSetMap getDataSets( void );
       void clearDataSets( void );
 
     protected:
@@ -48,9 +56,9 @@ namespace vishnu
 
       void addUserDataSetEvent( const std::string& filePath );
 
-    private slots:
+    //private slots:
 
-      void slotCheckSelectedDataSets( bool checked );
+      //void slotCheckSelectedDataSets( bool checked );
 
     private:
 

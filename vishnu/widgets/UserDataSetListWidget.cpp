@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #include "UserDataSetListWidget.h"
 
 #include <algorithm>
@@ -74,15 +82,41 @@ namespace vishnu
     listWidgetItem->setSizeHint( dataSetWidget->sizeHint ( ) );
     setItemWidget( listWidgetItem, dataSetWidget );
 
-    QObject::connect( dataSetWidget, SIGNAL( signalCheckSelected( bool ) ),
-      this, SLOT( slotCheckSelectedDataSets( bool ) ) );
-
     return dataSetWidget;
   }
 
   void UserDataSetListWidget::removeCurrentDataSet( )
   {    
     takeItem( row( currentItem( ) ) );
+  }
+
+  void UserDataSetListWidget::selectCurrentDataSet( void )
+  {
+    UserDataSetWidgetPtr currentDataSet =
+      static_cast< UserDataSetWidgetPtr >( itemWidget( currentItem( ) ) );
+
+    if ( !_checkingProperty )
+    {
+      _checkingProperty = true;
+      for( int row = 0; row < count( ); ++row )
+      {
+        UserDataSetWidget* dataSet = static_cast< UserDataSetWidget* >(
+          itemWidget( item( row ) ) );
+        if ( currentDataSet != dataSet )
+        {
+          dataSet->setSelected( false );
+        }
+      }
+      currentDataSet->setSelected( true );
+      _checkingProperty = false;
+    }
+  }
+
+  std::string UserDataSetListWidget::getCurrentDataSetName( )
+  {
+    UserDataSetWidgetPtr userDataSet =
+      static_cast< UserDataSetWidgetPtr >( itemWidget( currentItem( ) ) );
+    return userDataSet->getName( );
   }
 
   UserDataSetMap UserDataSetListWidget::getDataSets( )
@@ -119,26 +153,33 @@ namespace vishnu
     event->accept();
   }
 
-  void UserDataSetListWidget::slotCheckSelectedDataSets( bool checked )
+ /* void UserDataSetListWidget::slotCheckSelectedDataSets( bool checked )
   {
-    std::cout << "list: check" << std::endl;
-    if ( checked )
-    {
-      QCheckBox* cbSender = static_cast< QCheckBox* >( sender( ) );
-      for( int row = 0; row < count( ); ++row )
-      {
-        UserDataSetWidget* dsw = static_cast< UserDataSetWidget* >(
-          itemWidget( item( row ) ) );
+    std::cout << "USE DATA SET LIST WIDGET, slot check" << std::endl;
+    //if ( !_checkingProperty  )
+    //{
+      //_checkingProperty = true;
 
-        if ( dsw->getCheckBox( ) != cbSender )
+      if ( checked )
+      {
+        QCheckBox* cbSender = static_cast< QCheckBox* >( sender( ) );
+        for( int row = 0; row < count( ); ++row )
         {
-          if ( dsw->getSelected( ) )
+          UserDataSetWidgetPtr dsw = static_cast< UserDataSetWidgetPtr >(
+            itemWidget( item( row ) ) );
+          std::cout << "row " << row << ", name " << dsw->getName( ) << std::endl;
+          if ( dsw->getCheckBox( ) != cbSender )
           {
-            dsw->setSelected( false );
+            if ( dsw->getSelected( ) )
+            {
+              std::cout << "xx" << std::endl;
+              dsw->setSelected( false );
+            }
           }
         }
-      }
+      //}
+      //emit signalCheckApps( );
     }
-    //emit signalCheckApps( );
-  }
+    //_checkingProperty = false;
+  }*/
 }

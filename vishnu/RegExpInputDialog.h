@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #ifndef VISHNU_REGEXPINPUTDIALOG_H
 #define VISHNU_REGEXPINPUTDIALOG_H
 

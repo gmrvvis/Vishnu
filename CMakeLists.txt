@@ -1,18 +1,19 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
 #   Vishnu
-#   2017 (c) GMRV / Universidad Rey Juan Carlos
-#   gmrv@gmrv.es
-#   www.gmrv.es
+#   2017-2018 (c) GMRV/URJC
+#   Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+#   http://gmrv.es/gmrvvis/
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
 cmake_minimum_required( VERSION 3.1 )
 set( PROJECT_VERSION_MAJOR "0" )
-set( PROJECT_VERSION_MINOR "2" )
-set( PROJECT_VERSION_PATCH "1" )
+set( PROJECT_VERSION_MINOR "3" )
+set( PROJECT_VERSION_PATCH "0" )
 set( PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH} )
 project( vishnu VERSION ${PROJECT_VERSION} )
-set( vishnu_VERSION_ABI 4 )
+set( vishnu_VERSION_ABI 5 )
 
 # Disable in source building
 if( "${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}" )
@@ -36,6 +37,8 @@ endif( )
 include( GitExternal )
 
 set( VISHNU_DESCRIPTION "Vishnu" )
+set( VISHNU_MAINTAINER "Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>")
+set( VISHNU_LICENSE "" )
 set( COMMON_PROJECT_DOMAIN gmrv.es )
 
 include( Common )
@@ -58,6 +61,7 @@ list( APPEND VISHNU_DEPENDENT_LIBRARIES
 )
 
 add_subdirectory( vishnu )
+add_subdirectory( examples )
 
 if( MSVC )  
   # Set Vishnu as startup project on Visual Studio, CMake v3.6

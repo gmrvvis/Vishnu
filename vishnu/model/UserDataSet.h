@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #ifndef VISHNU_USERDATASET_H
 #define VISHNU_USERDATASET_H
 
@@ -23,11 +31,11 @@ namespace vishnu
 
     public:
 
-      UserDataSet( );
+      UserDataSet( void );
       UserDataSet( const std::string& name, const std::string& path,
         const std::string& csvFilename, const std::string& jsonFilename,
         const std::string& xmlFilename, const bool& selected );
-      ~UserDataSet( );
+      ~UserDataSet( void );
 
       std::string getName( void ) const;
       void setName( const std::string& name );

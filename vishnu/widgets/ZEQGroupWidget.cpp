@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #include "ZEQGroupWidget.h"
 
 #include <QHBoxLayout>
@@ -21,45 +29,45 @@ namespace vishnu
   ZEQGroupWidget::ZEQGroupWidget( const std::string& key, const QString& name,
     const QString& owner, const std::vector< std::string >& ids,
     const QColor& color, QWidget* /*parent*/ )
-    : _key( key )
-    , _ids( ids )
+     : _key( key )
+     , _ids( ids )
   {
     QHBoxLayout *hLayout = new QHBoxLayout( this );
 
     //DataSet image
     QVBoxLayout *vLayout1 = new QVBoxLayout( );
     setColor( color );
-    vLayout1->addWidget( _color, 0, 0);
-    hLayout->addLayout( vLayout1, 0);
-    hLayout->addSpacing(30);
+    vLayout1->addWidget( _color, 0, 0 );
+    hLayout->addLayout( vLayout1, 0 );
+    hLayout->addSpacing( 30 );
 
     setName( name );
     setOwner( owner );
 
-    hLayout->addWidget( _name, 1);
-    hLayout->addWidget( _owner, 2);
-    hLayout->addSpacing(30);
+    hLayout->addWidget( _name, 1 );
+    hLayout->addWidget( _owner, 2 );
+    hLayout->addSpacing( 30 );
 
     //DataSet remove image
     QLabel* removeGroupImage = new QLabel( );
-    removeGroupImage->setStyleSheet("width: 32px; height: 32px;");
+    removeGroupImage->setStyleSheet("width: 32px; height: 32px;" );
     QPixmap removeGroupPixmap( ":/icons/close.png" );
     removeGroupImage->setPixmap( removeGroupPixmap );
     _remove = new QPushButton( );
     _remove->setIcon( QIcon( ":/icons/close.png" ) );
-    QObject::connect( _remove, SIGNAL( clicked() ), this,
+    QObject::connect( _remove, SIGNAL( clicked( ) ), this,
       SLOT( clickRemove( ) ) );
 
     QVBoxLayout *vLayout4 = new QVBoxLayout( );
     vLayout4->addWidget( _remove, 0, 0);
-    hLayout->addLayout( vLayout4, 0);
+    hLayout->addLayout( vLayout4, 0 );
 
-    QPalette pal(palette());
+    QPalette pal( palette( ) );
     //pal.setColor(QPalette:, Qt::black);
-    pal.setColor(QPalette::Base, QColor( "#c3e6fc" ));
-    setAutoFillBackground(true);
-    setPalette(pal);
-    show();
+    pal.setColor( QPalette::Base, QColor( "#c3e6fc" ) );
+    setAutoFillBackground( true );
+    setPalette( pal );
+    show( );
 
     setLayout( hLayout );
   }
@@ -81,7 +89,7 @@ namespace vishnu
       _name = new QLabel( );
     }
     _name->setText( name );
-    _name->setStyleSheet("font-weight: bold; font-size: 12px");
+    _name->setStyleSheet( "font-weight: bold; font-size: 12px" );
   }
 
   QString ZEQGroupWidget::getOwner( ) const
@@ -96,12 +104,12 @@ namespace vishnu
       _owner = new QLabel( );
     }
     _owner->setText( owner );
-    _owner->setStyleSheet("font-weight: bold; font-size: 12px");
+    _owner->setStyleSheet( "font-weight: bold; font-size: 12px" );
   }
 
   QColor ZEQGroupWidget::getColor( void ) const
   {
-    return _color->pixmap()->toImage( ).pixelColor(0, 0);
+    return _color->pixmap( )->toImage( ).pixelColor( 0, 0 );
   }
 
   void ZEQGroupWidget::setColor( const QColor& color )

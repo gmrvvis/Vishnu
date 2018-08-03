@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #include "UserDataSets.h"
 
 #include <QJsonArray>
@@ -5,7 +13,7 @@
 namespace vishnu
 {
 
-  UserDataSets::UserDataSets( )
+  UserDataSets::UserDataSets( void )
   {
 
   }
@@ -16,7 +24,7 @@ namespace vishnu
 
   }
 
-  UserDataSets::~UserDataSets( )
+  UserDataSets::~UserDataSets( void )
   {
 
   }
@@ -54,8 +62,8 @@ namespace vishnu
     for ( const auto& userDataSet : _userDataSets )
     {
         QJsonObject userDataSetObject;
-        userDataSet->serialize(userDataSetObject);
-        userDataSets.append(userDataSetObject);
+        userDataSet->serialize( userDataSetObject );
+        userDataSets.append( userDataSetObject );
     }
     jsonObject[ "userDataSets" ] = userDataSets;
   }

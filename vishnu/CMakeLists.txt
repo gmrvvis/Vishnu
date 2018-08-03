@@ -1,3 +1,12 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+#   Vishnu
+#   2017-2018 (c) GMRV/URJC
+#   Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+#   http://gmrv.es/gmrvvis/
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
 source_group( \\ FILES CMakeLists.txt )
 
 set( Name Vishnu )
@@ -13,35 +22,14 @@ configure_file( ${CMAKE_SOURCE_DIR}/CMake/common/cpp/version.h
 configure_file( ${CMAKE_SOURCE_DIR}/CMake/common/cpp/version.cpp
   ${PROJECT_BINARY_DIR}/src/version.cpp @ONLY )
   
-set( VISHNU_SOURCES
-  ${PROJECT_BINARY_DIR}/src/version.cpp
-  MainWindow.cpp
-  DataSetWindow.cpp
-  main.cpp
-  Application.cpp
-  widgets/DataSetListWidget.cpp
-  widgets/DataSetWidget.cpp
-  widgets/UserDataSetListWidget.cpp
-  widgets/UserDataSetWidget.cpp
-  widgets/PropertiesTableWidget.cpp
-  widgets/PropertiesWidget.cpp
-  widgets/ZEQGroupListWidget.cpp
-  widgets/ZEQGroupWidget.cpp
-  widgets/PathsWidget.cpp
-  Property.cpp
-  DataSet.cpp
-  UserDataSets.cpp
-  UserDataSet.cpp
-  RegExpInputDialog.cpp
-)
-
 set( VISHNU_HEADERS
   ${PROJECT_BINARY_DIR}/include/vishnu/version.h
-  MainWindow.h
-  DataSetWindow.h
-  Application.h
   resources.qrc
   Definitions.hpp
+  MainWindow.h
+  AppProcess.h  
+  DataSetWindow.h
+  RegExpInputDialog.h
   widgets/DataSetListWidget.h
   widgets/DataSetWidget.h
   widgets/UserDataSetListWidget.h
@@ -51,11 +39,34 @@ set( VISHNU_HEADERS
   widgets/ZEQGroupListWidget.h
   widgets/ZEQGroupWidget.h
   widgets/PathsWidget.h
-  Property.h
-  DataSet.h
-  UserDataSets.h
-  UserDataSet.h
-  RegExpInputDialog.h
+  model/Application.h
+  model/AppsConfig.h
+  model/Preferences.h
+  model/UserDataSets.h
+  model/UserDataSet.h
+)
+
+set( VISHNU_SOURCES
+  ${PROJECT_BINARY_DIR}/src/version.cpp
+  main.cpp
+  MainWindow.cpp
+  AppProcess.cpp
+  DataSetWindow.cpp
+  RegExpInputDialog.cpp
+  widgets/DataSetListWidget.cpp
+  widgets/DataSetWidget.cpp
+  widgets/UserDataSetListWidget.cpp
+  widgets/UserDataSetWidget.cpp
+  widgets/PropertiesTableWidget.cpp
+  widgets/PropertiesWidget.cpp
+  widgets/ZEQGroupListWidget.cpp
+  widgets/ZEQGroupWidget.cpp
+  widgets/PathsWidget.cpp
+  model/Application.cpp
+  model/AppsConfig.cpp
+  model/Preferences.cpp
+  model/UserDataSets.cpp
+  model/UserDataSet.cpp
 )
 
 set( VISHNU_LINK_LIBRARIES

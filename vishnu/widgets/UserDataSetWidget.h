@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #ifndef VISHNU_USERDATASETWIDGET_H
 #define VISHNU_USERDATASETWIDGET_H
 
@@ -58,7 +66,7 @@ namespace vishnu
   private slots:
 
     void clickName( void );
-    void slotCheck( bool checked );
+    void slotCheck( bool check );
     void slotRemove( void );
 
   private:

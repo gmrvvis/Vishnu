@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #include "PropertiesTableWidget.h"
 
 #include <algorithm>
@@ -52,30 +60,74 @@ namespace vishnu
   }
 
   void PropertiesTableWidget::addProperties(
-    const std::vector< std::string >& properties )
+    const sp1common::Properties& properties,
+    const sp1common::PropertyGroupsPtr& propertyGroups )
   {
     for ( const auto& property : properties )
     {
+      std::string propertyName = property->getName( );
       std::vector< std::string > tableProperties;
       for (int i = 0; i < rowCount(); ++i )
       {
-        std::string propertyName = static_cast< QLabel* >( cellWidget( i, 0 )
-          )->text( ).toStdString( );
-
-        tableProperties.push_back( propertyName );
+        tableProperties.push_back( static_cast< QLabel* >( cellWidget( i, 0 )
+          )->text( ).toStdString( ) );
       }
 
       if ( std::find( tableProperties.begin( ), tableProperties.end( ),
-        property ) == tableProperties.end( ) )
+        propertyName ) == tableProperties.end( ) )
       {
+        std::vector< std::string > primaryKeys =
+          propertyGroups->getPrimaryKeys( );
+        std::vector< std::string > nonPrimaryKeys =
+          propertyGroups->getNonPrimaryKeys( );
+        std::vector< std::string > axes = propertyGroups->getAxes( );
+        bool isPrimaryKey = false;
+        bool inUse = false;
+        sp1common::AxisType axis = sp1common::AxisType::None;
+        if ( sp1common::Vectors::find( primaryKeys, propertyName ) != -1 )
+        {
+          isPrimaryKey = true;
+          inUse = true;
+        }
+        else if ( sp1common::Vectors::find( nonPrimaryKeys, propertyName )
+          != -1 )
+        {
+          inUse = true;
+        }
+        int axisPos = sp1common::Vectors::find( axes, propertyName );
+        if ( axisPos != -1 )
+        {
+          if ( axes.size( ) > 1 )
+          {
+            switch( axisPos )
+            {
+              case 0:
+                axis = sp1common::AxisType::X;
+                break;
+              case 1:
+                axis = sp1common::AxisType::Y;
+                break;
+              case 2:
+                axis = sp1common::AxisType::Z;
+                break;
+              default:
+                sp1common::Error::throwError(
+                  sp1common::Error::ErrorType::Error, "Invalid Axis", true );
+                break;
+            }
+          }
+          else
+          {
+            axis = sp1common::AxisType::XYZ;
+          }
+        }
+
+        PropertiesWidget* propertiesWidget = new PropertiesWidget( propertyName,
+          inUse, isPrimaryKey, property->getDataType( ), axis );
+
         int row = this->rowCount( );
         int columns = columnCount( );
-
-        PropertiesWidget* propertiesWidget = new PropertiesWidget( property,
-          true, false, sp1common::DataType::Undefined,
-          sp1common::AxisType::None );
-
-        insertRow(row);
+        insertRow( row );
         for( int column = 0; column < columns; ++column )
         {
           setItem( row, column, new QTableWidgetItem( ) );

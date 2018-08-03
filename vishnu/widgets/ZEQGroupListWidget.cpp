@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #include "ZEQGroupListWidget.h"
 
 #include <algorithm>
@@ -22,11 +30,11 @@ namespace vishnu
     setDefaultDropAction( Qt::MoveAction );
   }
 
-  ZEQGroupWidget* ZEQGroupListWidget::syncGroup( const std::string& key,
+  ZEQGroupWidgetPtr ZEQGroupListWidget::syncGroup( const std::string& key,
     const QString& name, const QString& owner,
     const std::vector< std::string >& ids, const QColor& color )
   {
-    ZEQGroupWidget* zeqGroup = findGroup( key );
+    ZEQGroupWidgetPtr zeqGroup = findGroup( key );
 
     if ( zeqGroup )
     {
@@ -56,11 +64,11 @@ namespace vishnu
     return zeqGroup;
   }
 
-  ZEQGroupWidget* ZEQGroupListWidget::findGroup( const std::string& key )
+  ZEQGroupWidgetPtr ZEQGroupListWidget::findGroup( const std::string& key )
   {
     for( int row = 0; row < count( ); ++row )
     {
-      ZEQGroupWidget* zeqGroup = static_cast< ZEQGroupWidget* >( itemWidget(
+      ZEQGroupWidgetPtr zeqGroup = static_cast< ZEQGroupWidgetPtr >( itemWidget(
         item( row ) ) );
 
       if ( zeqGroup->getKey( ) == key )
@@ -73,7 +81,7 @@ namespace vishnu
 
   std::string ZEQGroupListWidget::getKey( QListWidgetItem* listWidgetItem )
   {
-    ZEQGroupWidget* zeqGroup = static_cast< ZEQGroupWidget* >( itemWidget(
+    ZEQGroupWidgetPtr zeqGroup = static_cast< ZEQGroupWidgetPtr >( itemWidget(
       listWidgetItem ) );
     return zeqGroup->getKey( );
   }
@@ -88,7 +96,7 @@ namespace vishnu
       zeqGroup->setName( name );
 
       sp1common::Debug::consoleMessage( "Group: '" + key
-        + "' - Group name changed sucessfully ('" + oldName + "'' -> '"
+        + "' - Group name changed sucessfully ('" + oldName + "' -> '"
         + name.toStdString( ) + "')." );
     }
   }
@@ -96,7 +104,7 @@ namespace vishnu
   void ZEQGroupListWidget::changeGroupColor( const std::string& key,
     const QColor& color )
   {
-    ZEQGroupWidget* zeqGroup = findGroup( key );
+    ZEQGroupWidgetPtr zeqGroup = findGroup( key );
     if ( zeqGroup )
     {
       //int r,g,b;
@@ -106,7 +114,7 @@ namespace vishnu
 
       sp1common::Debug::consoleMessage( "Group: '" + key
         + "' - Group color changed sucessfully ('"
-        + oldColor.name( ).toStdString( ) + "'' -> '"
+        + oldColor.name( ).toStdString( ) + "' -> '"
         + color.name( ).toStdString( ) + "')." );
     }
   }
@@ -114,7 +122,7 @@ namespace vishnu
   void ZEQGroupListWidget::removeCurrentGroup( )
   {    
     QListWidgetItem* listWidgetItem = currentItem( );
-    ZEQGroupWidget* zeqGroup = static_cast< ZEQGroupWidget* >( itemWidget(
+    ZEQGroupWidgetPtr zeqGroup = static_cast< ZEQGroupWidgetPtr >( itemWidget(
       listWidgetItem ) );
     std::string key = zeqGroup->getKey( );
 
@@ -128,7 +136,7 @@ namespace vishnu
   {
     for( int row = 0; row < count( ); ++row )
     {
-      ZEQGroupWidget* zeqGroup = static_cast< ZEQGroupWidget* >( itemWidget(
+      ZEQGroupWidgetPtr zeqGroup = static_cast< ZEQGroupWidgetPtr >( itemWidget(
         item( row ) ) );
 
       if ( zeqGroup->getKey( ) == key )

@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #ifndef VISHNU_DATASETWIDGET_H
 #define VISHNU_DATASETWIDGET_H
 
@@ -26,7 +34,7 @@ namespace vishnu
 
   public:
 
-    explicit DataSetWidget( const std::string& path,
+    explicit DataSetWidget( const sp1common::DataSetPtr& dataSet,
       QWidget* parent = Q_NULLPTR );
 
     std::string getPath( void ) const;
@@ -35,7 +43,10 @@ namespace vishnu
     QListWidgetItem* getListWidgetItem( void ) const;
     void setListWidgetItem( QListWidgetItem* listWidgetItem );
 
-    std::vector< std::string > getHeaders( ) const;
+    //std::vector< std::string > getHeaders( void ) const;
+
+    //std::vector< std::string > getPropertyNames (void ) const;
+    sp1common::DataSetPtr getDataSet( void ) const;
 
   signals:
 
@@ -52,7 +63,8 @@ namespace vishnu
     QLabel* _path = nullptr;
     QPushButton* _remove = nullptr;
     QListWidgetItem* _listWidgetItem = nullptr;
-    std::vector< std::string > _headers;
+    //std::vector< std::string > _headers;
+    sp1common::DataSetPtr _dataSet;
 
   };
 

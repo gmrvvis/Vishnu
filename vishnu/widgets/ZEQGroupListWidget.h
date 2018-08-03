@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #ifndef VISHNU_ZEQGROUPLISTWIDGET_H
 #define VISHNU_ZEQGROUPLISTWIDGET_H
 
@@ -26,7 +34,7 @@ namespace vishnu
 
       explicit ZEQGroupListWidget( QWidget* parent = Q_NULLPTR );
 
-      ZEQGroupWidget* syncGroup( const std::string& key, const QString& name,
+      ZEQGroupWidgetPtr syncGroup( const std::string& key, const QString& name,
         const QString& owner, const std::vector< std::string >& ids,
         const QColor& color );
 
@@ -42,7 +50,7 @@ namespace vishnu
 
     private:
 
-      ZEQGroupWidget* findGroup( const std::string& key );
+      ZEQGroupWidgetPtr findGroup( const std::string& key );
 
     signals:
 

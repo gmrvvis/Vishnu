@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #include "UserDataSetWidget.h"
 
 #include <QHBoxLayout>
@@ -205,16 +213,14 @@ namespace vishnu
 
   void UserDataSetWidget::slotRemove( void )
   {
-    std::cout << "slot remove" << std::endl;
     _listWidgetItem->listWidget( )->setCurrentItem( _listWidgetItem );
     emit signalRemoveSelected( );
   }
 
-  void UserDataSetWidget::slotCheck( bool checked )
+  void UserDataSetWidget::slotCheck( bool check )
   {
-    std::cout << "slot check: " << checked << std::endl;
     _listWidgetItem->listWidget( )->setCurrentItem( _listWidgetItem );
-    emit signalCheckSelected( checked );
+    emit signalCheckSelected( check );
   }
 
   void UserDataSetWidget::clickName( void )

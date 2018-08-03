@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #include "MainWindow.h"
 
 #include <QApplication>
@@ -19,9 +27,11 @@
 #include "Definitions.hpp"
 #include "RegExpInputDialog.h"
 
+#include "model/UserDataSets.h"
 #include "widgets/UserDataSetListWidget.h"
-#include "UserDataSets.h"
 #include "widgets/ZEQGroupListWidget.h"
+
+#include "model/AppsConfig.h"
 
 #include "DataSetWindow.h"
 
@@ -94,9 +104,7 @@ namespace vishnu
     _userDataSetListWidget.reset( new UserDataSetListWidget( ) );
 
     //Applications
-    loadClint();
-    loadDCExplorer();
-    loadPyramidal();
+    loadApps( );
 
     QVBoxLayout* appsVBoxLayout = new QVBoxLayout( );
     for ( const auto& application : _applications )
@@ -167,6 +175,8 @@ namespace vishnu
       SLOT( slotReloadDataSets( ) ) );
 
     emit signalReloadDataSets( );
+
+    checkApps( false );
   }
 
   MainWindow::~MainWindow( )
@@ -200,9 +210,9 @@ namespace vishnu
 
   void MainWindow::slotReloadDataSets( void )
   {
-    std::string userDataSetsFilename = qApp->applicationDirPath( ).toStdString( )
-        + std::string( "/" ) + USER_DATA_FOLDER + std::string( "/" )
-        + USER_DATASETS_FILENAME;
+    std::string userDataSetsFilename =
+      qApp->applicationDirPath( ).toStdString( ) + std::string( "/" )
+      + USER_DATA_FOLDER + std::string( "/" ) + FILE_DATASETS;
 
     if ( sp1common::Files::exist( userDataSetsFilename ) )
     {
@@ -219,6 +229,10 @@ namespace vishnu
         userDataSet->getJsonFilename( ), userDataSet->getXmlFilename( ),
         userDataSet->getSelected( ) );
 
+       QObject::connect( userDataSetWidget,
+         SIGNAL( signalCheckSelected( bool ) ), this,
+         SLOT( slotCheckUserDataSet( bool ) ) );
+
        QObject::connect( userDataSetWidget, SIGNAL( signalRemoveSelected( ) ),
          this, SLOT( slotRemoveUserDataSet( ) ) );
       }
@@ -232,6 +246,9 @@ namespace vishnu
     QObject::connect( userDataSetWidget2, SIGNAL( signalRemoveSelected( ) ),
       this, SLOT( slotRemoveUserDataSet( ) ) );
 
+    QObject::connect( userDataSetWidget2, SIGNAL( signalCheckSelected( bool ) ),
+      this, SLOT( slotCheckUserDataSet( bool ) ) );
+
     UserDataSetWidgetPtr userDataSetWidget3 =
       _userDataSetListWidget->addUserDataSet( "dataSet502",
       "/media/DATA/data/ds", "segmentations.csv", "test.json", "pyramidal.xml",
@@ -239,6 +256,9 @@ namespace vishnu
 
     QObject::connect( userDataSetWidget3, SIGNAL( signalRemoveSelected( ) ),
       this, SLOT( slotRemoveUserDataSet( ) ) );
+
+    QObject::connect( userDataSetWidget3, SIGNAL( signalCheckSelected( bool ) ),
+      this, SLOT( slotCheckUserDataSet( bool ) ) );
     //END TEST DATASET
   }
 
@@ -257,7 +277,7 @@ namespace vishnu
     dataSetWindow->setMaximumSize( 800, 800 );
     dataSetWindow->setWindowIcon( QIcon( ":/icons/logoVishnu.png") );
     dataSetWindow->setWindowTitle( QApplication::applicationName( )
-      + QString(" - Create new dataset"));
+      + QString(" - Create new dataset" ));
 
     dataSetWindow->setModal( true );
     dataSetWindow->exec( );
@@ -267,8 +287,23 @@ namespace vishnu
 
   void MainWindow::slotRemoveUserDataSet( void )
   {
-    //QDialog* d = new QDialog( this, );
-    _userDataSetListWidget->removeCurrentDataSet( );
+    QMessageBox::StandardButton reply = QMessageBox::warning( this,
+      "Remove DataSet", "Do you want to remove '" + QString::fromStdString(
+      _userDataSetListWidget->getCurrentDataSetName( ) ) + "'' DataSet?",
+      QMessageBox::Yes|QMessageBox::No );
+    if ( reply == QMessageBox::Yes )
+    {
+      _userDataSetListWidget->removeCurrentDataSet( );
+    }
+  }
+
+  void MainWindow::slotCheckUserDataSet( bool checked )
+  {
+    if ( checked )
+    {
+      _userDataSetListWidget->selectCurrentDataSet( );
+    }
+    checkApps( checked );
   }
 
   void MainWindow::syncGroup( const QString& key, const QString& name,
@@ -361,113 +396,57 @@ namespace vishnu
     }
   }
 
-  void MainWindow::checkApps( )
+  void MainWindow::checkApps( bool checked )
   {
-    /*if ( !_ui->csvFilename->text( ).isEmpty( ) )
-    {                
-      for ( const auto& appplication : _applications )
-      {
-
-        //TODO: parse XML in order to enable buttons instead of
-        //enabling all of them
-        appplication.second->getPushButton( )->setEnabled( true );
-      }
-    }*/
-  }
-
-
-
-  void MainWindow::loadClint()
-  {
-    std::string displayName = "Clint";
-    std::string cmd = "ClintExplorer";
-    sp1common::Args args;
-    if ( !_zeqSession.empty( ) )
+    for ( const auto& appplication : _applications )
     {
-      args.set( "-z", _zeqSession );
-      args.set( "-sp", 31400 );
+      appplication.second->getPushButton( )->setEnabled( checked );
     }
-    args.set( "-ce", _workingDirectory );
-    args.set( "-ch", "http://localhost" );
-    args.set( "-cp", 8765 );
-
-    /*if ( !_ui->csvFilename->text( ).isEmpty( ) )
-    {
-      args.set( "-f", _ui->csvFilename->text( ).toStdString( ) );
-    }*/
-
-   std::string instanceId = sp1common::Strings::generateRandom( 5 );
-   args.set( "-id", instanceId );
-
-    ApplicationPtr appplication( new Application(
-      sp1common::ApplicationType::CLINT, displayName, cmd, args,
-      QIcon(":/icons/logoClint.png"), _workingDirectory ) );
-
-    std::string owner = sp1common::toString(
-      sp1common::ApplicationType::CLINT ) + instanceId;
-
-    _applications[ owner ] = appplication;
   }
 
-  void MainWindow::loadDCExplorer()
+  void MainWindow::loadApps( void )
   {
-    std::string displayName = "DCExplorer";
-    std::string cmd = "WeCo";
-    std::string dockerContainerName = "apicolat";
+    std::string userDataFolder = qApp->applicationDirPath( ).toStdString( )
+        + std::string( "/" ) + USER_DATA_FOLDER + std::string( "/" );
 
-    sp1common::Args args;
-
-    if ( !_zeqSession.empty( ) )
+    QString qUserDataFolder = QString::fromStdString( userDataFolder );
+    QDir qDir( qUserDataFolder );
+    if ( !qDir.exists( ) )
     {
-      args.set( "-z", _zeqSession );
-      args.set( "-p", 12345 );
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+        "User Data folder doesn't exist.", true );
     }
-    args.set( "-u", "http://localhost:8888" );
-    args.set( "-n", displayName );
-    args.set( "-dcn", dockerContainerName );
 
-    /*if ( !_ui->csvFilename->text( ).isEmpty( ) )
+    std::string appsConfigFile = userDataFolder + FILE_APPS_CONFIG;
+    if ( !sp1common::Files::exist( appsConfigFile ) )
     {
-      args.set( "-f", _ui->csvFilename->text( ).toStdString( ) );
-    }*/
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+        "Apps Config file doesn't exist.", true );
+    }
 
-    std::string instanceId = sp1common::Strings::generateRandom( 5 );
-    args.set( "-id", instanceId );
+    AppsConfigPtr appsConfig
+      = sp1common::JSON::deserialize< AppsConfig >( appsConfigFile );
 
-    ApplicationPtr application( new Application(
-      sp1common::ApplicationType::DCEXPLORER, displayName, cmd, args,
-      QIcon(":/icons/logoDCExplorer.png"), _workingDirectory ) );
-
-    std::string owner = sp1common::toString(
-      sp1common::ApplicationType::DCEXPLORER ) + instanceId;
-
-    _applications[ owner ] = application;
-  }
-
-  void MainWindow::loadPyramidal()
-  {
-    std::string displayName = "Pyramidal";
-    std::string cmd = "CellExplorer";
-
-    sp1common::Args args;
-    args.set( "-z", _zeqSession );
-
-    /*if ( !_ui->csvFilename->text( ).isEmpty( ) )
+    //Not const in order to add (or overwrite) other arguments
+    for ( auto& application : appsConfig->getApplications( ) )
     {
-      args.set( "-f", _ui->csvFilename->text( ).toStdString( ) );
-    }*/
+      application->getArgs( ).set( "-z", _zeqSession );
 
-    std::string instanceId = sp1common::Strings::generateRandom( 5 );
-    args.set( "-id", instanceId );
+      std::string instanceId = sp1common::Strings::generateRandom( 5 );
+      application->getArgs( ).set( "-id", instanceId );
 
-    ApplicationPtr application( new Application(
-      sp1common::ApplicationType::PYRAMIDAL, displayName, cmd, args,
-      QIcon(":/icons/logoPyramidal.png"), _workingDirectory ) );
+      application->setWorkingDirectory( _workingDirectory );
 
-    std::string owner = sp1common::toString(
-      sp1common::ApplicationType::PYRAMIDAL ) + instanceId;
+      AppProcessPtr appProcess( new AppProcess(
+        application->getApplicationType( ), application->getDisplayName( ),
+        application->getShellCommand( ), application->getArgs( ),
+        application->getWorkingDirectory( ), application->getIconPath( ) ) );
 
-    _applications[ owner ] = application;
+      std::string owner = sp1common::toString(
+        application->getApplicationType( ) ) + instanceId;
+
+      _applications[ owner ] = appProcess;
+    }
   }
 
   void MainWindow::runApp( )
@@ -496,7 +475,7 @@ namespace vishnu
         it.second->readAllStandardOutput( );
 
         QStringList arguments;
-        for(const auto& arg : it.second->getArgs( ) )
+        for( const auto& arg : it.second->getArgs( ).get( ) )
         {
           arguments << QString::fromStdString( arg.first );
           if ( !arg.second.empty( ) )
@@ -506,7 +485,7 @@ namespace vishnu
         }
 
         it.second->start(
-          QString::fromStdString( it.second->getCmd( ) ),
+          QString::fromStdString( it.second->getShellCommand( ) ),
           arguments
         );
 

@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #ifndef VISHNU_ZEQGROUPWIDGET_H
 #define VISHNU_ZEQGROUPWIDGET_H
 
@@ -10,7 +18,9 @@
 #include <sp1common/sp1common.h>
 
 namespace vishnu
-{
+{  
+  class ZEQGroupWidget;
+  typedef ZEQGroupWidget* ZEQGroupWidgetPtr;
 
   class ZEQGroupWidget : public QWidget
   {
@@ -58,7 +68,7 @@ namespace vishnu
     QLabel* _name = nullptr;
     QLabel* _owner = nullptr;
     QLabel* _color = nullptr;
-    std::vector<std::string> _ids;
+    std::vector< std::string > _ids;
     QPushButton* _remove = nullptr;
     QListWidgetItem* _listWidgetItem = nullptr;
   };

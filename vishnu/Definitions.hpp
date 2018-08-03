@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #ifndef VISHNU_DEFINITIONS_HPP
 #define VISHNU_DEFINITIONS_HPP
 
@@ -10,7 +18,9 @@
 #define USER_DATA_FOLDER "userdata/"
 #define GEOMETRIC_DATA_FOLDER "geometricData/"
 #define DEFAULT_DATASET_FILENAME "dataSet"
-#define USER_DATASETS_FILENAME "userDataSets.json"
+#define FILE_USER_PREFERENCES "UserPreferences.json"
+#define FILE_APPS_CONFIG "AppsConfig.json"
+#define FILE_DATASETS "DataSets.json"
 
 #define MAX_DATASET_NAME_LENGTH 10
 

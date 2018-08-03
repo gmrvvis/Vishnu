@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #include "DataSetWidget.h"
 
 #include <QHBoxLayout>
@@ -16,7 +24,9 @@
 namespace vishnu
 {
 
-  DataSetWidget::DataSetWidget( const std::string& path, QWidget* /*parent*/ )
+  DataSetWidget::DataSetWidget( const sp1common::DataSetPtr& dataSet,
+    QWidget* /*parent*/ )
+      : _dataSet( dataSet )
   {
     QHBoxLayout *hLayout = new QHBoxLayout( this );
 
@@ -32,7 +42,7 @@ namespace vishnu
     hLayout->addSpacing( 30 );
 
     //Path
-    setPath( path );
+    setPath( _dataSet->getPath( ) );
     QVBoxLayout *vLayout2 = new QVBoxLayout( );
     vLayout2->addWidget( _path, 0, 0 );
     hLayout->addLayout( vLayout2, 1 );
@@ -60,8 +70,6 @@ namespace vishnu
     show( );
 
     setLayout( hLayout );
-
-    _headers = sp1common::Files::readCsvHeaders( path );
   }
 
   std::string DataSetWidget::getPath( ) const
@@ -99,9 +107,14 @@ namespace vishnu
     _listWidgetItem = listWidgetItem;
   }
 
-  std::vector< std::string > DataSetWidget::getHeaders( ) const
+  /*std::vector< std::string > DataSetWidget::getHeaders( void ) const
   {
     return _headers;
+  }*/
+
+  sp1common::DataSetPtr DataSetWidget::getDataSet( void ) const
+  {
+    return _dataSet;
   }
 
 }

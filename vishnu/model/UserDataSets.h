@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #ifndef VISHNU_USERDATASETS_H
 #define VISHNU_USERDATASETS_H
 
@@ -20,9 +28,9 @@ namespace vishnu
 
     public:
 
-      UserDataSets( );
+      UserDataSets( void );
       UserDataSets( const UserDataSetVector& userDataSets );
-      ~UserDataSets( );
+      ~UserDataSets( void );
 
       UserDataSetVector getUserDataSets( void ) const;
       void setUserDataSets( const UserDataSetVector& userDataSets );

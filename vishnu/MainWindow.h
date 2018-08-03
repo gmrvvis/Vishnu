@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #ifndef VISHNU_MAINWINDOW_H
 #define VISHNU_MAINWINDOW_H
 
@@ -18,7 +26,7 @@
 #include <QListWidgetItem>
 #include <QDir>
 
-#include "Application.h"
+#include "AppProcess.h"
 #include "widgets/UserDataSetListWidget.h"
 #include "widgets/ZEQGroupListWidget.h"
 
@@ -30,8 +38,8 @@
 
 namespace vishnu
 {
-  typedef std::shared_ptr< Application > ApplicationPtr;
-  typedef std::map< std::string, ApplicationPtr > Applications;
+  typedef std::shared_ptr< AppProcess > AppProcessPtr;
+  typedef std::map< std::string, AppProcessPtr > AppProcessMap;
   typedef std::shared_ptr< UserDataSetListWidget > UserDataSetListWidgetPtr;
   typedef std::shared_ptr< ZEQGroupListWidget > ZEQGroupListWidgetPtr;
 
@@ -40,7 +48,7 @@ namespace vishnu
     Q_OBJECT
 
     public:
-      explicit MainWindow(sp1common::Args args,
+      explicit MainWindow( sp1common::Args args,
         QWidget *parent = 0 );
       ~MainWindow();
 
@@ -50,11 +58,12 @@ namespace vishnu
     private slots:
 
       void slotRemoveUserDataSet( void );
+      void slotCheckUserDataSet( bool checke );
       void slotReloadDataSets( void );
-      void runApp( );
+      void runApp( void );
       void closeApp( int exitCode, QProcess::ExitStatus exitStatus );
 
-      void checkApps( );
+      void checkApps( bool checked );
       void addDataSet( void );
 
       void syncGroup( const QString& key, const QString& name,
@@ -78,7 +87,7 @@ namespace vishnu
       std::string _zeqSession;
       std::string _workingDirectory;
       bool _closingProcesses;
-      Applications _applications;
+      AppProcessMap _applications;
 
       QAction* removeGroupAction;
 
@@ -91,9 +100,7 @@ namespace vishnu
       void receivedChangeColorGroup( zeroeq::gmrv::ConstChangeColorGroupPtr o );
       void receivedDestroyGroup( zeroeq::gmrv::ConstDestroyGroupPtr o );
 
-      void loadClint();
-      void loadDCExplorer();
-      void loadPyramidal();
+      void loadApps( void );
 
   };
 

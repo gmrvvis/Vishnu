@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2017-2018 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+*/
+
 #include "DataSetListWidget.h"
 
 #include <algorithm>
@@ -16,7 +24,7 @@
 namespace vishnu
 {
   DataSetListWidget::DataSetListWidget( QWidget* parent )
-    : QListWidget( parent )
+      : QListWidget( parent )
   {    
     setSelectionMode( QAbstractItemView::SingleSelection );
     setDragDropMode( QAbstractItemView::DragDrop );
@@ -24,14 +32,35 @@ namespace vishnu
     setAcceptDrops( true );
   }
 
+  void DataSetListWidget::createDataSetsFromSEG(
+    DataSetWidgets& /*dataSetWidgets*/, const std::string& /*path*/ )
+  {
 
-  void DataSetListWidget::createDataSetFromCSV( const std::string& path,
-    DataSetWidgets& dataSetWidgets )
+  }
+
+  void DataSetListWidget::createDataSetsFromJSON(
+    DataSetWidgets& dataSetWidgets, const std::string& path )
+  {
+    sp1common::DataSetsPtr dataSets =
+      sp1common::JSON::deserialize< sp1common::DataSets >( path );
+
+    for ( const auto& dataSet : dataSets->getDataSets( ) )
+    {
+      createDataSetFromCSV( dataSetWidgets, dataSet->getPath( ),
+        dataSet->getProperties( ) );
+    }
+
+    _propertyGroups = dataSets->getPropertyGroups( );
+
+  }
+
+  void DataSetListWidget::createDataSetFromCSV( DataSetWidgets& dataSetWidgets,
+     const std::string& path, const sp1common::Properties& properties )
   {
     bool notUsedPath = true;
     for ( int i = 0; i < count( ); ++i )
     {
-      DataSetWidget* dataSetWidget = static_cast< DataSetWidget* >(
+      DataSetWidgetPtr dataSetWidget = static_cast< DataSetWidgetPtr >(
         itemWidget( item( i ) ) );
       if ( dataSetWidget->getPath( ) == path )
       {
@@ -44,8 +73,27 @@ namespace vishnu
 
     if ( notUsedPath )
     {
+      sp1common::DataSetPtr dataSet( new sp1common::DataSet( path ) );
+
+      if ( properties.size( ) == 0 ) //CSV
+      {
+        std::vector< std::string > headers =
+          sp1common::Files::readCsvHeaders( path );
+
+        for ( const auto& header : headers )
+        {
+          dataSet->addProperty( sp1common::PropertyPtr(
+            new sp1common::Property( header, sp1common::DataType::Undefined,
+            sp1common::DataStructureType::None ) ) );
+        }
+      }
+      else //JSON or SEG
+      {
+        dataSet->setProperties( properties );
+      }
+
       //Add to dataset
-      DataSetWidgetPtr dataSetWidget( new DataSetWidget( path ) );
+      DataSetWidgetPtr dataSetWidget( new DataSetWidget( dataSet ) );
       dataSetWidget->setListWidgetItem( new QListWidgetItem( this ) );
 
       QListWidgetItem* listWidgetItem = dataSetWidget->getListWidgetItem( );
@@ -53,7 +101,7 @@ namespace vishnu
       listWidgetItem->setSizeHint( dataSetWidget->sizeHint ( ) );
       setItemWidget( listWidgetItem, dataSetWidget );
 
-      dataSetWidgets.push_back( dataSetWidget );
+      dataSetWidgets.emplace_back( dataSetWidget );
     }
   }
 
@@ -98,11 +146,11 @@ namespace vishnu
       }
       else if ( extension == STR_EXT_JSON )
       {
-
+        createDataSetsFromJSON( dataSetWidgets, filepath );
       }
       else if ( extension == STR_EXT_CSV )
       {
-        createDataSetFromCSV( filepath, dataSetWidgets );
+        createDataSetFromCSV( dataSetWidgets, filepath );
       }
     }
 
@@ -111,19 +159,21 @@ namespace vishnu
 
   std::vector< std::string > DataSetListWidget::getPropertiesToRemove( )
   {
-    DataSetWidget* currentDsw = static_cast<DataSetWidget*>(
+    DataSetWidgetPtr currentDsw = static_cast< DataSetWidgetPtr >(
       itemWidget( currentItem( ) ) );
 
-    std::vector< std::string > propertiesToRemove = currentDsw->getHeaders( );
+    std::vector< std::string > propertiesToRemove =
+      currentDsw->getDataSet( )->getPropertyNames( );
 
     for( int row = 0; row < count( ); ++row )
     {
       QListWidgetItem* listItem = item( row );
       if ( listItem != currentItem( ) )
       {
-        DataSetWidget* dsw = static_cast< DataSetWidget* >(
+        DataSetWidgetPtr dsw = static_cast< DataSetWidgetPtr >(
           itemWidget( listItem ) );
-        std::vector< std::string > properties = dsw->getHeaders( );
+        std::vector< std::string > properties =
+          dsw->getDataSet( )->getPropertyNames( );
         for ( const auto& property: properties )
         {
           propertiesToRemove.erase( std::remove( propertiesToRemove.begin( ),
@@ -140,28 +190,41 @@ namespace vishnu
     takeItem( row( currentItem( ) ) );
   }
 
-  DataSets DataSetListWidget::getDataSets( )
+  sp1common::DataSetsPtr DataSetListWidget::getDataSets( void ) const
   {
-    DataSets dataSets;
+    sp1common::DataSetsPtr dataSets;
 
     for( int row = 0; row < count( ); ++row )
     {
-      DataSetWidget* dsw = static_cast< DataSetWidget* >(
+      DataSetWidgetPtr dsw = static_cast< DataSetWidgetPtr >(
         itemWidget( item( row ) ) );
 
-      DataSetPtr dataSet( new DataSet( dsw->getPath( ), dsw->getHeaders( ) ) );
-      dataSets[ dsw->getPath() ] = dataSet;
+      sp1common::DataSetPtr dataSet( new sp1common::DataSet( dsw->getPath( ) ) );
+      dataSet->setProperties( dsw->getDataSet( )->getProperties( ) );
+      dataSets->addDataSet( dataSet );
     }
 
     return dataSets;
   }
 
+  sp1common::PropertyGroupsPtr DataSetListWidget::getPropertyGroups(
+    void ) const
+  {
+    return _propertyGroups;
+  }
+
+  void DataSetListWidget::setPropertyGroups(
+    const sp1common::PropertyGroupsPtr& propertyGroups )
+  {
+    _propertyGroups = propertyGroups;
+  }
+
   std::vector< std::string > DataSetListWidget::getCommonProperties( )
   {
     std::vector< std::string > commonProperties;
-    for ( const auto& dataset : getDataSets( ) )
+    for ( const auto& dataset : getDataSets( )->getDataSets( ) )
     {
-      std::vector< std::string > dataSetHeaders = dataset.second->getHeaders( );
+      std::vector< std::string > dataSetHeaders = dataset->getPropertyNames( );
 
       if ( !commonProperties.empty( ) )
       {
