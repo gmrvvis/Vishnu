@@ -55,6 +55,7 @@ namespace vishnu
     removeGroupImage->setPixmap( removeGroupPixmap );
     _remove = new QPushButton( );
     _remove->setIcon( QIcon( ":/icons/close.png" ) );
+    _remove->setStyleSheet( "QWidget:hover{background-color:#AAAAFF;}" );
     QObject::connect( _remove, SIGNAL( clicked( ) ), this,
       SLOT( clickRemove( ) ) );
 
@@ -62,14 +63,9 @@ namespace vishnu
     vLayout4->addWidget( _remove, 0, 0);
     hLayout->addLayout( vLayout4, 0 );
 
-    QPalette pal( palette( ) );
-    //pal.setColor(QPalette:, Qt::black);
-    pal.setColor( QPalette::Base, QColor( "#c3e6fc" ) );
-    setAutoFillBackground( true );
-    setPalette( pal );
-    show( );
-
     setLayout( hLayout );
+
+    show( );
   }
 
   std::string ZEQGroupWidget::getKey( void ) const

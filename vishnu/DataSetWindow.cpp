@@ -90,7 +90,8 @@ namespace vishnu
   void DataSetWindow::slotAddFiles(
     const std::vector< std::string >& dropped )
   {
-    DataSetWidgets dataSetWidgets = _dataSetListWidget->addDataSets( dropped );
+    DataSetWidgets dataSetWidgets =
+      _dataSetListWidget->addDataSets( dropped );
     sp1common::PropertyGroupsPtr propertyGroups =
       _dataSetListWidget->getPropertyGroups( );
 
@@ -98,11 +99,6 @@ namespace vishnu
     {
       QObject::connect( dataSetWidget, SIGNAL( removeSelected( ) ), this,
         SLOT( slotRemoveDataSet( ) ) );
-
-
-
-
-
 
       _propertiesTableWidget->addProperties(
          dataSetWidget->getDataSet( )->getProperties( ), propertyGroups );
@@ -362,16 +358,16 @@ namespace vishnu
     {
       sp1common::PropertyPtr property = properties.at( i );
       std::string name = property->getName( );
-      sp1common::DataType dataType = property->getDataType( );
+      sp1common::DataCategory dataCategory = property->getDataCategory( );
       featuresVector.emplace_back( sp1common::FeaturePtr(
         new sp1common::Feature(
         name,
         name,
         "mV",
-        dataType,
+        dataCategory,
         property->getDataStructureType( ) ) ) );
 
-      if ( dataType == sp1common::DataType::Geometric )
+      if ( dataCategory == sp1common::DataCategory::Geometric )
       {
         geometryColumn = name;
       }

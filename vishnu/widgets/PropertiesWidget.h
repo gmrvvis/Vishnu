@@ -27,7 +27,7 @@ namespace vishnu
   public:
 
     explicit PropertiesWidget( const std::string& name, const bool& use,
-      const bool& primaryKey, const sp1common::DataType& dataType,
+      const bool& primaryKey, const sp1common::DataCategory& dataCategory,
       const sp1common::AxisType& axisType, QWidget* parent = Q_NULLPTR );
 
     std::string getName( void ) const;
@@ -39,9 +39,9 @@ namespace vishnu
     bool getPrimaryKey( void ) const;
     void setPrimaryKey( const bool& primaryKey );
 
-    void fillDataTypes( void );
-    sp1common::DataType getDataType( void ) const;
-    void setDataType( const sp1common::DataType& dataType );
+    void fillDataCategories( void );
+    sp1common::DataCategory getDataCategory( void ) const;
+    void setDataCategory( const sp1common::DataCategory& dataCategory );
 
     void fillAxisTypes( void );
     sp1common::AxisType getAxisType( void ) const;
@@ -60,7 +60,7 @@ namespace vishnu
     QLabel* _name = nullptr;
     QCheckBox* _use = nullptr;
     QCheckBox* _primaryKey = nullptr;
-    QComboBox* _dataType = nullptr;
+    QComboBox* _dataCategory = nullptr;
     QComboBox* _axisType = nullptr;
   };
 

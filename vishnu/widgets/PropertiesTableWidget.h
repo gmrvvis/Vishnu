@@ -49,11 +49,21 @@ namespace vishnu
     //Properties getProperties( void );
     sp1common::DataSetsPtr getDataSets( void );
 
+  protected:
+
+    void dragEnterEvent( QDragEnterEvent* event );
+
+    void dragMoveEvent( QDragMoveEvent* event );
+
+    void dragLeaveEvent( QDragLeaveEvent* event );
+
+    void dropEvent( QDropEvent* event );
+
   private slots:
 
       void axisTypeChanged( QString text );
 
-      void dataTypeChanged( QString text );
+      void dataCategoryChanged( QString text );
 
   private:
 

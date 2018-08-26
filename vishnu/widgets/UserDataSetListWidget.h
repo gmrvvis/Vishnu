@@ -45,6 +45,7 @@ namespace vishnu
       std::string getCurrentDataSetName( void );
       UserDataSetMap getDataSets( void );
       void clearDataSets( void );
+      void setBlurred( const bool& state );
 
     protected:
 

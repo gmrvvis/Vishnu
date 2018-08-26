@@ -48,6 +48,7 @@ namespace vishnu
 
       std::string getKey( QListWidgetItem* listWidgetItem );
 
+      void setBlurred( const bool& state );
     private:
 
       ZEQGroupWidgetPtr findGroup( const std::string& key );

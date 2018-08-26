@@ -41,7 +41,7 @@ set( VISHNU_HEADERS
   widgets/PathsWidget.h
   model/Application.h
   model/AppsConfig.h
-  model/Preferences.h
+  model/UserPreferences.h
   model/UserDataSets.h
   model/UserDataSet.h
 )
@@ -64,7 +64,7 @@ set( VISHNU_SOURCES
   widgets/PathsWidget.cpp
   model/Application.cpp
   model/AppsConfig.cpp
-  model/Preferences.cpp
+  model/UserPreferences.cpp
   model/UserDataSets.cpp
   model/UserDataSet.cpp
 )

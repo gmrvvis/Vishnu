@@ -62,8 +62,8 @@ int main( int argc, char *argv[] )
 
   if( running )
   {
-    QMessageBox::warning( NULL, "Warning!", "Another instance of " +
-      QApplication::applicationName( ) + " is already running!" );
+    QMessageBox::warning( NULL, APPLICATION_NAME, "Another instance of " +
+      QString::fromStdString( APPLICATION_NAME )+ " is already running!" );
     app.exit( );
     return 1;
   }
@@ -80,8 +80,8 @@ int main( int argc, char *argv[] )
   int y = ( screenGeometry.height() - window.height( ) ) / 2;
   window.move( x, y );
 
-  window.setMinimumSize( 1000, 500 );
-  window.setMaximumSize( 1000, 500 );
+  window.setMinimumSize( 1000, 630 );
+  window.setMaximumSize( 1000, 630 );
   window.setWindowIcon( QIcon( ":/icons/logoVishnu.png") );
   window.setIconSize( QSize( 32, 32 ) );
   window.setWindowTitle( QApplication::applicationName( ) );

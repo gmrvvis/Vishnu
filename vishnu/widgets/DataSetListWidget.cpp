@@ -26,10 +26,20 @@ namespace vishnu
   DataSetListWidget::DataSetListWidget( QWidget* parent )
       : QListWidget( parent )
   {    
+
     setSelectionMode( QAbstractItemView::SingleSelection );
-    setDragDropMode( QAbstractItemView::DragDrop );
+    setDragDropMode( QAbstractItemView::InternalMove );
     setDefaultDropAction( Qt::MoveAction );
     setAcceptDrops( true );
+
+    setMouseTracking( true );
+    setStyleSheet(
+      "QListWidget::item:selected{border: 1px solid #6a6a6a;background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #AAAAFF, stop: 0.5 #FFFFFF, stop: 1 #AAAAFF );}"
+      "QListWidget::item:!selected{background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0.0 #CCCCFF, stop: 0.5 #FFFFFF, stop: 1.0 #CCCCFF );}"
+      "QListWidget::item:hover{background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #BBBBFF, stop: 0.5 #FFFFFF, stop: 1 #BBBBFF );}"
+    );
+
+     _propertyGroups.reset( new sp1common::PropertyGroups( ) );
   }
 
   void DataSetListWidget::createDataSetsFromSEG(
@@ -83,7 +93,7 @@ namespace vishnu
         for ( const auto& header : headers )
         {
           dataSet->addProperty( sp1common::PropertyPtr(
-            new sp1common::Property( header, sp1common::DataType::Undefined,
+            new sp1common::Property( header, sp1common::DataCategory::Undefined,
             sp1common::DataStructureType::None ) ) );
         }
       }
@@ -122,7 +132,7 @@ namespace vishnu
     else
     {
       filePaths = QFileDialog::getOpenFileNames( this,
-        QString( "Choose CSV file" ), QString( "" ),
+        QString( "Select files" ), QString( "" ),
         QString( "CSV-Files(*.csv);;JSON-Files(*.json);;SEG-Files(*.seg)" ) );
     }
     if ( filePaths.isEmpty( ) )
@@ -142,7 +152,7 @@ namespace vishnu
 
       if ( extension == STR_EXT_SEG )
       {
-
+        createDataSetsFromSEG( dataSetWidgets, filepath );
       }
       else if ( extension == STR_EXT_JSON )
       {
@@ -192,7 +202,7 @@ namespace vishnu
 
   sp1common::DataSetsPtr DataSetListWidget::getDataSets( void ) const
   {
-    sp1common::DataSetsPtr dataSets;
+    sp1common::DataSetsPtr dataSets( new sp1common::DataSets( ) );
 
     for( int row = 0; row < count( ); ++row )
     {

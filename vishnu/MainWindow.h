@@ -29,12 +29,10 @@
 #include "AppProcess.h"
 #include "widgets/UserDataSetListWidget.h"
 #include "widgets/ZEQGroupListWidget.h"
+#include "model/UserPreferences.h"
 
 #include <manco/manco.h>
 #include <sp1common/sp1common.h>
-
-//typedef std::vector< std::string > StringVector;
-//Q_DECLARE_METATYPE( StringVector );
 
 namespace vishnu
 {
@@ -84,8 +82,7 @@ namespace vishnu
 
   private:
 
-      std::string _zeqSession;
-      std::string _workingDirectory;
+      UserPreferencesPtr _userPreferences;
       bool _closingProcesses;
       AppProcessMap _applications;
 
@@ -101,6 +98,7 @@ namespace vishnu
       void receivedDestroyGroup( zeroeq::gmrv::ConstDestroyGroupPtr o );
 
       void loadApps( void );
+      void setBlurred( const bool& state );
 
   };
 

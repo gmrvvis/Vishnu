@@ -32,19 +32,19 @@ set( VISHNU-CREATEAPPSCONFIG_LINK_LIBRARIES
 
 common_application( vishnu-CreateAppsConfig )
 
-set( VISHNU-CREATEPREFERENCES_SOURCES
-  vishnu-CreatePreferences.cpp
-  ../vishnu/model/Preferences.cpp
+set( VISHNU-CREATEUSERPREFERENCES_SOURCES
+  vishnu-CreateUserPreferences.cpp
+  ../vishnu/model/UserPreferences.cpp
 )
 
-set( VISHNU-CREATEPREFERENCES_HEADERS
-  ../vishnu/model/Preferences.h
+set( VISHNU-CREATEUSERPREFERENCES_HEADERS
+  ../vishnu/model/UserPreferences.h
 )
 
-set( VISHNU-CREATEPREFERENCES_LINK_LIBRARIES
+set( VISHNU-CREATEUSERPREFERENCES_LINK_LIBRARIES
   Qt5::Core
   Qt5::Widgets
   sp1common
 )
 
-common_application( vishnu-CreatePreferences )
+common_application( vishnu-CreateUserPreferences )

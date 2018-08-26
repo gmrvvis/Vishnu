@@ -38,7 +38,6 @@ namespace vishnu
     //DataSet image
     QLabel* dataSetImage = new QLabel( );
     dataSetImage->setStyleSheet("width: 32px; height: 32px;");
-    //dataSetImage->setScaledContents( true );
     QPixmap dataSetPixmap( ":/icons/dataSet.png" );
     dataSetImage->setPixmap( dataSetPixmap );
 
@@ -58,14 +57,10 @@ namespace vishnu
 
     QVBoxLayout *vLayout2 = new QVBoxLayout( );
     vLayout2->addWidget( _name, 0, 0 );
-    //vLayout2->addWidget( _csvPath, 1, 0 );
-    //vLayout2->addWidget( _jsonPath, 2, 0 );
-    //vLayout2->addWidget( _xmlPath, 3, 0 );
     hLayout->addLayout( vLayout2, 1 );
     hLayout->addSpacing( 30 );
 
     QVBoxLayout *vLayout3 = new QVBoxLayout( );
-    //vLayout3->addWidget( _name, 0, 0 );
     vLayout3->addWidget( _csvPath, 1, 0 );
     vLayout3->addWidget( _jsonPath, 2, 0 );
     vLayout3->addWidget( _xmlPath, 3, 0 );
@@ -73,11 +68,10 @@ namespace vishnu
     hLayout->addSpacing( 30 );
 
     //DataSet CheckBox
-    std::stringstream checkBoxStyleSheet;
-    checkBoxStyleSheet << "QCheckBox::indicator { width: 32px; height: 32px; }"
-      << "QCheckBox::indicator:checked { background-image:url(:/icons/checked.png); }"
-      << "QCheckBox::indicator:unchecked { background-image:url(:/icons/unchecked.png); }";
-    _selected->setStyleSheet( QString::fromStdString( checkBoxStyleSheet.str( ) ) );
+    _selected->setStyleSheet( "QCheckBox::indicator { width: 32px; height: 32px; }"
+      "QCheckBox::indicator:checked { background-image:url(:/icons/checked.png); }"
+      "QCheckBox::indicator:unchecked { background-image:url(:/icons/unchecked.png); }"
+    );
     QObject::connect( _selected, SIGNAL( toggled( bool ) ), this,
       SLOT( slotCheck( bool ) ) );
 
@@ -93,6 +87,7 @@ namespace vishnu
     removeDataSetImage->setPixmap( removeDataSetPixmap );
     _remove = new QPushButton( );
     _remove->setIcon( QIcon( ":/icons/close.png" ) );
+    _remove->setStyleSheet( "QWidget:hover{background-color:#AAAAFF;}" );
     QObject::connect( _remove, SIGNAL( clicked( ) ), this,
       SLOT( slotRemove( ) ) );
 
@@ -100,13 +95,14 @@ namespace vishnu
     vLayout5->addWidget( _remove, 0, 0);
     hLayout->addLayout( vLayout5, 0);
 
-    QPalette pal(palette());
+    /*QPalette pal(palette());
     pal.setColor(QPalette::Base, QColor( "#c3e6fc" ));
     setAutoFillBackground(true);
-    setPalette(pal);
-    show();
+    setPalette(pal);*/
 
     setLayout( hLayout );
+
+    show();
   }
 
   std::string UserDataSetWidget::getName( ) const

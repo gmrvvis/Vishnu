@@ -17,6 +17,7 @@
 #include <QHeaderView>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QGraphicsBlurEffect>
 
 #include "../Definitions.hpp"
 #include "../RegExpInputDialog.h"
@@ -27,9 +28,16 @@ namespace vishnu
     : _checkingProperty( false )
   {    
     setSelectionMode( QAbstractItemView::SingleSelection );
-    setDragDropMode( QAbstractItemView::DragDrop );
+    setDragDropMode( QAbstractItemView::InternalMove );
     setDefaultDropAction( Qt::MoveAction );
     setAcceptDrops( true );
+
+    setMouseTracking( true );
+    setStyleSheet(
+      "QListWidget::item:selected{border: 1px solid #6a6a6a;background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #AAAAFF, stop: 0.5 #FFFFFF, stop: 1 #AAAAFF );}"
+      "QListWidget::item:!selected{background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0.0 #CCCCFF, stop: 0.5 #FFFFFF, stop: 1.0 #CCCCFF );}"
+      "QListWidget::item:hover{background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #BBBBFF, stop: 0.5 #FFFFFF, stop: 1 #BBBBFF );}"
+    );
   }
 
   UserDataSetWidgetPtr UserDataSetListWidget::addUserDataSet(
@@ -153,33 +161,21 @@ namespace vishnu
     event->accept();
   }
 
- /* void UserDataSetListWidget::slotCheckSelectedDataSets( bool checked )
+  void UserDataSetListWidget::setBlurred( const bool& state )
   {
-    std::cout << "USE DATA SET LIST WIDGET, slot check" << std::endl;
-    //if ( !_checkingProperty  )
-    //{
-      //_checkingProperty = true;
 
-      if ( checked )
+    for ( int row = 0; row < count( ); ++row )
+    {
+      if ( state )
       {
-        QCheckBox* cbSender = static_cast< QCheckBox* >( sender( ) );
-        for( int row = 0; row < count( ); ++row )
-        {
-          UserDataSetWidgetPtr dsw = static_cast< UserDataSetWidgetPtr >(
-            itemWidget( item( row ) ) );
-          std::cout << "row " << row << ", name " << dsw->getName( ) << std::endl;
-          if ( dsw->getCheckBox( ) != cbSender )
-          {
-            if ( dsw->getSelected( ) )
-            {
-              std::cout << "xx" << std::endl;
-              dsw->setSelected( false );
-            }
-          }
-        }
-      //}
-      //emit signalCheckApps( );
+        QGraphicsBlurEffect* blur = new QGraphicsBlurEffect( this );
+        itemWidget( item( row ) )->setGraphicsEffect( blur );
+      }
+      else
+      {
+        itemWidget( item( row ) )->setGraphicsEffect( 0 );
+      }
     }
-    //_checkingProperty = false;
-  }*/
+  }
+
 }

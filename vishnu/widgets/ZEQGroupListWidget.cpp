@@ -21,13 +21,36 @@
 #include "../Definitions.hpp"
 #include "../RegExpInputDialog.h"
 
+#include <QGraphicsBlurEffect>
+
 namespace vishnu
 {
   ZEQGroupListWidget::ZEQGroupListWidget( QWidget* /*parent*/ )
   {    
     setSelectionMode( QAbstractItemView::SingleSelection );
-    setDragDropMode( QAbstractItemView::DragDrop );
+    setDragDropMode( QAbstractItemView::DragDropMode::InternalMove );
     setDefaultDropAction( Qt::MoveAction );
+    setAcceptDrops( true );
+
+    setMouseTracking( true );
+    setStyleSheet(
+      "QListWidget::item:selected{border: 1px solid #6a6a6a;background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #AAAAFF, stop: 0.5 #FFFFFF, stop: 1 #AAAAFF );}"
+      "QListWidget::item:!selected{background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0.0 #CCCCFF, stop: 0.5 #FFFFFF, stop: 1.0 #CCCCFF );}"
+      "QListWidget::item:hover{background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #BBBBFF, stop: 0.5 #FFFFFF, stop: 1 #BBBBFF );}"
+    );
+
+    //QStyle* style = new QStyle( );
+    //setStyle()
+
+    //item()
+    //ite :hover { background: transparent; }
+
+    //setAlternatingRowColors( true );
+    //setStyleSheet("alternate-background-color: white;background-color: red;");
+
+    //setDropIndicatorShown( true );
+    //setMovement( QListView::Movement::Snap );
+    //setUniformItemSizes( true);
   }
 
   ZEQGroupWidgetPtr ZEQGroupListWidget::syncGroup( const std::string& key,
@@ -62,6 +85,23 @@ namespace vishnu
     }
 
     return zeqGroup;
+  }
+
+  void ZEQGroupListWidget::setBlurred( const bool& state )
+  {
+
+    for ( int row = 0; row < count( ); ++row )
+    {
+      if ( state )
+      {
+        QGraphicsBlurEffect* blur = new QGraphicsBlurEffect( this );
+        itemWidget( item( row ) )->setGraphicsEffect( blur );
+      }
+      else
+      {
+        itemWidget( item( row ) )->setGraphicsEffect( 0 );
+      }
+    }
   }
 
   ZEQGroupWidgetPtr ZEQGroupListWidget::findGroup( const std::string& key )

@@ -21,6 +21,8 @@
 #include <QComboBox>
 #include <QGroupBox>
 
+#include <QGraphicsBlurEffect>
+
 #include <iostream>
 #include <stdio.h>
 
@@ -40,7 +42,33 @@ namespace vishnu
   MainWindow::MainWindow( sp1common::Args args,
     QWidget *parent )
     : QMainWindow( parent )
-  {    
+  {
+    //Get User Preferences and Args
+    std::string userDataFolder = qApp->applicationDirPath( ).toStdString( )
+        + std::string( "/" ) + USER_DATA_FOLDER + std::string( "/" );
+
+    QString qUserDataFolder = QString::fromStdString( userDataFolder );
+    QDir qDir( qUserDataFolder );
+    if ( !qDir.exists( ) )
+    {
+      qDir.mkpath( qUserDataFolder );
+    }
+
+    std::string userPreferencesFile = userDataFolder + FILE_USER_PREFERENCES;
+
+    _userPreferences =
+      sp1common::JSON::deserialize< UserPreferences >( userPreferencesFile );
+
+    if ( args.has( "-wd" ) )
+    {
+      _userPreferences->addUserPreference(
+        "workingDirectory", args.get( "-wd" ) );
+    }
+    if ( args.has( "-z" ) )
+    {
+      _userPreferences->addUserPreference( "zeqSession", args.get( "-z" ) );
+    }
+
     //MenuBar
     QMenu *fileMenu = new QMenu(tr("&File"));
     QAction *quitAction = fileMenu->addAction(tr("E&xit"));
@@ -68,9 +96,6 @@ namespace vishnu
     toolBar->addAction( actionAddDataSet );
     addToolBar(Qt::TopToolBarArea, toolBar);
     //End ToolBar
-
-    _workingDirectory = args.get( "-wd" );
-    _zeqSession = args.get( "-z" );
 
     qRegisterMetaType< std::vector< std::string > >("StringVector");
 
@@ -118,15 +143,6 @@ namespace vishnu
     //Groups
     _zeqGroupListWidget.reset( new ZEQGroupListWidget( ) );
 
-    //Add all widgets to grid
-    /*QSizePolicy dsSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
-    dsSizePolicy.setHorizontalStretch( 255 );
-    _dataSetListWidget->setSizePolicy( dsSizePolicy );
-
-    QSizePolicy prSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
-    prSizePolicy.setHorizontalStretch( 1 );
-    _propertiesTableWidget->setSizePolicy( prSizePolicy );*/
-
     QSizePolicy groupsSizePolicy( QSizePolicy::Preferred,
       QSizePolicy::Expanding );
     groupsSizePolicy.setHorizontalStretch( 1 );
@@ -135,28 +151,26 @@ namespace vishnu
     //User DataSets
     QVBoxLayout* userDSLayout = new QVBoxLayout( );
     userDSLayout->addWidget( _userDataSetListWidget.get( ), 0 );
-    mainVLayout->addLayout( userDSLayout, 0 );
+    mainVLayout->addLayout( userDSLayout, 2 );
 
     //Apps and groups
     QHBoxLayout* appsAndGroupsLayout = new QHBoxLayout( );
 
     //Applications
     QVBoxLayout* appsLayout = new QVBoxLayout( );
-    appsLayout->addLayout( appsVBoxLayout, 0 );
-    //mainHLayout->addLayout( appsLayout, 1 );
+    appsLayout->addLayout( appsVBoxLayout, 1 );
 
     //ZEQ Groups
     QVBoxLayout* zeqLayout = new QVBoxLayout( );
     zeqLayout->addWidget( _zeqGroupListWidget.get( ), 0 );
-    //mainHLayout->addLayout( zeqLayout, 2 );
 
     appsAndGroupsLayout->addLayout( appsLayout, 0 );
     appsAndGroupsLayout->addLayout( zeqLayout, 1 );
     mainVLayout->addLayout( appsAndGroupsLayout, 1 );
 
     //TEST GROUPS
-    std::vector<std::string> ids;
-    ids.push_back("test");
+    std::vector< std::string > ids;
+    ids.emplace_back("test");
     syncGroup("GROUP1#!#CLINT", "GROUP1", "CLINT", ids, QColor(255, 65, 77));
     syncGroup("GROUP1#!#DCEXPLORER", "GROUP2", "DCEXPLORER", ids, QColor(3, 255, 77));
     syncGroup("GROUP2#!#DCEXPLORER", "GROUP3", "DCEXPLORER", ids, QColor(67, 67, 15));
@@ -169,7 +183,7 @@ namespace vishnu
     //END TEST GROUPS
 
     //Status bar
-    statusBar()->showMessage("");
+    statusBar()->showMessage( "Test status bar" );
 
     QObject::connect( this, SIGNAL( signalReloadDataSets( ) ), this,
       SLOT( slotReloadDataSets( ) ) );
@@ -264,6 +278,8 @@ namespace vishnu
 
   void MainWindow::addDataSet( void )
   {
+    setBlurred( true );
+
     DataSetWindow* dataSetWindow = new DataSetWindow();
 
     dataSetWindow->setGeometry( QRect( 0, 0, APPLICATION_WIDTH, APPLICATION_HEIGHT ) );
@@ -281,6 +297,8 @@ namespace vishnu
 
     dataSetWindow->setModal( true );
     dataSetWindow->exec( );
+
+    setBlurred( false );
 
     emit signalReloadDataSets( );
   }
@@ -430,12 +448,14 @@ namespace vishnu
     //Not const in order to add (or overwrite) other arguments
     for ( auto& application : appsConfig->getApplications( ) )
     {
-      application->getArgs( ).set( "-z", _zeqSession );
+      application->getArgs( ).set( "-z",
+        _userPreferences->getUserPreference( "zeqSession" ) );
 
       std::string instanceId = sp1common::Strings::generateRandom( 5 );
       application->getArgs( ).set( "-id", instanceId );
 
-      application->setWorkingDirectory( _workingDirectory );
+      application->setWorkingDirectory(
+        _userPreferences->getUserPreference( "workingDirectory" ) );
 
       AppProcessPtr appProcess( new AppProcess(
         application->getApplicationType( ), application->getDisplayName( ),
@@ -502,8 +522,10 @@ namespace vishnu
 
   void MainWindow::initZeqSession( )
   {
-    std::cout << "Init ZeqSession ( " << _zeqSession << " )" << std::endl;
-    manco::ZeqManager::instance( ).init( _zeqSession );
+    std::string zeqSession =
+      _userPreferences->getUserPreference( "zeqSession" );
+    std::cout << "Init ZeroEQ Session ( " << zeqSession << " )" << std::endl;
+    manco::ZeqManager::instance( ).init( zeqSession );
     manco::ZeqManager::instance( ).setReceivedSyncGroupCallback(
       std::bind( &MainWindow::receivedSyncGroup, this,
       std::placeholders::_1 ) );
@@ -566,5 +588,23 @@ namespace vishnu
   {
     emit signalDestroyGroup( QString::fromStdString( o->getKeyString( ) ) );
   }
+
+  void MainWindow::setBlurred( const bool& state )
+  {
+    if ( state )
+    {
+      QGraphicsBlurEffect* blur = new QGraphicsBlurEffect( this );
+      setGraphicsEffect( blur );
+      _userDataSetListWidget->setBlurred( true );
+      _zeqGroupListWidget->setBlurred( true );
+    }
+    else
+    {
+      setGraphicsEffect( 0 );
+      _userDataSetListWidget->setBlurred( false );
+      _zeqGroupListWidget->setBlurred( false );
+    }
+  }
+
 }
 

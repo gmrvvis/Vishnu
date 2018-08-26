@@ -20,21 +20,28 @@ namespace vishnu
   PropertiesTableWidget::PropertiesTableWidget( QWidget* /*parent*/ )
     : _checkingProperty( false )
   {
+    setSelectionMode( QAbstractItemView::SelectionMode::SingleSelection );
+    setDragDropMode( QAbstractItemView::DragDropMode::InternalMove );
+    setDefaultDropAction( Qt::DropAction::MoveAction );
+
+    setSelectionBehavior(QAbstractItemView::SelectRows);
+
     setColumnCount( 5 );
     setColumnWidth( 0, 220 );
-    setColumnWidth( 1, 80 );
+    setColumnWidth( 1, 34 );
     setColumnWidth( 2, 150 );
     setColumnWidth( 3, 100 );
     setColumnWidth( 4, 100 );
 
     horizontalHeader()->setStretchLastSection( true );
     QStringList headers;
-    headers << "Property name" << "Use" << "Primary Key" << "Data type"
+    headers << "Property name" << "Use" << "Primary Key" << "Data category"
       << "Axis type";
     setHorizontalHeaderLabels( headers );
     setSortingEnabled( false );
     verticalHeader( )->setVisible( false );
     setAcceptDrops( true );
+
   }
 
   void PropertiesTableWidget::checkPrimaryKeys(
@@ -67,9 +74,9 @@ namespace vishnu
     {
       std::string propertyName = property->getName( );
       std::vector< std::string > tableProperties;
-      for (int i = 0; i < rowCount(); ++i )
+      for (int i = 0; i < rowCount( ); ++i )
       {
-        tableProperties.push_back( static_cast< QLabel* >( cellWidget( i, 0 )
+        tableProperties.emplace_back( static_cast< QLabel* >( cellWidget( i, 0 )
           )->text( ).toStdString( ) );
       }
 
@@ -123,7 +130,7 @@ namespace vishnu
         }
 
         PropertiesWidget* propertiesWidget = new PropertiesWidget( propertyName,
-          inUse, isPrimaryKey, property->getDataType( ), axis );
+          inUse, isPrimaryKey, property->getDataCategory( ), axis );
 
         int row = this->rowCount( );
         int columns = columnCount( );
@@ -260,10 +267,10 @@ namespace vishnu
     }
   }
 
-  void PropertiesTableWidget::dataTypeChanged( QString text )
+  void PropertiesTableWidget::dataCategoryChanged( QString text )
   {
-    if ( sp1common::toDataType( text.toStdString( ) )
-      == sp1common::DataType::Geometric )
+    if ( sp1common::toDataCategory( text.toStdString( ) )
+      == sp1common::DataCategory::Geometric )
     {
         QComboBox* cbSender = static_cast< QComboBox* >( sender( ) );
         if ( !_checkingProperty  )
@@ -275,11 +282,11 @@ namespace vishnu
             QComboBox* cb = static_cast< QComboBox* >( cellWidget( i, 3 ) );
             if ( cb != cbSender )
             {
-              if ( sp1common::toDataType( cb->currentText( ).toStdString( ) )
-                == sp1common::DataType::Geometric )
+              if ( sp1common::toDataCategory( cb->currentText( ).toStdString( ) )
+                == sp1common::DataCategory::Geometric )
               {
                 cb->setCurrentText( QString::fromStdString( toString(
-                  sp1common::DataType::Undefined ) ) );
+                  sp1common::DataCategory::Undefined ) ) );
               }
             }
           }
@@ -327,7 +334,7 @@ namespace vishnu
         )->isChecked( );
       QComboBox* dataTypeComboBox = static_cast< QComboBox* >( cellWidget(
         row, 3 ) );
-      sp1common::DataType dataType = sp1common::toDataType(
+      sp1common::DataCategory dataCategory = sp1common::toDataCategory(
         dataTypeComboBox->currentText( ).toStdString( ) );
       QComboBox* axisTypeComboBox = static_cast< QComboBox* >( cellWidget(
         row, 4 ) );
@@ -345,7 +352,7 @@ namespace vishnu
           propertyGroups->addNonPrimaryKey( name );
         }
         dataSet->addProperty( sp1common::PropertyPtr(
-          new sp1common::Property( name, dataType,
+          new sp1common::Property( name, dataCategory,
           sp1common::DataStructureType::None ) ) );
       }
 
@@ -381,6 +388,26 @@ namespace vishnu
     dataSets->setPropertyGroups( propertyGroups );
 
     return dataSets;
+  }
+
+  void PropertiesTableWidget::dragEnterEvent( QDragEnterEvent* event )
+  {
+    event->acceptProposedAction( );
+  }
+
+  void PropertiesTableWidget::dragMoveEvent( QDragMoveEvent* event )
+  {
+    event->acceptProposedAction( );
+  }
+
+  void PropertiesTableWidget::dragLeaveEvent( QDragLeaveEvent* event )
+  {
+    event->accept( );
+  }
+
+  void PropertiesTableWidget::dropEvent( QDropEvent* event )
+  {
+    event->acceptProposedAction( );
   }
 
   /*Properties PropertiesTableWidget::getProperties( void )

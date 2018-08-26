@@ -42,11 +42,11 @@ namespace vishnu
       DataSetWidgets addDataSets( const std::vector< std::string >& dropped =
         std::vector< std::string >( ) );
 
-      std::vector< std::string > getPropertiesToRemove( );
+      std::vector< std::string > getPropertiesToRemove( void );
 
-      void removeCurrentDataSet( );
+      void removeCurrentDataSet( void );
 
-      std::vector< std::string > getCommonProperties( );
+      std::vector< std::string > getCommonProperties( void );
 
       sp1common::DataSetsPtr getDataSets( void ) const;
 

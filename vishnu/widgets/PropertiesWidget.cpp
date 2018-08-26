@@ -17,7 +17,6 @@
 #include <QPixmap>
 #include <QColor>
 
-#include <sstream>
 #include <iostream>
 
 #include "../Definitions.hpp"
@@ -27,17 +26,27 @@ namespace vishnu
 {
 
   PropertiesWidget::PropertiesWidget( const std::string& name, const bool& use,
-        const bool& primaryKey, const sp1common::DataType& dataType,
+        const bool& primaryKey, const sp1common::DataCategory& dataCategory,
         const sp1common::AxisType& axisType, QWidget* /*parent*/ )
   {    
 
-    fillDataTypes( );
+    fillDataCategories( );
     fillAxisTypes( );
     setName( name );
     setUse( use );
     setPrimaryKey( primaryKey );
-    setDataType( dataType );
+    setDataCategory( dataCategory );
     setAxisType( axisType );
+
+    _use->setStyleSheet( "QCheckBox::indicator { width: 100%; height: 100%; subcontrol-position: center center;}"
+      "QCheckBox::indicator:checked { background-image:url(:/icons/checked.png); }"
+      "QCheckBox::indicator:unchecked { background-image:url(:/icons/unchecked.png); }"
+    );
+
+    _primaryKey->setStyleSheet( "QCheckBox::indicator { width: 32px; height: 32px; subcontrol-position: center center;}"
+      "QCheckBox::indicator:checked { background-image:url(:/icons/checked.png); }"
+      "QCheckBox::indicator:unchecked { background-image:url(:/icons/unchecked.png); }"
+    );
 
     QObject::connect( _use, SIGNAL( toggled( bool ) ), this,
       SLOT( useChanged( bool ) ) );
@@ -89,30 +98,32 @@ namespace vishnu
     _primaryKey->setChecked( primaryKey );
   }
 
-  void PropertiesWidget::fillDataTypes( void )
+  void PropertiesWidget::fillDataCategories( void )
   {
-    if ( _dataType == nullptr)
+    if ( _dataCategory == nullptr)
     {
-      _dataType = new QComboBox( );
+      _dataCategory = new QComboBox( );
     }
-    for (const auto& dt : sp1common::dataTypesToVector( ) )
+    for (const auto& dt : sp1common::dataCategoriesToVector( ) )
     {
-      _dataType->addItem( QString::fromStdString( dt ) );      
+      _dataCategory->addItem( QString::fromStdString( dt ) );
     }
   }
 
-  sp1common::DataType PropertiesWidget::getDataType( void ) const
+  sp1common::DataCategory PropertiesWidget::getDataCategory( void ) const
   {
-    return sp1common::toDataType( _dataType->currentText( ).toStdString( ) );
+    return sp1common::toDataCategory(
+      _dataCategory->currentText( ).toStdString( ) );
   }
 
-  void PropertiesWidget::setDataType( const sp1common::DataType& dataType )
+  void PropertiesWidget::setDataCategory(
+    const sp1common::DataCategory& dataCategory )
   {
-    int index = _dataType->findData( QString::fromStdString(
-      sp1common::toString( dataType ) ) );
+    int index = _dataCategory->findData( QString::fromStdString(
+      sp1common::toString( dataCategory ) ) );
     if ( index != -1 )
     {
-      _dataType->setCurrentIndex( index );
+      _dataCategory->setCurrentIndex( index );
     }
   }
 
@@ -154,7 +165,7 @@ namespace vishnu
       case 2:
         return _primaryKey;
       case 3:
-        return _dataType;
+        return _dataCategory;
       case 4:
         return _axisType;
       default:

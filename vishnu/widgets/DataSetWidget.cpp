@@ -56,6 +56,7 @@ namespace vishnu
     removeDataSetImage->setPixmap( removeDataSetPixmap );
     _remove = new QPushButton( );
     _remove->setIcon( QIcon( ":/icons/close.png" ) );
+    _remove->setStyleSheet( "QWidget:hover{background-color:#AAAAFF;}" );
     QObject::connect( _remove, SIGNAL( clicked( ) ), this,
       SLOT( clickRemove( ) ) );
 
@@ -63,13 +64,9 @@ namespace vishnu
     vLayout3->addWidget( _remove, 0, 0 );
     hLayout->addLayout( vLayout3, 0 );
 
-    QPalette pal( palette( ) );
-    pal.setColor( QPalette::Base, QColor( "#c3e6fc" ) );
-    setAutoFillBackground( true );
-    setPalette( pal );
-    show( );
-
     setLayout( hLayout );
+
+    show( );
   }
 
   std::string DataSetWidget::getPath( ) const
@@ -106,11 +103,6 @@ namespace vishnu
   {
     _listWidgetItem = listWidgetItem;
   }
-
-  /*std::vector< std::string > DataSetWidget::getHeaders( void ) const
-  {
-    return _headers;
-  }*/
 
   sp1common::DataSetPtr DataSetWidget::getDataSet( void ) const
   {
