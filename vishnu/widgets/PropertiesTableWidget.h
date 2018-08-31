@@ -46,7 +46,6 @@ namespace vishnu
 
     void removeProperties( const std::vector< std::string >& properties );
 
-    //Properties getProperties( void );
     sp1common::DataSetsPtr getDataSets( void );
 
   protected:
@@ -78,6 +77,10 @@ namespace vishnu
 
       void changeToXYZ(
         const std::vector< sp1common::AxisType >& selectedAxis );
+
+      PropertiesWidget* getRow( const int& index );
+
+      int _sourceIndex;
 
   };
 

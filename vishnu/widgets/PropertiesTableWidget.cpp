@@ -19,18 +19,13 @@ namespace vishnu
 {
   PropertiesTableWidget::PropertiesTableWidget( QWidget* /*parent*/ )
     : _checkingProperty( false )
+    , _sourceIndex( -1 )
   {
-    setSelectionMode( QAbstractItemView::SelectionMode::SingleSelection );
-    setDragDropMode( QAbstractItemView::DragDropMode::InternalMove );
-    setDefaultDropAction( Qt::DropAction::MoveAction );
-
-    setSelectionBehavior(QAbstractItemView::SelectRows);
-
     setColumnCount( 5 );
     setColumnWidth( 0, 220 );
-    setColumnWidth( 1, 34 );
+    setColumnWidth( 1, 50 );
     setColumnWidth( 2, 150 );
-    setColumnWidth( 3, 100 );
+    setColumnWidth( 3, 120 );
     setColumnWidth( 4, 100 );
 
     horizontalHeader()->setStretchLastSection( true );
@@ -38,9 +33,14 @@ namespace vishnu
     headers << "Property name" << "Use" << "Primary Key" << "Data category"
       << "Axis type";
     setHorizontalHeaderLabels( headers );
-    setSortingEnabled( false );
+    setSortingEnabled( true );
     verticalHeader( )->setVisible( false );
-    setAcceptDrops( true );
+
+    setDragEnabled( true );
+    setSelectionMode( QAbstractItemView::SelectionMode::SingleSelection );
+    setDragDropMode( QAbstractItemView::DragDropMode::InternalMove );
+    setSelectionBehavior( QAbstractItemView::SelectionBehavior::SelectRows );
+    setDropIndicatorShown( true );
 
   }
 
@@ -132,7 +132,7 @@ namespace vishnu
         PropertiesWidget* propertiesWidget = new PropertiesWidget( propertyName,
           inUse, isPrimaryKey, property->getDataCategory( ), axis );
 
-        int row = this->rowCount( );
+        int row = rowCount( );
         int columns = columnCount( );
         insertRow( row );
         for( int column = 0; column < columns; ++column )
@@ -149,7 +149,7 @@ namespace vishnu
         //DataType
         QObject::connect( propertiesWidget->getWidget( 3 ),
           SIGNAL( currentIndexChanged( QString ) ), this,
-          SLOT( dataTypeChanged( QString ) ) );
+          SLOT( dataCategoryChanged( QString ) ) );
       }
     }
   }
@@ -392,7 +392,12 @@ namespace vishnu
 
   void PropertiesTableWidget::dragEnterEvent( QDragEnterEvent* event )
   {
-    event->acceptProposedAction( );
+    int index = currentIndex( ).row( );
+    if ( index >= 0 )
+    {
+      _sourceIndex = index;
+      event->acceptProposedAction( );
+    }
   }
 
   void PropertiesTableWidget::dragMoveEvent( QDragMoveEvent* event )
@@ -407,35 +412,57 @@ namespace vishnu
 
   void PropertiesTableWidget::dropEvent( QDropEvent* event )
   {
-    event->acceptProposedAction( );
-  }
-
-  /*Properties PropertiesTableWidget::getProperties( void )
-  {
-    Properties properties;
-
-    for( int row = 0; row < rowCount( ); ++row )
+    if ( _sourceIndex != -1 )
     {
-      std::string name = static_cast< QLabel* >( cellWidget( row, 0 )
-        )->text( ).toStdString( );
-      bool use = static_cast< QCheckBox* >( cellWidget( row, 1 )
-        )->isChecked( );
-      bool primaryKey = static_cast< QCheckBox* >( cellWidget( row, 2 )
-        )->isChecked( );
-      QComboBox* dataTypeComboBox = static_cast< QComboBox* >( cellWidget(
-        row, 3 ) );
-      sp1common::DataType dataType = sp1common::toDataType(
-        dataTypeComboBox->currentText( ).toStdString( ) );
-      QComboBox* axisTypeComboBox = static_cast< QComboBox* >( cellWidget(
-        row, 4 ) );
-      sp1common::AxisType axisType = sp1common::toAxisType(
-        axisTypeComboBox->currentText( ).toStdString( ) );
+      int targetIndex = indexAt( event->pos( ) ).row( );
 
-      PropertyPtr property( new Property( name, use, primaryKey, dataType, 
-        axisType ) );
-      properties.emplace_back( property );
+      PropertiesWidget* sourceRow = getRow( _sourceIndex );
+      PropertiesWidget* targetRow = getRow( targetIndex );
+
+      for( int column = 0; column < columnCount( ); ++column )
+      {
+        setCellWidget( _sourceIndex, column, targetRow->getWidget( column ) );
+        setCellWidget( targetIndex, column, sourceRow->getWidget( column ) );
+      }
+
+      _sourceIndex = -1;
+
+      //Set moved row as selected row
+      setCurrentCell( targetIndex, 0 );
+
+      event->acceptProposedAction( );
     }
 
-    return properties;
-  }*/
+  }
+
+  PropertiesWidget* PropertiesTableWidget::getRow( const int& index )
+  {
+    if ( ( index >= rowCount( ) ) || ( index < 0 ) )
+    {
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+        "Invalid row", true );
+    }
+
+    std::string name = static_cast< QLabel* >( cellWidget( index, 0 )
+      )->text( ).toStdString( );
+    bool use = static_cast< QCheckBox* >( cellWidget( index, 1 )
+      )->isChecked( );
+    bool primaryKey = static_cast< QCheckBox* >( cellWidget( index, 2 )
+      )->isChecked( );
+    QComboBox* dataCategoryComboBox = static_cast< QComboBox* >( cellWidget(
+      index, 3 ) );
+    sp1common::DataCategory dataCategory = sp1common::toDataCategory(
+      dataCategoryComboBox->currentText( ).toStdString( ) );
+
+    QComboBox* axisTypeComboBox = static_cast< QComboBox* >( cellWidget(
+      index, 4 ) );
+    sp1common::AxisType axisType = sp1common::toAxisType(
+      axisTypeComboBox->currentText( ).toStdString( ) );
+
+    PropertiesWidget* propertiesWidget = new PropertiesWidget( name, use,
+      primaryKey, dataCategory, axisType );
+
+    return propertiesWidget;
+  }
+
 }

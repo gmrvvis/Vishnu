@@ -233,6 +233,47 @@ namespace vishnu
       return;
     }
 
+    //Create geometric data folder
+    std::string geometryFolder = path + std::string( "/" )
+      + GEOMETRY_DATA_FOLDER;
+    QDir qGeometryFolder( QString::fromStdString( geometryFolder ) );
+    if ( !qGeometryFolder.mkpath( QString::fromStdString( geometryFolder ) ) )
+    {
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+        "Can't create " + geometryFolder + " folder.", false );
+      return;
+    }
+
+    //Copy geometry files
+    std::string sourceGeometryFolder = qDir.absolutePath( ).toStdString( )
+      + std::string( "/" ) + GEOMETRY_DATA_FOLDER;
+    QDir qSourceGeometryFolder(
+      QString::fromStdString( sourceGeometryFolder ) );
+
+    for( const QFileInfo& info : qSourceGeometryFolder.entryInfoList(
+      /*QDir::Dirs |*/ QDir::Files | QDir::NoDotAndDotDot ) ) {
+
+        QString srcFilePath =
+          qSourceGeometryFolder.absoluteFilePath( info.fileName( ) );
+        QString dstFilePath =
+          qGeometryFolder.absoluteFilePath( info.fileName( ) );
+
+        /*if ( info.isDir() )
+        {
+          //Recursive function to copy nested dirs...
+        } else */
+        if ( info.isFile( ) )
+        {
+          if ( !QFile::copy( srcFilePath, dstFilePath ) )
+          {
+            sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+              "Can't copy " + info.fileName( ).toStdString( )
+              + " file.", false );
+            return;
+          }
+        }
+    }
+
     //Create JSON DataSet (userdata)
     std::string userDataFolder = qApp->applicationDirPath( ).toStdString( )
         + std::string( "/" ) + USER_DATA_FOLDER + std::string( "/" );
@@ -380,7 +421,7 @@ namespace vishnu
     //Set
     sp1common::Sets sets;
     sets.emplace_back( sp1common::SetPtr( new sp1common::Set( csvPath,
-      path + std::string( "/" ) + GEOMETRIC_DATA_FOLDER ) ) );
+      path + std::string( "/" ) + GEOMETRY_DATA_FOLDER ) ) );
 
     //Data
     sp1common::DataPtr dataPtr( new sp1common::Data( "customDataSet", "",

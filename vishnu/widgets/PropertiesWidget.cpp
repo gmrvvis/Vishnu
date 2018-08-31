@@ -38,12 +38,16 @@ namespace vishnu
     setDataCategory( dataCategory );
     setAxisType( axisType );
 
-    _use->setStyleSheet( "QCheckBox::indicator { width: 100%; height: 100%; subcontrol-position: center center;}"
+    _use->setStyleSheet(
+      //"QCheckBox { background-color: #AAAAAA; }"
+      "QCheckBox::indicator { width: 32px; height: 32px; subcontrol-position: center center;}"
       "QCheckBox::indicator:checked { background-image:url(:/icons/checked.png); }"
       "QCheckBox::indicator:unchecked { background-image:url(:/icons/unchecked.png); }"
     );
 
-    _primaryKey->setStyleSheet( "QCheckBox::indicator { width: 32px; height: 32px; subcontrol-position: center center;}"
+    _primaryKey->setStyleSheet(
+      //"QCheckBox { background-color: #AAAAAA; }"
+      "QCheckBox::indicator { width: 32px; height: 32px; subcontrol-position: center center;}"
       "QCheckBox::indicator:checked { background-image:url(:/icons/checked.png); }"
       "QCheckBox::indicator:unchecked { background-image:url(:/icons/unchecked.png); }"
     );
@@ -53,7 +57,6 @@ namespace vishnu
 
     QObject::connect( _primaryKey, SIGNAL( toggled( bool ) ), this,
       SLOT( primaryKeyChanged( bool ) ) );
-
   }
 
   std::string PropertiesWidget::getName( void ) const
@@ -119,8 +122,9 @@ namespace vishnu
   void PropertiesWidget::setDataCategory(
     const sp1common::DataCategory& dataCategory )
   {
-    int index = _dataCategory->findData( QString::fromStdString(
+    int index = _dataCategory->findText( QString::fromStdString(
       sp1common::toString( dataCategory ) ) );
+
     if ( index != -1 )
     {
       _dataCategory->setCurrentIndex( index );
@@ -146,8 +150,9 @@ namespace vishnu
 
   void PropertiesWidget::setAxisType( const sp1common::AxisType& axisType )
   {
-    int index = _axisType->findData( QString::fromStdString(
+    int index = _axisType->findText( QString::fromStdString(
       toString( axisType ) ) );
+
     if ( index != -1 )
     {
       _axisType->setCurrentIndex( index );

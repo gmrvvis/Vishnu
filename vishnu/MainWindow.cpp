@@ -70,7 +70,7 @@ namespace vishnu
     }
 
     //MenuBar
-    QMenu *fileMenu = new QMenu(tr("&File"));
+    /*QMenu *fileMenu = new QMenu(tr("&File"));
     QAction *quitAction = fileMenu->addAction(tr("E&xit"));
     quitAction->setShortcut(tr("Ctrl+Q"));
     QMenu *itemsMenu = new QMenu(tr("&DataSets"));
@@ -80,12 +80,13 @@ namespace vishnu
     //QAction *descendingAction = itemsMenu->addAction(tr("Sort in &Descending Order"));
 
     menuBar()->addMenu(fileMenu);
-    menuBar()->addMenu(itemsMenu);
+    menuBar()->addMenu(itemsMenu);*/
     //End MenuBar
 
     //ToolBar
     QToolBar* toolBar = new QToolBar( );
     toolBar->setMovable( false );
+    toolBar->setContextMenuPolicy( Qt::PreventContextMenu );
     QAction* actionAddDataSet = new QAction( );
     actionAddDataSet->setIcon( QIcon( ":/icons/addDataSet.png" ) );
     actionAddDataSet->setText( "AddDataSet" );
@@ -168,6 +169,41 @@ namespace vishnu
     appsAndGroupsLayout->addLayout( zeqLayout, 1 );
     mainVLayout->addLayout( appsAndGroupsLayout, 1 );
 
+    //Status bar
+    statusBar()->showMessage( "" );
+
+    QObject::connect( this, SIGNAL( signalReloadDataSets( ) ), this,
+      SLOT( slotReloadDataSets( ) ) );
+
+    emit signalReloadDataSets( );
+
+    checkApps( false );
+
+    //TEST DATASETS
+  /*  UserDataSetWidgetPtr userDataSetWidget2 =
+      _userDataSetListWidget->addUserDataSet( "dataSet001",
+      "/media/DATA/data/test", "dataSet.csv", "dataSet.json", "dataSet.xml",
+      false );
+
+    QObject::connect( userDataSetWidget2, SIGNAL( signalRemoveSelected( ) ),
+      this, SLOT( slotRemoveUserDataSet( ) ) );
+
+    QObject::connect( userDataSetWidget2, SIGNAL( signalCheckSelected( bool ) ),
+      this, SLOT( slotCheckUserDataSet( bool ) ) );
+
+    UserDataSetWidgetPtr userDataSetWidget3 =
+      _userDataSetListWidget->addUserDataSet( "dataSet502",
+      "/media/DATA/data/ds", "segmentations.csv", "test.json", "pyramidal.xml",
+      false );
+
+    QObject::connect( userDataSetWidget3, SIGNAL( signalRemoveSelected( ) ),
+      this, SLOT( slotRemoveUserDataSet( ) ) );
+
+    QObject::connect( userDataSetWidget3, SIGNAL( signalCheckSelected( bool ) ),
+      this, SLOT( slotCheckUserDataSet( bool ) ) );
+    //END TEST DATASETS
+
+
     //TEST GROUPS
     std::vector< std::string > ids;
     ids.emplace_back("test");
@@ -182,15 +218,7 @@ namespace vishnu
     removeGroup("GROUP3#!#PYRAMIDAL");
     //END TEST GROUPS
 
-    //Status bar
-    statusBar()->showMessage( "Test status bar" );
-
-    QObject::connect( this, SIGNAL( signalReloadDataSets( ) ), this,
-      SLOT( slotReloadDataSets( ) ) );
-
-    emit signalReloadDataSets( );
-
-    checkApps( false );
+    */
   }
 
   MainWindow::~MainWindow( )
@@ -221,7 +249,6 @@ namespace vishnu
     }
   }
 
-
   void MainWindow::slotReloadDataSets( void )
   {
     std::string userDataSetsFilename =
@@ -251,29 +278,6 @@ namespace vishnu
          this, SLOT( slotRemoveUserDataSet( ) ) );
       }
     }
-    //TEST DATASET
-    UserDataSetWidgetPtr userDataSetWidget2 =
-      _userDataSetListWidget->addUserDataSet( "dataSet001",
-      "/media/DATA/data/test", "dataSet.csv", "dataSet.json", "dataSet.xml",
-      false );
-
-    QObject::connect( userDataSetWidget2, SIGNAL( signalRemoveSelected( ) ),
-      this, SLOT( slotRemoveUserDataSet( ) ) );
-
-    QObject::connect( userDataSetWidget2, SIGNAL( signalCheckSelected( bool ) ),
-      this, SLOT( slotCheckUserDataSet( bool ) ) );
-
-    UserDataSetWidgetPtr userDataSetWidget3 =
-      _userDataSetListWidget->addUserDataSet( "dataSet502",
-      "/media/DATA/data/ds", "segmentations.csv", "test.json", "pyramidal.xml",
-      false );
-
-    QObject::connect( userDataSetWidget3, SIGNAL( signalRemoveSelected( ) ),
-      this, SLOT( slotRemoveUserDataSet( ) ) );
-
-    QObject::connect( userDataSetWidget3, SIGNAL( signalCheckSelected( bool ) ),
-      this, SLOT( slotCheckUserDataSet( bool ) ) );
-    //END TEST DATASET
   }
 
   void MainWindow::addDataSet( void )
@@ -282,7 +286,8 @@ namespace vishnu
 
     DataSetWindow* dataSetWindow = new DataSetWindow();
 
-    dataSetWindow->setGeometry( QRect( 0, 0, APPLICATION_WIDTH, APPLICATION_HEIGHT ) );
+    dataSetWindow->setGeometry(
+      QRect( 0, 0, APPLICATION_WIDTH, APPLICATION_HEIGHT ) );
 
     QRect screenGeometry = QApplication::desktop()->screenGeometry();
     int x = ( screenGeometry.width() - dataSetWindow->width( ) ) / 2;
@@ -483,7 +488,7 @@ namespace vishnu
 
     for (const auto& it : _applications )
     {
-      if ( it.second->getPushButton( ) == appButton)
+      if ( it.second->getPushButton( ) == appButton )
       {        
         sp1common::Debug::consoleMessage( "Opening "
           + it.second->getDisplayName( ) );
@@ -504,10 +509,22 @@ namespace vishnu
           }
         }
 
-        it.second->start(
-          QString::fromStdString( it.second->getShellCommand( ) ),
-          arguments
-        );
+        std::string application = it.second->getShellCommand( );
+        if ( !sp1common::Files::exist( application ) )
+        {
+          QMessageBox::information( this, QString( APPLICATION_NAME ),
+            QString( "Can't find " ) + QString::fromStdString( application )
+            + QString( " application." ), QMessageBox::Ok );
+
+          sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
+            "Can't find " + application + " application.", false );
+
+          it.second->getPushButton( )->setEnabled( true );
+
+          return;
+        }
+
+        it.second->start( QString::fromStdString( application ), arguments );
 
         QByteArray out_data = it.second->readAllStandardOutput( );
         QString out_string( out_data );
@@ -597,12 +614,14 @@ namespace vishnu
       setGraphicsEffect( blur );
       _userDataSetListWidget->setBlurred( true );
       _zeqGroupListWidget->setBlurred( true );
+      statusBar( )->setGraphicsEffect( blur );
     }
     else
     {
       setGraphicsEffect( 0 );
       _userDataSetListWidget->setBlurred( false );
       _zeqGroupListWidget->setBlurred( false );
+      statusBar( )->setGraphicsEffect( 0 );
     }
   }
 

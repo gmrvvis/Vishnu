@@ -16,7 +16,7 @@
 #define APPLICATION_HEIGHT 768
 
 #define USER_DATA_FOLDER "userdata/"
-#define GEOMETRIC_DATA_FOLDER "geometricData/"
+#define GEOMETRY_DATA_FOLDER "geometricData/"
 #define DEFAULT_DATASET_FILENAME "dataSet"
 #define FILE_USER_PREFERENCES "UserPreferences.json"
 #define FILE_APPS_CONFIG "AppsConfig.json"
