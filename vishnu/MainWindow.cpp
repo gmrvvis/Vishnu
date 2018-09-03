@@ -178,9 +178,9 @@ namespace vishnu
     emit signalReloadDataSets( );
 
     checkApps( false );
-
+/*
     //TEST DATASETS
-  /*  UserDataSetWidgetPtr userDataSetWidget2 =
+    UserDataSetWidgetPtr userDataSetWidget2 =
       _userDataSetListWidget->addUserDataSet( "dataSet001",
       "/media/DATA/data/test", "dataSet.csv", "dataSet.json", "dataSet.xml",
       false );
@@ -217,8 +217,8 @@ namespace vishnu
     syncGroup("GROUP2#!#PYRAMIDAL", "otherName", "PYRAMIDAL", ids, QColor(255, 65, 77));
     removeGroup("GROUP3#!#PYRAMIDAL");
     //END TEST GROUPS
+*/
 
-    */
   }
 
   MainWindow::~MainWindow( )

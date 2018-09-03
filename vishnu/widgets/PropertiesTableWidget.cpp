@@ -22,11 +22,11 @@ namespace vishnu
     , _sourceIndex( -1 )
   {
     setColumnCount( 5 );
-    setColumnWidth( 0, 220 );
-    setColumnWidth( 1, 50 );
-    setColumnWidth( 2, 150 );
-    setColumnWidth( 3, 120 );
-    setColumnWidth( 4, 100 );
+    setColumnWidth( 0, 300 );
+    setColumnWidth( 1, 100 );
+    setColumnWidth( 2, 100 );
+    setColumnWidth( 3, 140 );
+    setColumnWidth( 4, 50 );
 
     horizontalHeader()->setStretchLastSection( true );
     QStringList headers;
@@ -141,15 +141,15 @@ namespace vishnu
           setCellWidget( row, column, propertiesWidget->getWidget( column ) );
         }
 
+        //DataCategory
+        QObject::connect( propertiesWidget->getWidget( 3 ),
+          SIGNAL( currentIndexChanged( QString ) ), this,
+          SLOT( dataCategoryChanged( QString ) ) );
+
         //Axis Type
         QObject::connect( propertiesWidget->getWidget( 4 ),
           SIGNAL( currentIndexChanged( QString ) ), this,
           SLOT( axisTypeChanged( QString ) ) );
-
-        //DataType
-        QObject::connect( propertiesWidget->getWidget( 3 ),
-          SIGNAL( currentIndexChanged( QString ) ), this,
-          SLOT( dataCategoryChanged( QString ) ) );
       }
     }
   }
@@ -205,7 +205,8 @@ namespace vishnu
       std::vector< sp1common::AxisType > toExclude = selectedAxis;
       sp1common::Vectors::remove( toExclude, axisType );
 
-      if ( sp1common::Vectors::find( toExclude, sp1common::AxisType::XYZ ) != -1 )
+      if ( sp1common::Vectors::find( toExclude, sp1common::AxisType::XYZ )
+        != -1 )
       {
         toExclude.push_back( sp1common::AxisType::X );
         toExclude.push_back( sp1common::AxisType::Y );
@@ -453,7 +454,6 @@ namespace vishnu
       index, 3 ) );
     sp1common::DataCategory dataCategory = sp1common::toDataCategory(
       dataCategoryComboBox->currentText( ).toStdString( ) );
-
     QComboBox* axisTypeComboBox = static_cast< QComboBox* >( cellWidget(
       index, 4 ) );
     sp1common::AxisType axisType = sp1common::toAxisType(

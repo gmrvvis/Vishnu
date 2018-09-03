@@ -56,7 +56,7 @@ namespace vishnu
       SLOT( useChanged( bool ) ) );
 
     QObject::connect( _primaryKey, SIGNAL( toggled( bool ) ), this,
-      SLOT( primaryKeyChanged( bool ) ) );
+      SLOT( primaryKeyChanged( bool ) ) ); 
   }
 
   std::string PropertiesWidget::getName( void ) const
