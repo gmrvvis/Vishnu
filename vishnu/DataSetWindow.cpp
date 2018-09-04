@@ -415,7 +415,7 @@ namespace vishnu
     }
 
     sp1common::FeaturesPtr features( new sp1common::Features(
-      propertyGroups->getPrimaryKeys( ), propertyGroups->getAxes( ),
+      propertyGroups->getUsedPrimaryKeys( ), propertyGroups->getAxes( ),
       geometryColumn, featuresVector ) );
 
     //Set

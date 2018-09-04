@@ -133,7 +133,10 @@ namespace vishnu
     {
       filePaths = QFileDialog::getOpenFileNames( this,
         QString( "Select files" ), QString( "" ),
-        QString( "CSV-Files(*.csv);;JSON-Files(*.json);;SEG-Files(*.seg)" ) );
+        QString( "CSV Tabular Data Files(*.csv);;"
+          "JSON Schema(*.json);;"
+          "EspINA Session Files(*.seg)"
+        ) );
     }
     if ( filePaths.isEmpty( ) )
     {

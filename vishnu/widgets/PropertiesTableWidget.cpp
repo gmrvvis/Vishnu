@@ -83,20 +83,20 @@ namespace vishnu
       if ( std::find( tableProperties.begin( ), tableProperties.end( ),
         propertyName ) == tableProperties.end( ) )
       {
-        std::vector< std::string > primaryKeys =
-          propertyGroups->getPrimaryKeys( );
-        std::vector< std::string > nonPrimaryKeys =
-          propertyGroups->getNonPrimaryKeys( );
+        std::vector< std::string > usedPrimaryKeys =
+          propertyGroups->getUsedPrimaryKeys( );
+        std::vector< std::string > usedNonPrimaryKeys =
+          propertyGroups->getUsedNonPrimaryKeys( );
         std::vector< std::string > axes = propertyGroups->getAxes( );
         bool isPrimaryKey = false;
         bool inUse = false;
         sp1common::AxisType axis = sp1common::AxisType::None;
-        if ( sp1common::Vectors::find( primaryKeys, propertyName ) != -1 )
+        if ( sp1common::Vectors::find( usedPrimaryKeys, propertyName ) != -1 )
         {
           isPrimaryKey = true;
           inUse = true;
         }
-        else if ( sp1common::Vectors::find( nonPrimaryKeys, propertyName )
+        else if ( sp1common::Vectors::find( usedNonPrimaryKeys, propertyName )
           != -1 )
         {
           inUse = true;
@@ -346,11 +346,11 @@ namespace vishnu
       {
         if ( primaryKey )
         {
-          propertyGroups->addPrimaryKey( name );
+          propertyGroups->addUsedPrimaryKey( name );
         }
         else
         {
-          propertyGroups->addNonPrimaryKey( name );
+          propertyGroups->addUsedNonPrimaryKey( name );
         }
         dataSet->addProperty( sp1common::PropertyPtr(
           new sp1common::Property( name, dataCategory,

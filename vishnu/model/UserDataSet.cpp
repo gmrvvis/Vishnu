@@ -99,6 +99,7 @@ namespace vishnu
     _name = jsonObject[ "name" ].toString( ).toStdString( );
     _path = jsonObject[ "path" ].toString( ).toStdString( );
     _csvFilename = jsonObject[ "csvFilename" ].toString( ).toStdString( );
+    _jsonFilename = jsonObject[ "jsonFilename" ].toString( ).toStdString( );
     _xmlFilename = jsonObject[ "xmlFilename" ].toString( ).toStdString( );
     _selected = jsonObject[ "selected" ].toBool( );
   }
@@ -108,6 +109,7 @@ namespace vishnu
     jsonObject[ "name" ] = QString::fromStdString( _name );
     jsonObject[ "path" ] = QString::fromStdString( _path );
     jsonObject[ "csvFilename" ] = QString::fromStdString( _csvFilename );
+    jsonObject[ "jsonFilename" ] = QString::fromStdString( _jsonFilename );
     jsonObject[ "xmlFilename" ] = QString::fromStdString( _xmlFilename );
     jsonObject[ "selected" ] = _selected;
   }
