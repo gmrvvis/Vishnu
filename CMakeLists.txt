@@ -15,6 +15,9 @@ set( PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT
 project( vishnu VERSION ${PROJECT_VERSION} )
 set( vishnu_VERSION_ABI 5 )
 
+// For EspINA.
+add_definitions( -Wno-attributes )
+
 # Disable in source building
 if( "${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}" )
   message( FATAL "no in source building allowed." )
@@ -43,22 +46,40 @@ set( COMMON_PROJECT_DOMAIN gmrv.es )
 
 include( Common )
 
-common_find_package( Qt5Core SYSTEM REQUIRED )
-common_find_package( Qt5Widgets SYSTEM REQUIRED )
-common_find_package( Qt5Network SYSTEM REQUIRED )
 common_find_package( manco REQUIRED )
 common_find_package( sp1common REQUIRED )
 
 common_find_package_post( )
 
+# No common.
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Network Widgets Test X11Extras)
+find_package(QuaZip5 REQUIRED)
+include_directories(${QUAZIP_INCLUDE_DIR})
+find_package(VTK REQUIRED NO_MODULE)
+include (${VTK_USE_FILE})
+find_package(ITK REQUIRED)
+include (${ITK_USE_FILE})
+find_package( EspinaCore REQUIRED )
+# Only needed for spine information.
+# find_package( EspinaExtensions REQUIRED )
+
 list( APPEND VISHNU_DEPENDENT_LIBRARIES 
   Qt5::Core 
-  Qt5::Gui 
+  Qt5::Gui
+  Qt5::Network 
   Qt5::Widgets 
-  Qt5::Network
+  Qt5::Test
+  Qt5::X11Extras
   manco
   sp1common
+  ${QUAZIP_LIBRARIES}
+  ${VTK_LIBRARIES}
+  ${ITK_LIBRARIES}
+  ${EspinaCore_LIBRARIES}
 )
+
+# Only needed for spine information.
+# ${EspinaExtensions_LIBRARIES}
 
 add_subdirectory( vishnu )
 add_subdirectory( examples )

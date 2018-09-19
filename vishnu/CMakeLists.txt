@@ -44,6 +44,7 @@ set( VISHNU_HEADERS
   model/UserPreferences.h
   model/UserDataSets.h
   model/UserDataSet.h
+  espinaExtensions/ExtensionInformationDump.h
 )
 
 set( VISHNU_SOURCES
@@ -67,19 +68,34 @@ set( VISHNU_SOURCES
   model/UserPreferences.cpp
   model/UserDataSets.cpp
   model/UserDataSet.cpp
+  espinaExtensions/ExtensionInformationDump.cpp
 )
 
 set( VISHNU_LINK_LIBRARIES
-  Qt5::Core
+  Qt5::Core 
   Qt5::Gui
-  Qt5::Widgets
-  Qt5::Network
+  Qt5::Network 
+  Qt5::Widgets 
+  Qt5::Test
+  Qt5::X11Extras
   manco
   sp1common
+  ${QUAZIP_LIBRARIES}
+  ${VTK_LIBRARIES}
+  ${ITK_LIBRARIES}
+  ${EspinaCore_LIBRARIES}
 )
 
+# Only needed for spine information.
+# ${EspinaExtensions_LIBRARIES}
+
+#include_directories( ${CMAKE_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories( ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src )
+include_directories( ${EspinaCore_INCLUDE_DIRS} )
+
+# Only needed for spine information.
+# include_directories( ${EspinaExtensions_INCLUDE_DIRS} )
 
 if( MSVC )
   add_definitions( "-W4" )
