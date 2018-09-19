@@ -294,7 +294,7 @@ namespace vishnu
     int y = ( screenGeometry.height() - dataSetWindow->height( ) ) / 2;
     dataSetWindow->move( x, y );
 
-    dataSetWindow->setMinimumSize( 800, 800 );
+    //dataSetWindow->setMinimumSize( 800, 800 );
     dataSetWindow->setMaximumSize( 800, 800 );
     dataSetWindow->setWindowIcon( QIcon( ":/icons/logoVishnu.png") );
     dataSetWindow->setWindowTitle( QApplication::applicationName( )

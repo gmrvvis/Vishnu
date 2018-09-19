@@ -15,7 +15,7 @@ set( PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT
 project( vishnu VERSION ${PROJECT_VERSION} )
 set( vishnu_VERSION_ABI 5 )
 
-// For EspINA.
+# For EspINA.
 add_definitions( -Wno-attributes )
 
 # Disable in source building
