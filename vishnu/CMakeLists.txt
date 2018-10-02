@@ -84,18 +84,16 @@ set( VISHNU_LINK_LIBRARIES
   ${VTK_LIBRARIES}
   ${ITK_LIBRARIES}
   ${EspinaCore_LIBRARIES}
+  # Only needed for spine information.
+  ${EspinaExtensions_LIBRARIES}
 )
-
-# Only needed for spine information.
-# ${EspinaExtensions_LIBRARIES}
 
 #include_directories( ${CMAKE_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories( ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src )
 include_directories( ${EspinaCore_INCLUDE_DIRS} )
-
 # Only needed for spine information.
-# include_directories( ${EspinaExtensions_INCLUDE_DIRS} )
+include_directories( ${EspinaExtensions_INCLUDE_DIRS} )
 
 if( MSVC )
   add_definitions( "-W4" )

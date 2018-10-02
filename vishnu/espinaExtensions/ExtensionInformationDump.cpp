@@ -161,6 +161,7 @@ namespace vishnu
       return result;
     }
 
+    // Extension: MPH.
     if(type == MorphologicalInformationType)
     {
       QStringList banned = { "Centroid Y", "Centroid Z", "Binary Principal Moments Y", "Binary Principal Moments Z",
@@ -226,6 +227,115 @@ namespace vishnu
       return result;
     }
 
+    // Extension: EGD.
+    if(type == EdgeDistancesType)
+    {
+      for(auto key: keys)
+      {
+        auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
+        if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
+        {
+          result += segmentation->information(iKey).toString();
+        }
+
+        // Feedback.
+        /**
+        else
+        {
+          std::cout << "Segmentation (" << segmentation->name().toStdString()
+                    << ") has NOT (Others) this information: "
+                    << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
+        }
+        **/
+
+        if(key != keys.last()) result += separator;
+      }
+
+      return result;
+    }
+
+    // Extension: NTS.
+    if(type == SegmentationNotesType)
+    {
+      for(auto key: keys)
+      {
+        auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
+        if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
+        {
+          result += segmentation->information(iKey).toString();
+        }
+
+        // Feedback.
+        /**
+        else
+        {
+          std::cout << "Segmentation (" << segmentation->name().toStdString()
+                    << ") has NOT (Others) this information: "
+                    << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
+        }
+        **/
+
+        if(key != keys.last()) result += separator;
+      }
+
+      return result;
+    }
+
+    // Extension: TGS.
+    if(type == SegmentationTagsType)
+    {
+      for(auto key: keys)
+      {
+        auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
+        if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
+        {
+          result += segmentation->information(iKey).toString();
+        }
+
+        // Feedback.
+        /**
+        else
+        {
+          std::cout << "Segmentation (" << segmentation->name().toStdString()
+                    << ") has NOT (Others) this information: "
+                    << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
+        }
+        **/
+
+        if(key != keys.last()) result += separator;
+      }
+
+      return result;
+    }
+
+    // Extension: SAS.
+    if(type == AppositionSurfaceType)
+    {
+      for(auto key: keys)
+      {
+        auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
+        if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
+        {
+          result += segmentation->information(iKey).toString();
+        }
+
+        // Feedback.
+        /**
+        else
+        {
+          std::cout << "Segmentation (" << segmentation->name().toStdString()
+                    << ") has NOT (Others) this information: "
+                    << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
+        }
+        **/
+
+        if(key != keys.last()) result += separator;
+      }
+
+      return result;
+    }
+
+    // Extension: STI.
     if(type == StereologicalInclusionType)
     {
       QString cfs;
@@ -264,16 +374,71 @@ namespace vishnu
       return result;
     }
 
-    if(type == DendriteInformationType)
+    // Extension: SYN.
+    if(type == SynapseConnectionType)
     {
-      //bool anyInformation = false;
       for(auto key: keys)
       {
         auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
         {
           result += segmentation->information(iKey).toString();
-          //anyInformation = true;
+        }
+
+        // Feedback.
+        /**
+        else
+        {
+          std::cout << "Segmentation (" << segmentation->name().toStdString()
+                    << ") has NOT (Others) this information: "
+                    << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
+        }
+        **/
+
+        if(key != keys.last()) result += separator;
+      }
+
+      return result;
+    }
+
+    // Extension: AXN.
+    if(type == AxonInformationType)
+    {
+      for(auto key: keys)
+      {
+        auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
+        if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
+        {
+          result += segmentation->information(iKey).toString();
+        }
+
+        // Feedback.
+        /**
+        else
+        {
+          std::cout << "Segmentation (" << segmentation->name().toStdString()
+                    << ") has NOT (Others) this information: "
+                    << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
+        }
+        **/
+
+        if(key != keys.last()) result += separator;
+      }
+
+      return result;
+    }
+
+    // Extension: DEN.
+    if(type == DendriteInformationType)
+    {
+      bool anyInformation = false;
+      for(auto key: keys)
+      {
+        auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
+        if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
+        {
+          result += segmentation->information(iKey).toString();
+          anyInformation = true;
         }
 
         // Feedback.
@@ -289,58 +454,76 @@ namespace vishnu
         if(key != keys.last()) result += separator;
       }
 
-      // Spine data: not included in EspINA yet.
-      /**
+      // Separating sections.
+      result += separator;
+
+      // Spine data.
+      /**/
       if( anyInformation )
       {
         auto extension = segmentation->readOnlyExtensions()->get< ESPINA::Extensions::DendriteSkeletonInformation >( );
-        auto table = extension->spinesInformation();
 
-        QStringList nameList, completeList, branchedList, lengthList, numSynapsesList, numAsymmetricList, numAsymmetricHeadList,
-        numAsymmetricNeckList, numSymmetricList, numSymmetricHeadList, numSymmetricNeckList, numAxonsList, numInhibitoryAxonsList,
-        numExcitatoryAxonsList;
-
-        for(auto data: table)
+        // Temporary solution.
+        if( extension == nullptr )
         {
-          nameList               << data.name;
-          completeList           << (data.complete ? "true" : "false");
-          branchedList           << (data.branched ? "yes" : "no");
-          lengthList             << QString::number(data.length);
-          numSynapsesList        << QString::number(data.numSynapses);
-          numAsymmetricList      << QString::number(data.numAsymmetric);
-          numAsymmetricHeadList  << QString::number(data.numAsymmetricHead);
-          numAsymmetricNeckList  << QString::number(data.numAsymmetricNeck);
-          numSymmetricList       << QString::number(data.numSymmetric);
-          numSymmetricHeadList   << QString::number(data.numSymmetricHead);
-          numSymmetricNeckList   << QString::number(data.numSymmetricNeck);
-          numAxonsList           << QString::number(data.numAxons);
-          numInhibitoryAxonsList << QString::number(data.numAxonsInhibitory);
-          numExcitatoryAxonsList << QString::number(data.numAxonsExcitatory);
+          result += separator + separator + separator + separator + separator +
+            separator + separator + separator + separator + separator +
+            separator + separator + separator;
         }
+        else
+        {
+          auto table = extension->spinesInformation();
 
-        result += nameList.join(";")               + separator;
-        result += completeList.join(";")           + separator;
-        result += branchedList.join(";")           + separator;
-        result += lengthList.join(";")             + separator;
-        result += numSynapsesList.join(";")        + separator;
-        result += numAsymmetricList.join(";")      + separator;
-        result += numAsymmetricHeadList.join(";")  + separator;
-        result += numAsymmetricNeckList.join(";")  + separator;
-        result += numSymmetricList.join(";")       + separator;
-        result += numSymmetricHeadList.join(";")   + separator;
-        result += numSymmetricNeckList.join(";")   + separator;
-        result += numAxonsList.join(";")           + separator;
-        result += numInhibitoryAxonsList.join(";") + separator;
-        result += numExcitatoryAxonsList.join(";");
+          QStringList nameList, completeList, branchedList, lengthList, numSynapsesList, numAsymmetricList, numAsymmetricHeadList,
+          numAsymmetricNeckList, numSymmetricList, numSymmetricHeadList, numSymmetricNeckList, numAxonsList, numInhibitoryAxonsList,
+          numExcitatoryAxonsList;
+
+          for(auto data: table)
+          {
+            nameList               << data.name;
+            completeList           << (data.complete ? "true" : "false");
+            branchedList           << (data.branched ? "yes" : "no");
+            lengthList             << QString::number(data.length);
+            numSynapsesList        << QString::number(data.numSynapses);
+            numAsymmetricList      << QString::number(data.numAsymmetric);
+            numAsymmetricHeadList  << QString::number(data.numAsymmetricHead);
+            numAsymmetricNeckList  << QString::number(data.numAsymmetricNeck);
+            numSymmetricList       << QString::number(data.numSymmetric);
+            numSymmetricHeadList   << QString::number(data.numSymmetricHead);
+            numSymmetricNeckList   << QString::number(data.numSymmetricNeck);
+            numAxonsList           << QString::number(data.numAxons);
+            numInhibitoryAxonsList << QString::number(data.numAxonsInhibitory);
+            numExcitatoryAxonsList << QString::number(data.numAxonsExcitatory);
+          }
+
+          result += nameList.join(";")               + separator;
+          result += completeList.join(";")           + separator;
+          result += branchedList.join(";")           + separator;
+          result += lengthList.join(";")             + separator;
+          result += numSynapsesList.join(";")        + separator;
+          result += numAsymmetricList.join(";")      + separator;
+          result += numAsymmetricHeadList.join(";")  + separator;
+          result += numAsymmetricNeckList.join(";")  + separator;
+          result += numSymmetricList.join(";")       + separator;
+          result += numSymmetricHeadList.join(";")   + separator;
+          result += numSymmetricNeckList.join(";")   + separator;
+          result += numAxonsList.join(";")           + separator;
+          result += numInhibitoryAxonsList.join(";") + separator;
+          result += numExcitatoryAxonsList.join(";");
+        }
       }
-      **/
+      else
+      {
+        result += separator + separator + separator + separator + separator +
+          separator + separator + separator + separator + separator +
+          separator + separator + separator;
+      }
+      /**/
 
       return result;
     }
 
-    // valid for EdgeDistance, SegmentationTags, SegmentationNotes,
-    // AppositionSurface, SynapseConnection, AxonInformation
-    // and unknown (for this plugin) extensions.
+    // Extension: Unknown.
     for(auto key: keys)
     {
       auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
@@ -379,18 +562,7 @@ namespace vishnu
       return result;
     }
 
-    if(type == EdgeDistancesType)
-    {
-      for(auto key: keys)
-      {
-        result += EdgeDistanceTranslations.at(key);
-
-        if(key != keys.last()) result += separator;
-      }
-
-      return result;
-    }
-
+    // Extension: MPH.
     if(type == MorphologicalInformationType)
     {
       for(auto key: keys)
@@ -407,6 +579,20 @@ namespace vishnu
       return result;
     }
 
+    // Extension: EGD.
+    if(type == EdgeDistancesType)
+    {
+      for(auto key: keys)
+      {
+        result += EdgeDistanceTranslations.at(key);
+
+        if(key != keys.last()) result += separator;
+      }
+
+      return result;
+    }
+
+    // Extension: NTS.
     if(type == SegmentationNotesType)
     {
       for(auto key: keys)
@@ -417,6 +603,7 @@ namespace vishnu
       return result;
     }
 
+    // Extension: TGS.
     if(type == SegmentationTagsType)
     {
       for(auto key: keys)
@@ -427,6 +614,7 @@ namespace vishnu
       return result;
     }
 
+    // Extension: SAS.
     if(type == AppositionSurfaceType)
     {
       for(auto key: keys)
@@ -439,6 +627,7 @@ namespace vishnu
       return result;
     }
 
+    // Extension: STI.
     if(type == StereologicalInclusionType)
     {
       for(auto it = StereologicalIncTranslations.begin(); it != StereologicalIncTranslations.end();)
@@ -455,6 +644,7 @@ namespace vishnu
       return result;
     }
 
+    // Extension: SYN.
     if(type == SynapseConnectionType)
     {
       for(auto key: keys)
@@ -467,6 +657,7 @@ namespace vishnu
       return result;
     }
 
+    // Extension: AXN.
     if(type == AxonInformationType)
     {
       for(auto key: keys)
@@ -479,17 +670,16 @@ namespace vishnu
       return result;
     }
 
+    // Extension: DEN.
     if(type == DendriteInformationType)
     {
       for(auto key: keys)
       {
-        result += DendriteInformationTranslations.at(key);
-
-        if(key != keys.last()) result += separator;
+        result += DendriteInformationTranslations.at(key) + separator;
       }
 
-      // Spine data: not included in EspINA yet.
-      /**
+      // Spine data.
+      /**/
       QStringList spineKeys{"dummy01", "dummy02", "dummy03", "dummy04", "dummy05", "dummy06", "dummy07",
                             "dummy08", "dummy09", "dummy10", "dummy11", "dummy12", "dummy13", "dummy14"};
       for(auto spineKey: spineKeys)
@@ -498,12 +688,12 @@ namespace vishnu
 
         if(spineKey != spineKeys.last()) result += separator;
       }
-      **/
+      /**/
 
       return result;
     }
 
-    // unknown extension
+    // Extension: Unknown.
     for(auto key: keys)
     {
       result += "UNK" + key;

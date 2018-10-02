@@ -61,7 +61,7 @@ find_package(ITK REQUIRED)
 include (${ITK_USE_FILE})
 find_package( EspinaCore REQUIRED )
 # Only needed for spine information.
-# find_package( EspinaExtensions REQUIRED )
+find_package( EspinaExtensions REQUIRED )
 
 list( APPEND VISHNU_DEPENDENT_LIBRARIES 
   Qt5::Core 
@@ -76,10 +76,9 @@ list( APPEND VISHNU_DEPENDENT_LIBRARIES
   ${VTK_LIBRARIES}
   ${ITK_LIBRARIES}
   ${EspinaCore_LIBRARIES}
+  # Only needed for spine information.
+  ${EspinaExtensions_LIBRARIES}
 )
-
-# Only needed for spine information.
-# ${EspinaExtensions_LIBRARIES}
 
 add_subdirectory( vishnu )
 add_subdirectory( examples )

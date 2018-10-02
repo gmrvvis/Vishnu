@@ -23,7 +23,7 @@
 #include <EspinaCore/Types.h>
 
 // Only needed for spine information.
-// #include <EspinaExtensions/SkeletonInformation/DendriteInformation.h>
+#include <EspinaExtensions/SkeletonInformation/DendriteInformation.h>
 
 namespace vishnu
 {
