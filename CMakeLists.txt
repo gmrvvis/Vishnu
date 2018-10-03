@@ -16,7 +16,9 @@ project( vishnu VERSION ${PROJECT_VERSION} )
 set( vishnu_VERSION_ABI 5 )
 
 # For EspINA.
-add_definitions( -Wno-attributes )
+if(UNIX)
+  add_definitions( -Wno-attributes )
+endif(UNIX)
 
 # Disable in source building
 if( "${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}" )
@@ -51,14 +53,23 @@ common_find_package( sp1common REQUIRED )
 
 common_find_package_post( )
 
-# No common.
+find_package(Boost REQUIRED COMPONENTS graph regex)
+set(Boost_USE_MULTITHREADED ON)
+link_directories(${Boost_LIBRARY_DIRS})
+include_directories(${Boost_INCLUDE_DIR})
+find_package(ITK REQUIRED)
+include (${ITK_USE_FILE})
+if(UNIX)
 find_package(Qt5 REQUIRED COMPONENTS Core Gui Network Widgets Test X11Extras)
+elseif(MSVC)
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Network Widgets Test)
+endif()
 find_package(QuaZip5 REQUIRED)
 include_directories(${QUAZIP_INCLUDE_DIR})
 find_package(VTK REQUIRED NO_MODULE)
 include (${VTK_USE_FILE})
-find_package(ITK REQUIRED)
-include (${ITK_USE_FILE})
+
+# EspINA.
 find_package( EspinaCore REQUIRED )
 # Only needed for spine information.
 find_package( EspinaExtensions REQUIRED )
@@ -69,16 +80,20 @@ list( APPEND VISHNU_DEPENDENT_LIBRARIES
   Qt5::Network 
   Qt5::Widgets 
   Qt5::Test
-  Qt5::X11Extras
   manco
   sp1common
   ${QUAZIP_LIBRARIES}
   ${VTK_LIBRARIES}
   ${ITK_LIBRARIES}
+  ${Boost_LIBRARIES}
   ${EspinaCore_LIBRARIES}
   # Only needed for spine information.
   ${EspinaExtensions_LIBRARIES}
 )
+
+if(UNIX)
+  list( APPEND VISHNU_DEPENDENT_LIBRARIES Qt5::X11Extras )
+endif(UNIX)
 
 add_subdirectory( vishnu )
 add_subdirectory( examples )

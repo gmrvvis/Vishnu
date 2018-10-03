@@ -1,2 +1,7 @@
+if(UNIX)
 set( EspinaCore_INCLUDE_DIRS /home/jguerrero/opt/espinacore /home/jguerrero/opt/espinacore/build )
 set( EspinaCore_LIBRARIES /home/jguerrero/opt/espinacore/build/lib/libEspinaCore.so )
+elseif(MSVC)
+set( EspinaCore_INCLUDE_DIRS C:/Users/jguerrero/Desktop/espina_sp1/espinacore C:/Users/jguerrero/Desktop/espina_sp1/espinacore/build )
+set( EspinaCore_LIBRARIES C:/Users/jguerrero/Desktop/espina_sp1/espinacore/build/Release/EspinaCore.lib )
+endif()

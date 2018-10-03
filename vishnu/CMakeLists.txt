@@ -71,6 +71,7 @@ set( VISHNU_SOURCES
   espinaExtensions/ExtensionInformationDump.cpp
 )
 
+if(UNIX)
 set( VISHNU_LINK_LIBRARIES
   Qt5::Core 
   Qt5::Gui
@@ -83,10 +84,29 @@ set( VISHNU_LINK_LIBRARIES
   ${QUAZIP_LIBRARIES}
   ${VTK_LIBRARIES}
   ${ITK_LIBRARIES}
+  ${Boost_LIBRARIES}
   ${EspinaCore_LIBRARIES}
   # Only needed for spine information.
   ${EspinaExtensions_LIBRARIES}
 )
+elseif(MSVC)
+set( VISHNU_LINK_LIBRARIES
+  Qt5::Core 
+  Qt5::Gui
+  Qt5::Network 
+  Qt5::Widgets 
+  Qt5::Test
+  manco
+  sp1common
+  ${QUAZIP_LIBRARIES}
+  ${VTK_LIBRARIES}
+  ${ITK_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${EspinaCore_LIBRARIES}
+  # Only needed for spine information.
+  ${EspinaExtensions_LIBRARIES}
+)
+endif()
 
 #include_directories( ${CMAKE_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )

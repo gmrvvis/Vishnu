@@ -1,2 +1,7 @@
+if(UNIX)
 set( EspinaExtensions_INCLUDE_DIRS /home/jguerrero/opt/espinaextensions /home/jguerrero/opt/espinaextensions/build )
 set( EspinaExtensions_LIBRARIES /home/jguerrero/opt/espinaextensions/build/lib/libEspinaExtensions.so )
+elseif(MSVC)
+set( EspinaExtensions_INCLUDE_DIRS C:/Users/jguerrero/Desktop/espina_sp1/espinaextensions C:/Users/jguerrero/Desktop/espina_sp1/espinaextensions/build )
+set( EspinaExtensions_LIBRARIES C:/Users/jguerrero/Desktop/espina_sp1/espinaextensions/build/Release/EspinaExtensions.lib )
+endif()
