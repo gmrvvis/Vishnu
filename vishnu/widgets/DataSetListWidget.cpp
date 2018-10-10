@@ -44,6 +44,7 @@ namespace vishnu
 
 // -----------------------------------------------------------------------------
 
+#ifdef USE_ESPINA
   /** BEGIN EspINA methods. **/
 
   void DataSetListWidget::createDataSetsFromSEG(
@@ -850,6 +851,7 @@ namespace vishnu
 
 // -----------------------------------------------------------------------------
 
+#endif
   void DataSetListWidget::createDataSetsFromJSON(
     DataSetWidgets& dataSetWidgets, const std::string& path )
   {
@@ -957,7 +959,11 @@ namespace vishnu
 
       if ( extension == STR_EXT_SEG )
       {
+#ifdef USE_ESPINA
         createDataSetsFromSEG( dataSetWidgets, filepath );
+#else
+        std::cout << "Warning: This version of Vishnu is not compatible with EspINA segmentation files." << std::endl;
+#endif
       }
       else if ( extension == STR_EXT_JSON )
       {

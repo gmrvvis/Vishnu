@@ -25,6 +25,7 @@
 // sp1common.
 #include <sp1common/sp1common.h>
 
+#ifdef USE_ESPINA
 // EspINA.
 #include <EspinaCore/Analysis/Analysis.h>
 #include <EspinaCore/Analysis/Extensions.h>
@@ -42,6 +43,7 @@
 #include <EspinaCore/IO/SegFile.h>
 #include <EspinaCore/Utils/ListUtils.hxx>
 #include <EspinaCore/Types.h>
+#endif
 
 // Qt.
 #include <QFileInfo>
@@ -53,7 +55,9 @@
 #include <QUuid>
 
 #include "DataSetWidget.h"
+#ifdef USE_ESPINA
 #include "../espinaExtensions/ExtensionInformationDump.h"
+#endif
 
 namespace vishnu
 {
@@ -102,6 +106,7 @@ namespace vishnu
 
     private:
 
+#ifdef USE_ESPINA
       /** BEGIN EspINA methods. **/
 
       void createDataSetsFromSEG( DataSetWidgets& dataSetWidgets,
@@ -136,7 +141,7 @@ namespace vishnu
       sp1common::Properties segsJsonSchemaToSP1Properties( QString jsonSchema );
 
       /** END EspINA methods. **/
-
+#endif
       void createDataSetsFromJSON( DataSetWidgets& dataSetWidgets,
         const std::string& path );
 

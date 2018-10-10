@@ -6,7 +6,6 @@
  *
  * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
 */
-
 #ifndef VISHNU_EXTENSIONINFORMATIONDUMP_H
 #define VISHNU_EXTENSIONINFORMATIONDUMP_H
 
