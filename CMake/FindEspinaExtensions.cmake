@@ -56,15 +56,9 @@ find_library( EspinaExtensions_LIBRARY
 )
 
 find_path( EspinaExtensions_INCLUDE_DIR
-  NAMES EspinaExtensions/LibraryExtensionFactory.h
-  PATHS ${EspinaExtensions_INCLUDE_SEARCH_DIRS}
-)
-
-find_path( EspinaExtensions_Export_INCLUDE_DIR
   NAMES EspinaExtensions_Export.h
   PATHS ${EspinaExtensions_INCLUDE_SEARCH_DIRS}
 )
-list( APPEND EspinaExtensions_INCLUDE_DIR ${EspinaExtensions_Export_INCLUDE_DIR} )
 
 set( EspinaExtensions_INCLUDE_DIRS ${EspinaExtensions_INCLUDE_DIR} )
 set( EspinaExtensions_LIBRARIES ${EspinaExtensions_LIBRARY} )

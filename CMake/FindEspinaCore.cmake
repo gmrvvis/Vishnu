@@ -56,15 +56,9 @@ find_library( EspinaCore_LIBRARY
 )
 
 find_path( EspinaCore_INCLUDE_DIR
-  NAMES EspinaCore/Types.h
-  PATHS ${EspinaCore_INCLUDE_SEARCH_DIRS}
-)
-
-find_path( EspinaCore_Export_INCLUDE_DIR
   NAMES EspinaCore_Export.h
   PATHS ${EspinaCore_INCLUDE_SEARCH_DIRS}
 )
-list( APPEND EspinaCore_INCLUDE_DIR ${EspinaCore_Export_INCLUDE_DIR} )
 
 set( EspinaCore_INCLUDE_DIRS ${EspinaCore_INCLUDE_DIR} )
 set( EspinaCore_LIBRARIES ${EspinaCore_LIBRARY} )
