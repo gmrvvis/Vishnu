@@ -23,3 +23,6 @@ vmmlib*
 cppnetlib*
 build*
 CMakeLists.txt.user
+.project
+.cproject
+.settings/
