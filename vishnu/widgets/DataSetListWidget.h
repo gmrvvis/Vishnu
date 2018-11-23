@@ -41,8 +41,11 @@
 #include <EspinaCore/Factory/FilterFactory.h>
 #include <EspinaCore/IO/DataFactory/RawDataFactory.h>
 #include <EspinaCore/IO/SegFile.h>
+#include <EspinaCore/IO/ErrorHandler.h>
+#include <EspinaCore/MultiTasking/Scheduler.h>
 #include <EspinaCore/Utils/ListUtils.hxx>
 #include <EspinaCore/Types.h>
+#include <EspinaExtensions/LibraryExtensionFactory.h>
 #endif
 
 // Qt.
@@ -57,6 +60,7 @@
 #include "DataSetWidget.h"
 #ifdef USE_ESPINA
 #include "../espinaExtensions/ExtensionInformationDump.h"
+#include "../espinaExtensions/ChannelReader.h"
 #endif
 
 namespace vishnu

@@ -233,9 +233,18 @@ namespace vishnu
       for(auto key: keys)
       {
         auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
+
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
         {
-          result += segmentation->information(iKey).toString();
+          auto keyInformation = segmentation->information(iKey);
+          if( keyInformation.isValid( ) )
+          {
+            result += keyInformation.toString();
+          }
+          else
+          {
+            std::cout << "The key " << iKey.value().toStdString() << " has no value." << std::endl;
+          }
         }
 
         // Feedback.
@@ -243,7 +252,7 @@ namespace vishnu
         else
         {
           std::cout << "Segmentation (" << segmentation->name().toStdString()
-                    << ") has NOT (Others) this information: "
+                    << ") has NOT (EdgeDistancesType) this information: "
                     << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
         }
         **/
@@ -270,7 +279,7 @@ namespace vishnu
         else
         {
           std::cout << "Segmentation (" << segmentation->name().toStdString()
-                    << ") has NOT (Others) this information: "
+                    << ") has NOT (SegmentationNotesType) this information: "
                     << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
         }
         **/
@@ -297,7 +306,7 @@ namespace vishnu
         else
         {
           std::cout << "Segmentation (" << segmentation->name().toStdString()
-                    << ") has NOT (Others) this information: "
+                    << ") has NOT (SegmentationTagsType) this information: "
                     << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
         }
         **/
@@ -324,7 +333,7 @@ namespace vishnu
         else
         {
           std::cout << "Segmentation (" << segmentation->name().toStdString()
-                    << ") has NOT (Others) this information: "
+                    << ") has NOT (AppositionSurfaceType) this information: "
                     << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
         }
         **/
@@ -390,7 +399,7 @@ namespace vishnu
         else
         {
           std::cout << "Segmentation (" << segmentation->name().toStdString()
-                    << ") has NOT (Others) this information: "
+                    << ") has NOT (SynapseConnectionType) this information: "
                     << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
         }
         **/
@@ -417,7 +426,7 @@ namespace vishnu
         else
         {
           std::cout << "Segmentation (" << segmentation->name().toStdString()
-                    << ") has NOT (Others) this information: "
+                    << ") has NOT (AxonInformationType) this information: "
                     << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
         }
         **/
@@ -466,12 +475,16 @@ namespace vishnu
         // Temporary solution.
         if( extension == nullptr )
         {
+          std::cout << "DendriteSkeletonInformation NOT available." << std::endl;
+
           result += separator + separator + separator + separator + separator +
             separator + separator + separator + separator + separator +
             separator + separator + separator;
         }
         else
         {
+          std::cout << "DendriteSkeletonInformation available." << std::endl;
+
           auto table = extension->spinesInformation();
 
           QStringList nameList, completeList, branchedList, lengthList, numSynapsesList, numAsymmetricList, numAsymmetricHeadList,

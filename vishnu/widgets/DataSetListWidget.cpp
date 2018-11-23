@@ -23,9 +23,10 @@
 
 namespace vishnu
 {
+
   DataSetListWidget::DataSetListWidget( QWidget* parent )
       : QListWidget( parent )
-  {    
+  {
 
     setSelectionMode( QAbstractItemView::SingleSelection );
     setDragDropMode( QAbstractItemView::InternalMove );
@@ -45,20 +46,105 @@ namespace vishnu
 // -----------------------------------------------------------------------------
 
 #ifdef USE_ESPINA
+
+  class VishnuErrorHandler
+  : public ESPINA::IO::ErrorHandler
+  {
+
+    public:
+
+      virtual ~VishnuErrorHandler()
+      { };
+
+      virtual void warning(const QString& msg)
+      {
+        qDebug( ) << msg;
+      };
+
+      virtual void error(const QString& msg)
+      {
+        qDebug( ) << msg;
+      };
+
+      virtual QFileInfo fileNotFound(const QFileInfo& file,
+                                     QDir dir = QDir(),
+                                     const ESPINA::Core::Utils::SupportedFormats &filters = ESPINA::Core::Utils::SupportedFormats().addAllFormat(),
+                                     const QString &hint = QString())
+      {
+        QString key = file.absoluteFilePath();
+
+        if (!m_files.contains(key))
+        {
+          QString locatedFilename;
+
+          if(defaultDir().exists(file.fileName()))
+          {
+            locatedFilename = defaultDir().filePath(file.fileName());
+          }
+          else
+          {
+            QString title     = (hint.isEmpty())? QObject::tr("Select file for %1:").arg(file.fileName()) : hint;
+            QDir    directory = (dir == QDir()) ? defaultDir() : dir;
+
+            // Temporary.
+            auto filtersAux = filters;
+
+            //locatedFilename = DefaultDialogs::OpenFile(title, filters, directory.absolutePath());
+          }
+
+          //if (!locatedFilename.isEmpty())
+          //{
+          //  m_files[key] = QFileInfo(locatedFilename);
+          //}
+        }
+
+        return m_files.value(key, QFileInfo());
+      };
+
+    private:
+
+      QMap<QString, QFileInfo> m_files;
+
+  };
+
   /** BEGIN EspINA methods. **/
 
   void DataSetListWidget::createDataSetsFromSEG(
     DataSetWidgets& dataSetWidgets, const std::string& path )
   {
+    auto vishnuScheduler = std::make_shared< ESPINA::Scheduler >( 16000 );
+
     // EspINA Core factory object.
-    auto factory = std::make_shared< ESPINA::CoreFactory >( ESPINA::SchedulerSPtr( ) );
+    auto factory = std::make_shared< ESPINA::CoreFactory >( vishnuScheduler );
+
+    /**
+     * Registering the channel reader (ESPINA/Support/Readers/ChannelReader.*)
+     * copied in vishnu/espinaExtensions/ChannelReader.*.
+     */
+    factory->registerFilterFactory( std::make_shared<ChannelReader>() );
+
+    // Registering extensions in Core factory object.
+    std::cout << "Registering extensions in Core factory object..." << std::endl;
+    factory->registerExtensionFactory(
+      std::make_shared<ESPINA::LibrarySegmentationExtensionFactory>( factory.get( ) ) );
+    factory->registerExtensionFactory(
+      std::make_shared<ESPINA::LibraryStackExtensionFactory>( factory.get( ) ) );
+    std::cout << "Registration ended." << std::endl;
 
     QFileInfo file( QString::fromStdString( path ) );
 
     try
     {
       // Loading EspINA analysis.
-      auto analysis = ESPINA::IO::SegFile::load( file, factory );
+      std::cout << "Loading EspINA analysis called: " << path << std::endl;
+
+      auto vishnuErrorHandler = std::make_shared<VishnuErrorHandler>();
+      vishnuErrorHandler->setDefaultDir( file.absoluteDir() );
+
+      auto analysis = ESPINA::IO::SegFile::load( file, factory,
+                                                 nullptr, vishnuErrorHandler );
+
+      std::cout << "EspINA analysis ready." << std::endl;
 
       auto segmentationList =
         ESPINA::Core::Utils::toRawList< ESPINA::Segmentation >(
@@ -66,6 +152,10 @@ namespace vishnu
 
       QString segmentationCSV = getCSVFromSegmentations( analysis.get( ), segmentationList );
       std::string segmentationCSVPath("segmentations.csv");
+
+      // Saving SEG file.
+      ESPINA::IO::SegFile::save( analysis.get( ), file,
+                                 nullptr, vishnuErrorHandler );
 
       // Writing CSV to a file.
       /**/
@@ -134,7 +224,7 @@ namespace vishnu
       auto extensions = availableInfo.keys( );
       for(auto extensionType: extensions)
       {
-        if(extensionType == "SegmentationIssues" || extensionType == "SkeletonInfo") continue;
+        if(extensionType == "SegmentationIssues") continue;
 
         result += dumpExtensionHeaderToCSV(extensionType, availableInfo.value(extensionType));
         if(extensionType != extensions.last()) result += separator;
@@ -175,7 +265,7 @@ namespace vishnu
           // Feedback.
           // std::cout << "Extension type: " << extensionType.toStdString() << std::endl;
 
-          if(extensionType == "SegmentationIssues" || extensionType == "SkeletonInfo") continue;
+          if(extensionType == "SegmentationIssues") continue;
 
           ESPINA::Core::SegmentationExtension::KeyList keyList =
             availableInfo.value(extensionType);

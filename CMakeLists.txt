@@ -15,7 +15,7 @@ set( PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT
 project( vishnu VERSION ${PROJECT_VERSION} )
 set( vishnu_VERSION_ABI 5 )
 
-set( USE_ESPINA OFF )
+set( USE_ESPINA ON )
 
 # Disable in source building
 if( "${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}" )
@@ -95,6 +95,7 @@ if( ${USE_ESPINA} )
   if( UNIX )
     list( APPEND VISHNU_DEPENDENT_LIBRARIES Qt5::X11Extras )
 	add_definitions( -Wno-attributes )
+	add_definitions( -fpermissive )
   endif( UNIX )  
 endif( )
 
