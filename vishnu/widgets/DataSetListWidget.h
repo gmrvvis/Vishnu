@@ -43,7 +43,9 @@
 #include <EspinaCore/IO/SegFile.h>
 #include <EspinaCore/IO/ErrorHandler.h>
 #include <EspinaCore/MultiTasking/Scheduler.h>
+#include <EspinaCore/Readers/ChannelReader.h>
 #include <EspinaCore/Utils/ListUtils.hxx>
+#include <EspinaCore/Plugin.h>
 #include <EspinaCore/Types.h>
 #include <EspinaExtensions/LibraryExtensionFactory.h>
 #endif
@@ -60,7 +62,6 @@
 #include "DataSetWidget.h"
 #ifdef USE_ESPINA
 #include "../espinaExtensions/ExtensionInformationDump.h"
-#include "../espinaExtensions/ChannelReader.h"
 #endif
 
 namespace vishnu

@@ -64,6 +64,7 @@ namespace vishnu
                                                                              { "Perimeter",                                      "SASPerimeter" },
                                                                              { "Area Ratio",                                     "SASAreaRatio" },
                                                                              { "Synapse",                                        "SASSynapse" },
+                                                                             { "Shape",                                          "SASShape" },
                                                                              { "Mean Gauss Curvature",                           "SASMean_GaussCurvature" },
                                                                              { "Std Deviation Gauss Curvature",                  "SASStdDev_GaussCurvature" },
                                                                              { "Mean Mean Curvature",                            "SASMean_MeanCurvature" },

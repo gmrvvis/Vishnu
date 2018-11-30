@@ -112,16 +112,14 @@ namespace vishnu
   void DataSetListWidget::createDataSetsFromSEG(
     DataSetWidgets& dataSetWidgets, const std::string& path )
   {
-    auto vishnuScheduler = std::make_shared< ESPINA::Scheduler >( 16000 );
-
     // EspINA Core factory object.
+    auto vishnuScheduler = std::make_shared< ESPINA::Scheduler >( 16000 );
     auto factory = std::make_shared< ESPINA::CoreFactory >( vishnuScheduler );
 
-    /**
-     * Registering the channel reader (ESPINA/Support/Readers/ChannelReader.*)
-     * copied in vishnu/espinaExtensions/ChannelReader.*.
-     */
-    factory->registerFilterFactory( std::make_shared<ChannelReader>() );
+    // EspINA channel reader registered.
+    auto vishnuChannelReader = std::make_shared<ESPINA::ChannelReader>();
+    factory->registerAnalysisReader( vishnuChannelReader );
+    factory->registerFilterFactory( vishnuChannelReader );
 
     // Registering extensions in Core factory object.
     std::cout << "Registering extensions in Core factory object..." << std::endl;
@@ -130,6 +128,10 @@ namespace vishnu
     factory->registerExtensionFactory(
       std::make_shared<ESPINA::LibraryStackExtensionFactory>( factory.get( ) ) );
     std::cout << "Registration ended." << std::endl;
+
+    // Loading EspINA plugins.
+    QDir pluginDir( QString("/home/jguerrero/opt/003_ALTERNATIVE/espina/build/App/plugins") );
+    auto pluginLoaders = ESPINA::Core::loadPlugins( pluginDir, factory.get( ) );
 
     QFileInfo file( QString::fromStdString( path ) );
 
@@ -156,6 +158,9 @@ namespace vishnu
       // Saving SEG file.
       ESPINA::IO::SegFile::save( analysis.get( ), file,
                                  nullptr, vishnuErrorHandler );
+
+      // Unloading EspINA plugins.
+      ESPINA::Core::unloadPlugins( pluginLoaders );
 
       // Writing CSV to a file.
       /**/
@@ -219,7 +224,7 @@ namespace vishnu
       std::cout << "Writing CSV header."  << std::endl;
 
       // create header row with different names.
-      result += "DFLName,SEGCategory,SEGConnections,";
+      result += "DFLName,DFLAlias,SEGCategory,SEGConnections,";
 
       auto extensions = availableInfo.keys( );
       for(auto extensionType: extensions)
@@ -246,6 +251,8 @@ namespace vishnu
         /**/
 
         result += segmentation->name();
+        result += separator;
+        result += segmentation->alias();
         result += separator;
         result += segmentation->category()->classificationName();
         result += separator;
@@ -436,7 +443,8 @@ namespace vishnu
   {
     QJsonObject attributeObject;
 
-    if( actualAttributeName == "Name" )
+    if( actualAttributeName == "Name" ||
+        actualAttributeName == "Alias" )
     {
       attributeObject.insert( "data_structure_type", QJsonValue::fromVariant( "NONE" ) );
       attributeObject.insert( "data_type", QJsonValue::fromVariant( "CATEGORICAL" ) );
@@ -726,6 +734,13 @@ namespace vishnu
     {
       attributeObject.insert( "data_structure_type", QJsonValue::fromVariant( "NONE" ) );
       attributeObject.insert( "data_type", QJsonValue::fromVariant( "CATEGORICAL" ) );
+      QJsonObject metaObject;
+      attributeObject.insert( "meta", metaObject );
+    }
+    else if( actualAttributeName == "Shape" )
+    {
+      attributeObject.insert( "data_structure_type", QJsonValue::fromVariant( "NONE" ) );
+      attributeObject.insert( "data_type", QJsonValue::fromVariant( "ORDINAL" ) );
       QJsonObject metaObject;
       attributeObject.insert( "meta", metaObject );
     }
