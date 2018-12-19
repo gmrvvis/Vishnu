@@ -317,12 +317,12 @@ namespace vishnu
     bool result = false;
 
     //Get headers (ordered, first pk headers, then non pk headers)
-    std::vector< std::string > headers = propertyGroups->getHeaders( );
-    size_t headersSize = headers.size( );
+    std::vector< std::string > selectedHeaders = propertyGroups->getHeaders( );
+    size_t selectedHeadersSize = selectedHeaders.size( );
 
     //Write headers to csv
     std::string joinedHeaders = sp1common::Strings::join(
-      headers, std::string( "," ) );
+      selectedHeaders, std::string( "," ) );
     result = sp1common::Files::writeLine( csvPath, joinedHeaders );
 
     //Loop over files
@@ -336,9 +336,11 @@ namespace vishnu
       std::vector< std::string > oldCsvHeaders = dataSet->getPropertyNames( );
       for ( unsigned int i = 0; i < oldCsvHeaders.size( ); ++i )
       {
-        if ( sp1common::Vectors::find( headers, oldCsvHeaders.at( i ) ) == -1 )
+        if ( sp1common::Vectors::find( selectedHeaders, oldCsvHeaders.at( i ) ) == -1 )
         {
-          sp1common::Matrices::removeColumn( csvData, i );
+          int index = sp1common::Vectors::find( csvData.at( 0 ), oldCsvHeaders.at( i ) );
+           // csvData
+          sp1common::Matrices::removeColumn( csvData, index );
         }
       }
 
@@ -346,12 +348,12 @@ namespace vishnu
       std::map< size_t, std::string > csvHeadersMap;
       std::vector< std::string > csvHeaders = sp1common::Strings::split(
         sp1common::Strings::joinAndTrim( csvData.at( 0 ), "," ), ',');
-      for ( size_t i = 0; i < headersSize; ++i )
+      for ( size_t i = 0; i < selectedHeadersSize; ++i )
       {
-        std::string header = headers.at( i );
+        std::string header = selectedHeaders.at( i );
         if ( sp1common::Vectors::find( csvHeaders, header ) != -1 )
         {
-          csvHeadersMap[ i ] = headers.at( i );
+          csvHeadersMap[ i ] = selectedHeaders.at( i );
         }
       }
 
@@ -361,7 +363,7 @@ namespace vishnu
           std::string line;
           std::vector< std::string > csvRow = csvData.at( row );
           //Loop over headers size instead of csv columns
-          for ( size_t col = 0; col < headersSize; ++col )
+          for ( size_t col = 0; col < selectedHeadersSize; ++col )
           {
             if ( csvHeadersMap.find( col ) != csvHeadersMap.end( ) )
             {
