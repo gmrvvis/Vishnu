@@ -58,8 +58,9 @@ namespace vishnu
                                                                              { "Equivalent Ellipsoid Diameter Y",                "" },
                                                                              { "Equivalent Ellipsoid Diameter Z",                "" },
                                                                              { "Surface Area",                                   "MPHSurfaceArea" },
-                                                                             { "dummy1",                                         "MPHVolumePath"} ,
-                                                                             { "dummy2",                                         "MPHMeshPath"}, };
+                                                                             { "dummy1",                                         "MPHVolumePath"},
+                                                                             { "dummy2",                                         "MPHMeshPath"},
+                                                                             { "dummy3",                                         "MPHMeshName"} };
   std::map<const QString, const QString> AppositionSurfaceTranslations   = { { "Area",                                           "SASArea" },
                                                                              { "Perimeter",                                      "SASPerimeter" },
                                                                              { "Area Ratio",                                     "SASAreaRatio" },
@@ -223,7 +224,10 @@ namespace vishnu
 
       // add non standard keys MPHVolumePath & MPHMeshPath
       auto segName = segmentation->name().replace(' ','_');
-      result += QString("/geometricData/%1-volume.json").arg(segName) + separator + QString("/geometricData/%1-mesh.obj").arg(segName);
+      auto segAlias = segmentation->alias().replace(' ','_');
+      result += QString("/geometricData/%1-%2-volume.json").arg( segName ).arg( segAlias ) + separator +
+                QString("/geometricData/%1-%2-mesh.obj").arg( segName ).arg( segAlias ) + separator +
+                QString("%1-%2-mesh").arg( segName ).arg( segAlias );
 
       return result;
     }
@@ -588,7 +592,9 @@ namespace vishnu
         result += value + separator;
       }
 
-      result += MorphologicalTranslations.at("dummy1") + separator + MorphologicalTranslations.at("dummy2");
+      result += MorphologicalTranslations.at("dummy1") + separator +
+                MorphologicalTranslations.at("dummy2") + separator +
+                MorphologicalTranslations.at("dummy3");
 
       return result;
     }

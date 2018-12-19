@@ -155,13 +155,6 @@ namespace vishnu
       QString segmentationCSV = getCSVFromSegmentations( analysis.get( ), segmentationList );
       std::string segmentationCSVPath("segmentations.csv");
 
-      // Saving SEG file.
-      ESPINA::IO::SegFile::save( analysis.get( ), file,
-                                 nullptr, vishnuErrorHandler );
-
-      // Unloading EspINA plugins.
-      ESPINA::Core::unloadPlugins( pluginLoaders );
-
       // Writing CSV to a file.
       /**/
       remove( segmentationCSVPath.c_str( ) );
@@ -179,6 +172,16 @@ namespace vishnu
       ofs << segmentationCSV.toStdString( ).c_str( );
       ofs.close( );
       /**/
+
+      std::string segmentationMeshesRoot("geometricData");
+      generateSegmentationMeshes( segmentationMeshesRoot, segmentationList );
+
+      // Saving SEG file.
+      ESPINA::IO::SegFile::save( analysis.get( ), file,
+                                 nullptr, vishnuErrorHandler );
+
+      // Unloading EspINA plugins.
+      ESPINA::Core::unloadPlugins( pluginLoaders );
 
       QString segmentationJSONSchema = createJsonSchema( segmentationCSV );
       sp1common::Properties segmentationProperties =
@@ -287,6 +290,8 @@ namespace vishnu
 
         // Feedback.
         segmentationCounter++;
+
+        //break;
       }
 
       // Feedback.
@@ -294,6 +299,124 @@ namespace vishnu
     }
 
     return result;
+  }
+
+  void DataSetListWidget::generateSegmentationMeshes( const std::string& segmentationMeshesRoot_, ESPINA::SegmentationList segmentations_ )
+  {
+    QDir geometricDataDir( QString::fromStdString( segmentationMeshesRoot_ ) );
+    if( !geometricDataDir.exists( ) )
+    {
+      int mkdirReturn =
+        mkdir( segmentationMeshesRoot_.c_str( ),
+               S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH );
+      if( mkdirReturn == -1 )
+      {
+        std::cerr << "Error creating " << segmentationMeshesRoot_ << std::endl;
+        exit( -1 );
+      }
+    }
+
+    std::string segMeshesRootExtended = segmentationMeshesRoot_ + std::string( "/" );
+
+    for( auto segmentation: segmentations_ )
+    {
+      auto segmentationOutput = segmentation->output( );
+      if( !ESPINA::hasMeshData( segmentationOutput ) )
+      {
+        std::cout << "Segmentation " << segmentation->name( ).toStdString( ) << " / "
+                                     << segmentation->alias( ).toStdString( )
+                                     << " has not a mesh." << std::endl;
+        continue;
+      }
+      auto segmentationPolyData = ESPINA::readLockMesh( segmentationOutput )->mesh( );
+      std::string segmentationMeshOBJ = vtkPolyDataToOBJ( segmentationPolyData );
+      auto segName = segmentation->name().replace(' ','_');
+      auto segAlias = segmentation->alias().replace(' ','_');
+      std::string segmentationMeshPath = segMeshesRootExtended + segName.toStdString( ) + "-" + segAlias.toStdString( ) + "-mesh.obj";
+      // Writing OBJ to a file.
+      /**/
+      remove( segmentationMeshPath.c_str( ) );
+      std::ofstream ofs;
+      ofs.exceptions( std::ofstream::failbit | std::ofstream::badbit );
+      try
+      {
+        ofs.open( segmentationMeshPath.c_str( ), std::ofstream::out | std::ofstream::app );
+      }
+      catch( std::system_error& e )
+      {
+        std::cerr << e.code( ).message( ) << std::endl;
+        exit( EXIT_FAILURE );
+      }
+      ofs << segmentationMeshOBJ.c_str( );
+      ofs.close( );
+      /**/
+      std::cout << "Segmentation " << segmentation->name( ).toStdString( ) << " / "
+                                   << segmentation->alias( ).toStdString( )
+                                   << " mesh generated." << std::endl;
+
+      //break;
+    }
+  }
+
+  std::string DataSetListWidget::vtkPolyDataToOBJ( vtkSmartPointer< vtkPolyData > polyData )
+  {
+    std::string meshOBJ("");
+
+    // VTK objects and more.
+    vtkCellArray* cells;
+    vtkIdType     npts = 0;
+    vtkIdType*    indx = 0;
+    vtkPoints*    points;
+    double*       point;
+    unsigned int  currentIndex, i;
+    unsigned int  idStart = 1;
+    std::string   whiteSpace(" ");
+    std::string   lineJump("\n");
+
+    // Writing vertex position to the OBJ.
+    points = polyData->GetPoints( );
+    for( i = 0; i < points->GetNumberOfPoints( ); i++ )
+    {
+      point = points->GetPoint( i );
+
+      std::stringstream xStream;
+      xStream << std::fixed << std::setprecision( 2 ) << point[0];
+      std::string xString = xStream.str();
+
+      std::stringstream yStream;
+      yStream << std::fixed << std::setprecision( 2 ) << point[1];
+      std::string yString = yStream.str();
+
+      std::stringstream zStream;
+      zStream << std::fixed << std::setprecision( 2 ) << point[2];
+      std::string zString = zStream.str();
+
+      meshOBJ = meshOBJ + std::string("v ") + xString + whiteSpace
+                                            + yString + whiteSpace
+                                            + zString + lineJump;
+    }
+    points->Delete( );
+
+    // No normals nor tex coords considered now.
+
+    // Writing facet indices to the OBJ.
+    if( polyData->GetNumberOfPolys( ) > 0 )
+    {
+      cells = polyData->GetPolys( );
+      for( cells->InitTraversal( );
+           cells->GetNextCell( npts, indx ); )
+      {
+        meshOBJ += std::string("f ");
+        for( i = 0; i < npts; i++ )
+        {
+          currentIndex = static_cast< unsigned int >( indx[i] ) + idStart;
+          meshOBJ = meshOBJ + std::to_string( currentIndex ) + whiteSpace;
+        }
+        meshOBJ += lineJump;
+      }
+    }
+
+    return meshOBJ;
   }
 
   QMap< QString, QStringList > DataSetListWidget::segmentationsAvailableInformation( ESPINA::SegmentationList segmentations )
@@ -693,7 +816,8 @@ namespace vishnu
       attributeObject.insert( "meta", metaObject );
     }
     else if( actualAttributeName == "MeshPath" ||
-             actualAttributeName == "VolumePath" )
+             actualAttributeName == "VolumePath" ||
+             actualAttributeName == "MeshName" )
     {
       attributeObject.insert( "data_structure_type", QJsonValue::fromVariant( "NONE" ) );
       attributeObject.insert( "data_type", QJsonValue::fromVariant( "GEOMETRIC" ) );

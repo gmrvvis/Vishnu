@@ -26,12 +26,20 @@
 #include <sp1common/sp1common.h>
 
 #ifdef USE_ESPINA
+
+// VTK
+#include <vtkCellArray.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
+#include <vtkSmartPointer.h>
+
 // EspINA.
 #include <EspinaCore/Analysis/Analysis.h>
 #include <EspinaCore/Analysis/Extensions.h>
 #include <EspinaCore/Analysis/ItemExtension.hxx>
 #include <EspinaCore/Analysis/Segmentation.h>
 #include <EspinaCore/Analysis/Channel.h>
+#include <EspinaCore/Analysis/Data/MeshData.h>
 #include <EspinaCore/Analysis/Data/VolumetricData.hxx>
 #include <EspinaCore/Analysis/Filters/VolumetricStreamReader.h>
 #include <EspinaCore/Analysis/Sample.h>
@@ -120,6 +128,12 @@ namespace vishnu
       // EspINA segmentations -> Segmentations CSV.
       QString getCSVFromSegmentations( ESPINA::AnalysisPtr analysis,
                                        ESPINA::SegmentationList segmentations );
+
+      // EspINA segmentations -> Meshes (OBJ).
+      void generateSegmentationMeshes( const std::string& segmentationMeshesRoot_, ESPINA::SegmentationList segmentations_ );
+
+      // vtkPolyData -> OBJ.
+      std::string vtkPolyDataToOBJ( vtkSmartPointer< vtkPolyData > polyData );
 
       // Based on ESPINA::GUI::availableInformation.
       QMap< QString, QStringList > segmentationsAvailableInformation( ESPINA::SegmentationList segmentations );
