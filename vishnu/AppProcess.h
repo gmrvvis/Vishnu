@@ -34,7 +34,7 @@ namespace vishnu
       QPushButton* getPushButton( ) const;
 
     private:
-      
+
       QPushButton* _pushButton;
   };
 }

@@ -91,7 +91,7 @@ namespace vishnu
     actionAddDataSet->setIcon( QIcon( ":/icons/addDataSet.png" ) );
     actionAddDataSet->setText( "AddDataSet" );
     actionAddDataSet->setToolTip( "Add Data Set" );
-    actionAddDataSet->setShortcut( QKeySequence( "Ctrl+O" ) ); 
+    actionAddDataSet->setShortcut( QKeySequence( "Ctrl+O" ) );
     QObject::connect( actionAddDataSet, SIGNAL( triggered( ) ), this,
       SLOT( addDataSet( ) ) );
     toolBar->addAction( actionAddDataSet );
@@ -231,7 +231,7 @@ namespace vishnu
       }
     }
   }
-  
+
   void MainWindow::closeEvent( QCloseEvent* e )
   {
     QMessageBox::StandardButton result = QMessageBox::question( this,
@@ -301,7 +301,14 @@ namespace vishnu
       + QString(" - Create new dataset" ));
 
     dataSetWindow->setModal( true );
-    dataSetWindow->exec( );
+    //int result = ;
+
+    //If dataset created, create userdataset row
+    if ( dataSetWindow->exec( ) == QDialog::Accepted )
+    {
+      UserDataSetPtr resultDataSet = dataSetWindow->getResultUserDataSet( );
+      addUserDataSet( resultDataSet );
+    }
 
     setBlurred( false );
 
@@ -316,7 +323,9 @@ namespace vishnu
       QMessageBox::Yes|QMessageBox::No );
     if ( reply == QMessageBox::Yes )
     {
-      _userDataSetListWidget->removeCurrentDataSet( );
+      //_userDataSetListWidget->removeCurrentDataSet( );
+      removeUserDataSet( _userDataSetListWidget->getCurrentDataSet( ) );
+      emit signalReloadDataSets( );
     }
   }
 
@@ -489,7 +498,7 @@ namespace vishnu
     for (const auto& it : _applications )
     {
       if ( it.second->getPushButton( ) == appButton )
-      {        
+      {
         sp1common::Debug::consoleMessage( "Opening "
           + it.second->getDisplayName( ) );
 
@@ -625,5 +634,62 @@ namespace vishnu
     }
   }
 
-}
+  void MainWindow::addUserDataSet( const UserDataSetPtr& userDataSet )
+  {
+    UserDataSetsPtr userDataSets = readUserDataSets( );
+    userDataSets->addUserDataSet( userDataSet );
+    writeUserDataSets( userDataSets );
+  }
 
+  void MainWindow::removeUserDataSet( const UserDataSetPtr& userDataSet )
+  {
+    UserDataSetVector userDataSets = readUserDataSets( )->getUserDataSets( );
+    UserDataSetsPtr newUserDataSets( new UserDataSets( ) );
+    for ( size_t i = 0; i < userDataSets.size( ); ++i )
+    {
+      if ( userDataSet->getName( ) != userDataSets.at( i )->getName( ) )
+      {
+        newUserDataSets->addUserDataSet( userDataSets.at( i ) );
+      }
+    }
+    writeUserDataSets( newUserDataSets );
+  }
+
+  UserDataSetsPtr MainWindow::readUserDataSets( void )
+  {
+    std::string userDataFolder = qApp->applicationDirPath( ).toStdString( )
+        + std::string( "/" ) + USER_DATA_FOLDER + std::string( "/" );
+    std::string userDataSetsFilename = userDataFolder + FILE_DATASETS;
+    UserDataSetsPtr userDataSets( new UserDataSets( ) );
+    if ( sp1common::Files::exist( userDataSetsFilename ) )
+    {
+      userDataSets =
+        sp1common::JSON::deserialize< UserDataSets >( userDataSetsFilename);
+    }
+    return userDataSets;
+  }
+
+  void MainWindow::writeUserDataSets( const UserDataSetsPtr& userDataSets )
+  {
+    std::string userDataFolder = qApp->applicationDirPath( ).toStdString( )
+        + std::string( "/" ) + USER_DATA_FOLDER + std::string( "/" );
+    std::string userDataSetsFilename = userDataFolder + FILE_DATASETS;
+    QDir qUserDataFolder( QString::fromStdString( userDataFolder ) );
+    if ( !qUserDataFolder.exists( ) )
+    {
+      if ( !qUserDataFolder.mkpath( QString::fromStdString( userDataFolder ) ) )
+      {
+        sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+          "Can't create " + userDataFolder + " folder.", false );
+        return;
+      }
+    }
+
+    if ( !sp1common::JSON::serialize( userDataSetsFilename, userDataSets ) )
+    {
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+        "Can't create user datasets file.", false );
+      return;
+    }
+  }
+}

@@ -20,7 +20,7 @@
 namespace vishnu
 {  
   class ZEQGroupWidget;
-  typedef ZEQGroupWidget* ZEQGroupWidgetPtr;
+  using ZEQGroupWidgetPtr = ZEQGroupWidget*;
 
   class ZEQGroupWidget : public QWidget
   {

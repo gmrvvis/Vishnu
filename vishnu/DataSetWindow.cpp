@@ -17,7 +17,6 @@
 #include <map>
 
 #include "Definitions.hpp"
-#include "model/UserDataSets.h"
 
 namespace vishnu
 {
@@ -87,6 +86,11 @@ namespace vishnu
 
   }
 
+  UserDataSetPtr DataSetWindow::getResultUserDataSet( void )
+  {
+    return _pathsWidget->getUserDataSet( );
+  }
+
   void DataSetWindow::slotAddFiles(
     const std::vector< std::string >& dropped )
   {
@@ -123,6 +127,9 @@ namespace vishnu
 
   void DataSetWindow::slotCreateButton( void )
   {
+    //TODO: Check for userdataset name (unique?)
+    //std::string name = _pathsWidget->getName( );
+
     //Create path
     std::string path = _pathsWidget->getPath( );
     QString qPath = QString::fromStdString( path );
@@ -233,85 +240,25 @@ namespace vishnu
       return;
     }
 
-    //Create geometric data folder
-    std::string geometryFolder = path + std::string( "/" )
-      + GEOMETRY_DATA_FOLDER;
-    QDir qGeometryFolder( QString::fromStdString( geometryFolder ) );
-    if ( !qGeometryFolder.mkpath( QString::fromStdString( geometryFolder ) ) )
+    //Create geometric data
+    if ( !createGeometricData( path ) )
     {
       sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
-        "Can't create " + geometryFolder + " folder.", false );
-      return;
-    }
-
-    //Copy geometry files
-    std::string sourceGeometryFolder = qDir.absolutePath( ).toStdString( )
-      + std::string( "/" ) + GEOMETRY_DATA_FOLDER;
-    QDir qSourceGeometryFolder(
-      QString::fromStdString( sourceGeometryFolder ) );
-
-    for( const QFileInfo& info : qSourceGeometryFolder.entryInfoList(
-      /*QDir::Dirs |*/ QDir::Files | QDir::NoDotAndDotDot ) ) {
-
-        QString srcFilePath =
-          qSourceGeometryFolder.absoluteFilePath( info.fileName( ) );
-        QString dstFilePath =
-          qGeometryFolder.absoluteFilePath( info.fileName( ) );
-
-        /*if ( info.isDir() )
-        {
-          //Recursive function to copy nested dirs...
-        } else */
-        if ( info.isFile( ) )
-        {
-          if ( !QFile::copy( srcFilePath, dstFilePath ) )
-          {
-            sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
-              "Can't copy " + info.fileName( ).toStdString( )
-              + " file.", false );
-            return;
-          }
-        }
-    }
-
-    //Create JSON DataSet (userdata)
-    std::string userDataFolder = qApp->applicationDirPath( ).toStdString( )
-        + std::string( "/" ) + USER_DATA_FOLDER + std::string( "/" );
-    std::string userDataSetsFilename = userDataFolder + FILE_DATASETS;
-    UserDataSetsPtr userDataSets( new UserDataSets( ) );
-    if ( sp1common::Files::exist( userDataSetsFilename ) )
-    {
-      userDataSets =
-        sp1common::JSON::deserialize< UserDataSets >( userDataSetsFilename);
-    }
-    UserDataSetPtr userDataSet = _pathsWidget->getUserDataSet( );
-    userDataSets->addUserDataSet( userDataSet );
-    QDir qUserDataFolder( QString::fromStdString( userDataFolder ) );
-    if ( !qUserDataFolder.exists( ) )
-    {
-      if ( !qUserDataFolder.mkpath( QString::fromStdString( userDataFolder ) ) )
-      {
-        sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
-          "Can't create " + userDataFolder + " folder.", false );
-        return;
-      }
-    }
-    if ( !sp1common::JSON::serialize( userDataSetsFilename, userDataSets ) )
-    {
-      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
-        "Can't create user datasets file.", false );
+        "Can't create geometric data.", false );
       return;
     }
 
     close( );
+    setResult( QDialog::Accepted );
   }
 
   void DataSetWindow::slotCancelButton()
   {
     close( );
+    setResult( QDialog::Rejected );
   }
 
-  bool DataSetWindow::createCSV( const std::string& csvPath,
+   bool DataSetWindow::createCSV( const std::string& csvPath,
     const sp1common::PropertyGroupsPtr& propertyGroups )
   {
     bool result = false;
@@ -336,9 +283,12 @@ namespace vishnu
       std::vector< std::string > oldCsvHeaders = dataSet->getPropertyNames( );
       for ( unsigned int i = 0; i < oldCsvHeaders.size( ); ++i )
       {
-        if ( sp1common::Vectors::find( selectedHeaders, oldCsvHeaders.at( i ) ) == -1 )
+        if ( sp1common::Vectors::find( selectedHeaders, oldCsvHeaders.at( i ) )
+          == -1 )
         {
-          int index = sp1common::Vectors::find( csvData.at( 0 ), oldCsvHeaders.at( i ) );
+          unsigned int index = static_cast< unsigned int >(
+            sp1common::Vectors::find( csvData.at( 0 ),
+            oldCsvHeaders.at( i ) ) );
            // csvData
           sp1common::Matrices::removeColumn( csvData, index );
         }
@@ -402,13 +352,24 @@ namespace vishnu
       sp1common::PropertyPtr property = properties.at( i );
       std::string name = property->getName( );
       sp1common::DataCategory dataCategory = property->getDataCategory( );
-      featuresVector.emplace_back( sp1common::FeaturePtr(
-        new sp1common::Feature(
-        name,
-        name,
-        "mV",
-        dataCategory,
-        property->getDataStructureType( ) ) ) );
+
+      //if PK do not include as pyramidal feature
+      if ( sp1common::Vectors::find( propertyGroups->getUsedPrimaryKeys( ),
+        name ) == -1 )
+      {
+        //if axes (geometric points xyz) do not include as pyramidal feature
+        if ( sp1common::Vectors::find( propertyGroups->getAxes( ), name )
+          == -1 )
+        {
+          featuresVector.emplace_back( sp1common::FeaturePtr(
+            new sp1common::Feature(
+            name,
+            name,
+            "mV",
+            dataCategory,
+            property->getDataStructureType( ) ) ) );
+        }
+      }
 
       if ( dataCategory == sp1common::DataCategory::Geometric )
       {
@@ -465,6 +426,53 @@ namespace vishnu
     sp1common::DataSetsPtr& dataSets )
   {
     return sp1common::JSON::serialize( jsonPath, dataSets );
+  }
+
+  bool DataSetWindow::createGeometricData( const std::string& path )
+  {
+    //Create geometric data folder
+    std::string geometryFolder = path + std::string( "/" )
+      + GEOMETRY_DATA_FOLDER;
+    QDir qGeometryFolder( QString::fromStdString( geometryFolder ) );
+    if ( !qGeometryFolder.mkpath( QString::fromStdString( geometryFolder ) ) )
+    {
+      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+        "Can't create " + geometryFolder + " folder.", false );
+      return false;
+    }
+
+    //Copy geometry files
+    QString qPath = QString::fromStdString( path );
+    QDir qDir( qPath );
+    std::string sourceGeometryFolder = qDir.absolutePath( ).toStdString( )
+      + std::string( "/" ) + GEOMETRY_DATA_FOLDER;
+    QDir qSourceGeometryFolder(
+      QString::fromStdString( sourceGeometryFolder ) );
+
+    for( const QFileInfo& info : qSourceGeometryFolder.entryInfoList(
+      /*QDir::Dirs |*/ QDir::Files | QDir::NoDotAndDotDot ) ) {
+
+        QString srcFilePath =
+          qSourceGeometryFolder.absoluteFilePath( info.fileName( ) );
+        QString dstFilePath =
+          qGeometryFolder.absoluteFilePath( info.fileName( ) );
+
+        /*if ( info.isDir() )
+        {
+          //Recursive function to copy nested dirs...
+        } else */
+        if ( info.isFile( ) )
+        {
+          if ( !QFile::copy( srcFilePath, dstFilePath ) )
+          {
+            sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+              "Can't copy " + info.fileName( ).toStdString( )
+              + " file.", false );
+            return false;
+          }
+        }
+    }
+    return true;
   }
 
 }

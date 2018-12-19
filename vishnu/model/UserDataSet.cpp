@@ -33,6 +33,9 @@ namespace vishnu
 
   }
 
+  //bool UserDataSet::operator==( const UserDataSet& other )
+
+
   std::string UserDataSet::getName( void ) const
   {
     return _name;
@@ -62,7 +65,7 @@ namespace vishnu
   void UserDataSet::setCsvFilename( const std::string& csvFilename )
   {
     _csvFilename = csvFilename;
-  }  
+  }
 
   std::string UserDataSet::getJsonFilename( void ) const
   {

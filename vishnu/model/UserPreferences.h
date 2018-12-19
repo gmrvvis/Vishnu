@@ -19,9 +19,8 @@ namespace vishnu
 {
 
   class UserPreferences;
-  typedef std::shared_ptr< UserPreferences > UserPreferencesPtr;
-
-  typedef std::map< std::string, std::string > UserPreferencesMap;
+  using UserPreferencesPtr = std::shared_ptr< UserPreferences >;
+  using UserPreferencesMap = std::map< std::string, std::string >;
 
   class UserPreferences
   {

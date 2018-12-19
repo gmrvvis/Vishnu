@@ -24,8 +24,8 @@ namespace vishnu
 {
 
   class DataSetWidget;
-  typedef DataSetWidget* DataSetWidgetPtr;
-  typedef std::vector< DataSetWidgetPtr > DataSetWidgets;
+  using DataSetWidgetPtr = DataSetWidget*;
+  using DataSetWidgets = std::vector< DataSetWidgetPtr >;
 
   class DataSetWidget : public QWidget
   {

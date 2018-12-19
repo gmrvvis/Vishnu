@@ -43,6 +43,7 @@ namespace vishnu
       void removeCurrentDataSet( void );
       void selectCurrentDataSet( void );
       std::string getCurrentDataSetName( void );
+      UserDataSetPtr getCurrentDataSet( );
       UserDataSetMap getDataSets( void );
       void clearDataSets( void );
       void setBlurred( const bool& state );

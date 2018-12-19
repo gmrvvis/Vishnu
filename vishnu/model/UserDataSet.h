@@ -22,9 +22,9 @@ namespace vishnu
 {
 
   class UserDataSet;
-  typedef std::shared_ptr< UserDataSet > UserDataSetPtr;
-  typedef std::vector< UserDataSetPtr > UserDataSetVector;
-  typedef std::map< std::string, UserDataSetPtr > UserDataSetMap;
+  using UserDataSetPtr = std::shared_ptr< UserDataSet >;
+  using UserDataSetVector = std::vector< UserDataSetPtr >;
+  using UserDataSetMap = std::map< std::string, UserDataSetPtr >;
 
   class UserDataSet
   {
@@ -36,6 +36,17 @@ namespace vishnu
         const std::string& csvFilename, const std::string& jsonFilename,
         const std::string& xmlFilename, const bool& selected );
       ~UserDataSet( void );
+      bool operator==( const UserDataSet& other )
+      {
+          std::cout << "comp" <<std::endl;
+          return (
+            ( _name == other.getName( ) )
+            && ( _path == other.getPath( ) )
+            && ( _csvFilename == other.getCsvFilename( ) )
+            && ( _jsonFilename == other.getJsonFilename( ) )
+            && ( _xmlFilename == other.getXmlFilename( ) )
+          );
+      }
 
       std::string getName( void ) const;
       void setName( const std::string& name );

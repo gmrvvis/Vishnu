@@ -26,7 +26,7 @@ namespace vishnu
 {
   UserDataSetListWidget::UserDataSetListWidget( QWidget* /*parent*/ )
     : _checkingProperty( false )
-  {    
+  {
     setSelectionMode( QAbstractItemView::SingleSelection );
     setDragDropMode( QAbstractItemView::InternalMove );
     setDefaultDropAction( Qt::MoveAction );
@@ -42,8 +42,8 @@ namespace vishnu
 
   UserDataSetWidgetPtr UserDataSetListWidget::addUserDataSet(
     const std::string& name, const std::string& path,
-    const std::string& csvFilename, const std::string& xmlFilename,
-    const std::string& jsonFilename, const bool& selected )
+    const std::string& csvFilename, const std::string& jsonFilename,
+    const std::string& xmlFilename, const bool& selected )
   {
     //UserDataSetWidgets dataSetWidgets;
 /*
@@ -94,7 +94,7 @@ namespace vishnu
   }
 
   void UserDataSetListWidget::removeCurrentDataSet( )
-  {    
+  {
     takeItem( row( currentItem( ) ) );
   }
 
@@ -127,13 +127,23 @@ namespace vishnu
     return userDataSet->getName( );
   }
 
+  UserDataSetPtr UserDataSetListWidget::getCurrentDataSet( )
+  {
+    UserDataSetWidgetPtr dsw = static_cast< UserDataSetWidgetPtr >(
+      itemWidget( currentItem( ) ) );
+    UserDataSetPtr userDataSet( new UserDataSet( dsw->getName( ), dsw->getPath( ),
+      dsw->getCsvFilename( ), dsw->getJsonFilename( ), dsw->getXmlFilename( ),
+      dsw->getSelected( ) ) );
+    return userDataSet;
+  }
+
   UserDataSetMap UserDataSetListWidget::getDataSets( )
   {
     UserDataSetMap dataSets;
 
     for( int row = 0; row < count( ); ++row )
     {
-      UserDataSetWidget* dsw = static_cast< UserDataSetWidget* >(
+      UserDataSetWidgetPtr dsw = static_cast< UserDataSetWidgetPtr >(
         itemWidget( item( row ) ) );
 
       UserDataSetPtr dataSet( new UserDataSet( dsw->getName( ), dsw->getPath( ),
