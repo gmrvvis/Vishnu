@@ -23,7 +23,7 @@ namespace vishnu
 {
 
   class PathsWidget;
-  typedef std::shared_ptr< PathsWidget > PathsWidgetPtr;
+  using PathsWidgetPtr = std::shared_ptr< PathsWidget >;
 
   class PathsWidget : public QWidget
   {

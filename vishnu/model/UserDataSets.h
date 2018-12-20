@@ -21,7 +21,7 @@ namespace vishnu
 {
 
   class UserDataSets;
-  typedef std::shared_ptr< UserDataSets > UserDataSetsPtr;
+  using UserDataSetsPtr = std::shared_ptr< UserDataSets >;
 
   class UserDataSets
   {

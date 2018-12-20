@@ -76,7 +76,7 @@ namespace vishnu
 {
 
   class DataSetListWidget;
-  typedef std::shared_ptr< DataSetListWidget > DataSetListWidgetPtr;
+  using DataSetListWidgetPtr = std::shared_ptr< DataSetListWidget >;
 
   class DataSetListWidget : public QListWidget
   {

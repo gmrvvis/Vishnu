@@ -21,7 +21,7 @@ namespace vishnu
 {
 
   class AppsConfig;
-  typedef std::shared_ptr< AppsConfig > AppsConfigPtr;
+  using AppsConfigPtr = std::shared_ptr< AppsConfig >;
 
   class AppsConfig
   {

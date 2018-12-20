@@ -34,6 +34,7 @@ namespace vishnu
       public:
         explicit DataSetWindow( QWidget *parent = Q_NULLPTR );
         ~DataSetWindow();
+        UserDataSetPtr getResultUserDataSet( void );
 
       private slots:
         void slotCreateButton( void );
@@ -58,6 +59,7 @@ namespace vishnu
           const sp1common::PropertyGroupsPtr& propertyGroups );
         bool createJSON( const std::string& jsonPath,
           sp1common::DataSetsPtr& dataSets );
+        bool createGeometricData( const std::string& path );
 
   };
 
