@@ -339,7 +339,6 @@ namespace vishnu
         if ( sp1common::Vectors::find( selectedHeaders, oldCsvHeaders.at( i ) ) == -1 )
         {
           int index = sp1common::Vectors::find( csvData.at( 0 ), oldCsvHeaders.at( i ) );
-           // csvData
           sp1common::Matrices::removeColumn( csvData, index );
         }
       }

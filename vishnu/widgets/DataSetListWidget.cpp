@@ -153,10 +153,13 @@ namespace vishnu
         analysis->segmentations( ) );
 
       QString segmentationCSV = getCSVFromSegmentations( analysis.get( ), segmentationList );
-      std::string segmentationCSVPath("segmentations.csv");
+
+      // Unloading EspINA plugins.
+      ESPINA::Core::unloadPlugins( pluginLoaders );
 
       // Writing CSV to a file.
       /**/
+      std::string segmentationCSVPath("segmentations.csv");
       remove( segmentationCSVPath.c_str( ) );
       std::ofstream ofs;
       ofs.exceptions( std::ofstream::failbit | std::ofstream::badbit );
@@ -176,18 +179,16 @@ namespace vishnu
       std::string segmentationMeshesRoot("geometricData");
       generateSegmentationMeshes( segmentationMeshesRoot, segmentationList );
 
-      // Saving SEG file.
-      ESPINA::IO::SegFile::save( analysis.get( ), file,
-                                 nullptr, vishnuErrorHandler );
-
-      // Unloading EspINA plugins.
-      ESPINA::Core::unloadPlugins( pluginLoaders );
-
       QString segmentationJSONSchema = createJsonSchema( segmentationCSV );
       sp1common::Properties segmentationProperties =
         segsJsonSchemaToSP1Properties( segmentationJSONSchema );
 
       createDataSetFromCSV( dataSetWidgets, segmentationCSVPath, segmentationProperties );
+
+      // Saving SEG file.
+      // SEGMENTATION FAULT HERE !
+      ESPINA::IO::SegFile::save( analysis.get( ), file,
+                                 nullptr, vishnuErrorHandler );
     }
     catch(const ESPINA::Core::Utils::EspinaException &e)
     {
@@ -253,18 +254,46 @@ namespace vishnu
                            << ")" << std::endl;
         /**/
 
-        result += segmentation->name();
-        result += separator;
-        result += segmentation->alias();
-        result += separator;
-        result += segmentation->category()->classificationName();
+        QString segmentationName = segmentation->name().simplified();
+        QString segmentationAlias = segmentation->alias().simplified();
+
+        if( segmentationName.isEmpty() && segmentationAlias.isEmpty() )
+        {
+          result += QString( "UnknownName" ) + QString( segmentationCounter );
+          result += separator;
+          result += QString( "UnknownAlias" ) + QString( segmentationCounter );
+          result += separator;
+        }
+        else if( segmentationName.isEmpty() && !segmentationAlias.isEmpty() )
+        {
+          result += segmentationAlias;
+          result += separator;
+          result += segmentationAlias;
+          result += separator;
+        }
+        else if( !segmentationName.isEmpty() && segmentationAlias.isEmpty() )
+        {
+          result += segmentationName;
+          result += separator;
+          result += segmentationName;
+          result += separator;
+        }
+        else
+        {
+          result += segmentationName;
+          result += separator;
+          result += segmentationAlias;
+          result += separator;
+        }
+
+        result += segmentation->category()->classificationName().simplified();
         result += separator;
 
         auto segConnections = analysis->connections(analysis->smartPointer(segmentation));
 
         for(int i = 0; i < segConnections.size(); ++i)
         {
-          result += segConnections.at(i).segmentation2->name();
+          result += segConnections.at(i).segmentation2->name().simplified();
 
           if(i != segConnections.size() - 1) result += concatenator;
         }
@@ -291,6 +320,7 @@ namespace vishnu
         // Feedback.
         segmentationCounter++;
 
+        // One exec.
         //break;
       }
 
@@ -330,9 +360,27 @@ namespace vishnu
       }
       auto segmentationPolyData = ESPINA::readLockMesh( segmentationOutput )->mesh( );
       std::string segmentationMeshOBJ = vtkPolyDataToOBJ( segmentationPolyData );
-      auto segName = segmentation->name().replace(' ','_');
-      auto segAlias = segmentation->alias().replace(' ','_');
-      std::string segmentationMeshPath = segMeshesRootExtended + segName.toStdString( ) + "-" + segAlias.toStdString( ) + "-mesh.obj";
+
+      QString segmentationName = segmentation->name().simplified();
+      QString segmentationAlias = segmentation->alias().simplified();
+      if( segmentationName.isEmpty() && segmentationAlias.isEmpty() )
+      {
+        // Highly unlikely.
+        segmentationName = QString( "UnknownName" );
+        segmentationAlias = QString( "UnknownAlias" );
+      }
+      else if( segmentationName.isEmpty() && !segmentationAlias.isEmpty() )
+      {
+        segmentationName = segmentationAlias;
+      }
+      else if( !segmentationName.isEmpty() && segmentationAlias.isEmpty() )
+      {
+        segmentationAlias = segmentationName;
+      }
+
+      auto segNameUScore = segmentationName.replace(' ','_');
+      auto segAliasUScore = segmentationAlias.replace(' ','_');
+      std::string segmentationMeshPath = segMeshesRootExtended + segNameUScore.toStdString( ) + "-" + segAliasUScore.toStdString( ) + "-mesh.obj";
       // Writing OBJ to a file.
       /**/
       remove( segmentationMeshPath.c_str( ) );
@@ -354,6 +402,7 @@ namespace vishnu
                                    << segmentation->alias( ).toStdString( )
                                    << " mesh generated." << std::endl;
 
+      // One exec.
       //break;
     }
   }

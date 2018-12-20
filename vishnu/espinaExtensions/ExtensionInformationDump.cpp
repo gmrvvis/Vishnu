@@ -148,7 +148,7 @@ namespace vishnu
         auto iKey_ = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey_))
         {
-          result_ += segmentation->information(iKey_).toString();
+          result_ += segmentation->information(iKey_).toString().simplified();
 
           if(key != keys_.last()) result_ += concatenator;
         }
@@ -205,7 +205,7 @@ namespace vishnu
           else
           {
             auto iKeyAux = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
-            result += segmentation->information(iKeyAux).toString();
+            result += segmentation->information(iKeyAux).toString().simplified();
           }
         }
 
@@ -223,11 +223,28 @@ namespace vishnu
       }
 
       // add non standard keys MPHVolumePath & MPHMeshPath
-      auto segName = segmentation->name().replace(' ','_');
-      auto segAlias = segmentation->alias().replace(' ','_');
-      result += QString("/geometricData/%1-%2-volume.json").arg( segName ).arg( segAlias ) + separator +
-                QString("/geometricData/%1-%2-mesh.obj").arg( segName ).arg( segAlias ) + separator +
-                QString("%1-%2-mesh").arg( segName ).arg( segAlias );
+      QString segmentationName = segmentation->name().simplified();
+      QString segmentationAlias = segmentation->alias().simplified();
+      if( segmentationName.isEmpty() && segmentationAlias.isEmpty() )
+      {
+        // Highly unlikely.
+        segmentationName = QString( "UnknownName" );
+        segmentationAlias = QString( "UnknownAlias" );
+      }
+      else if( segmentationName.isEmpty() && !segmentationAlias.isEmpty() )
+      {
+        segmentationName = segmentationAlias;
+      }
+      else if( !segmentationName.isEmpty() && segmentationAlias.isEmpty() )
+      {
+        segmentationAlias = segmentationName;
+      }
+
+      auto segNameUScore = segmentationName.replace(' ','_');
+      auto segAliasUScore = segmentationAlias.replace(' ','_');
+      result += QString("/geometricData/%1-%2-volume.json").arg( segNameUScore ).arg( segAliasUScore ) + separator +
+                QString("/geometricData/%1-%2-mesh.obj").arg( segNameUScore ).arg( segAliasUScore ) + separator +
+                QString("%1-%2-mesh").arg( segNameUScore ).arg( segAliasUScore );
 
       return result;
     }
@@ -244,7 +261,7 @@ namespace vishnu
           auto keyInformation = segmentation->information(iKey);
           if( keyInformation.isValid( ) )
           {
-            result += keyInformation.toString();
+            result += keyInformation.toString().simplified();
           }
           else
           {
@@ -276,7 +293,7 @@ namespace vishnu
         auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
         {
-          result += segmentation->information(iKey).toString();
+          result += segmentation->information(iKey).toString().simplified();
         }
 
         // Feedback.
@@ -303,7 +320,7 @@ namespace vishnu
         auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
         {
-          result += segmentation->information(iKey).toString();
+          result += segmentation->information(iKey).toString().simplified();
         }
 
         // Feedback.
@@ -330,7 +347,7 @@ namespace vishnu
         auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
         {
-          result += segmentation->information(iKey).toString();
+          result += segmentation->information(iKey).toString().simplified();
         }
 
         // Feedback.
@@ -396,7 +413,7 @@ namespace vishnu
         auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
         {
-          result += segmentation->information(iKey).toString();
+          result += segmentation->information(iKey).toString().simplified();
         }
 
         // Feedback.
@@ -423,7 +440,7 @@ namespace vishnu
         auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
         {
-          result += segmentation->information(iKey).toString();
+          result += segmentation->information(iKey).toString().simplified();
         }
 
         // Feedback.
@@ -451,7 +468,7 @@ namespace vishnu
         auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
         {
-          result += segmentation->information(iKey).toString();
+          result += segmentation->information(iKey).toString().simplified();
           anyInformation = true;
         }
 
@@ -498,7 +515,7 @@ namespace vishnu
 
           for(auto data: table)
           {
-            nameList               << data.name;
+            nameList               << data.name.simplified();
             completeList           << (data.complete ? "true" : "false");
             branchedList           << (data.branched ? "yes" : "no");
             lengthList             << QString::number(data.length);
@@ -547,7 +564,7 @@ namespace vishnu
       auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
       if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
       {
-        result += segmentation->information(iKey).toString();
+        result += segmentation->information(iKey).toString().simplified();
       }
 
       // Feedback.
