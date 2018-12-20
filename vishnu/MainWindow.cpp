@@ -62,11 +62,11 @@ namespace vishnu
     if ( args.has( "-wd" ) )
     {
       _userPreferences->addUserPreference(
-        "workingDirectory", args.get( "-wd" ) );
+        STR_WORKINGDIRECTORY, args.get( "-wd" ) );
     }
     if ( args.has( "-z" ) )
     {
-      _userPreferences->addUserPreference( "zeqSession", args.get( "-z" ) );
+      _userPreferences->addUserPreference( STR_ZEQSESSION, args.get( "-z" ) );
     }
 
     //MenuBar
@@ -509,12 +509,59 @@ namespace vishnu
         it.second->readAllStandardOutput( );
 
         QStringList arguments;
+        for ( const auto& userPreference
+          : _userPreferences->getUserPreferences( ) )
+        {
+          if ( userPreference.first == STR_ZEQSESSION )
+          {
+            arguments << QString::fromStdString( "-z" );
+            arguments << QString::fromStdString( userPreference.second );
+          }
+        }
+
         for( const auto& arg : it.second->getArgs( ).get( ) )
         {
+          std::string first = arg.first;
+          //if global zeqsession exists, ignore app specific
+          if ( ( first == "-z" ) && ( arguments.contains( "-z" ) ) )
+          {
+            std::cout << "Using Vishnu ZeroEQ session." << std::endl;
+            continue;
+          }
           arguments << QString::fromStdString( arg.first );
           if ( !arg.second.empty( ) )
           {
             arguments << QString::fromStdString( arg.second );
+          }
+        }
+
+        //Add selected dataset
+        for ( const auto& dataSet : _userDataSetListWidget->getDataSets( ) )
+        {
+          if ( dataSet.second->getSelected( ) )
+          {
+              switch( it.second->getApplicationType( ) )
+              {
+                case sp1common::ApplicationType::CLINT:
+                  arguments << QString::fromStdString( "-f" );
+                  arguments << QString::fromStdString(
+                  dataSet.second->getPath( ) + "/"
+                    + dataSet.second->getCsvFilename( ) );
+                  break;
+                case sp1common::ApplicationType::DCEXPLORER:
+                  arguments << QString::fromStdString( "-f" );
+                  arguments << QString::fromStdString(
+                  dataSet.second->getPath( ) + "/"
+                    + dataSet.second->getCsvFilename( ) );
+                  break;
+                case sp1common::ApplicationType::PYRAMIDAL:
+                  arguments << QString::fromStdString( "-f" );
+                  arguments << QString::fromStdString(
+                  dataSet.second->getPath( ) + "/"
+                    + dataSet.second->getXmlFilename( ) );
+                  break;
+              }
+            break;
           }
         }
 
