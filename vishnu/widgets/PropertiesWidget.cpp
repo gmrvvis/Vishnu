@@ -1,10 +1,24 @@
-/**
- * Copyright (c) 2017-2018 GMRV/URJC.
+/*
+ * Copyright (c) 2017-2019 GMRV/URJC.
  *
  * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
  *
  * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
-*/
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
 
 #include "PropertiesWidget.h"
 
@@ -26,8 +40,8 @@ namespace vishnu
 {
 
   PropertiesWidget::PropertiesWidget( const std::string& name, const bool& use,
-        const bool& primaryKey, const sp1common::DataCategory& dataCategory,
-        const sp1common::AxisType& axisType, QWidget* /*parent*/ )
+        const bool& primaryKey, const vishnucommon::DataCategory& dataCategory,
+        const vishnucommon::AxisType& axisType, QWidget* /*parent*/ )
   {    
 
     fillDataCategories( );
@@ -107,23 +121,23 @@ namespace vishnu
     {
       _dataCategory = new QComboBox( );
     }
-    for (const auto& dt : sp1common::dataCategoriesToVector( ) )
+    for (const auto& dt : vishnucommon::dataCategoriesToVector( ) )
     {
       _dataCategory->addItem( QString::fromStdString( dt ) );
     }
   }
 
-  sp1common::DataCategory PropertiesWidget::getDataCategory( void ) const
+  vishnucommon::DataCategory PropertiesWidget::getDataCategory( void ) const
   {
-    return sp1common::toDataCategory(
+    return vishnucommon::toDataCategory(
       _dataCategory->currentText( ).toStdString( ) );
   }
 
   void PropertiesWidget::setDataCategory(
-    const sp1common::DataCategory& dataCategory )
+    const vishnucommon::DataCategory& dataCategory )
   {
     int index = _dataCategory->findText( QString::fromStdString(
-      sp1common::toString( dataCategory ) ) );
+      vishnucommon::toString( dataCategory ) ) );
 
     if ( index != -1 )
     {
@@ -137,18 +151,18 @@ namespace vishnu
     {
       _axisType = new QComboBox( );
     }
-    for ( const auto& at : sp1common::axisTypesToVector( ) )
+    for ( const auto& at : vishnucommon::axisTypesToVector( ) )
     {
       _axisType->addItem( QString::fromStdString( at ) );
     }
   }
 
-  sp1common::AxisType PropertiesWidget::getAxisType( void ) const
+  vishnucommon::AxisType PropertiesWidget::getAxisType( void ) const
   {
-    return sp1common::toAxisType( _axisType->currentText( ).toStdString( ) );
+    return vishnucommon::toAxisType( _axisType->currentText( ).toStdString( ) );
   }
 
-  void PropertiesWidget::setAxisType( const sp1common::AxisType& axisType )
+  void PropertiesWidget::setAxisType( const vishnucommon::AxisType& axisType )
   {
     int index = _axisType->findText( QString::fromStdString(
       toString( axisType ) ) );
@@ -174,7 +188,7 @@ namespace vishnu
       case 4:
         return _axisType;
       default:
-        sp1common::Error::throwError(sp1common::Error::ErrorType::Error,
+        vishnucommon::Error::throwError(vishnucommon::Error::ErrorType::Error,
           "Invalid property index", true );
         return nullptr;
     }

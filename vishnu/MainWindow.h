@@ -1,10 +1,24 @@
-/**
- * Copyright (c) 2017-2018 GMRV/URJC.
+/*
+ * Copyright (c) 2017-2019 GMRV/URJC.
  *
  * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
  *
  * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
-*/
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
 
 #ifndef VISHNU_MAINWINDOW_H
 #define VISHNU_MAINWINDOW_H
@@ -32,7 +46,7 @@
 #include "model/UserPreferences.h"
 
 #include <manco/manco.h>
-#include <sp1common/sp1common.h>
+#include <vishnucommon/vishnucommon.h>
 
 namespace vishnu
 {
@@ -46,7 +60,7 @@ namespace vishnu
     Q_OBJECT
 
     public:
-      explicit MainWindow( sp1common::Args args,
+      explicit MainWindow( vishnucommon::Args args,
         QWidget *parent = 0 );
       ~MainWindow();
 
@@ -92,10 +106,10 @@ namespace vishnu
       ZEQGroupListWidgetPtr _zeqGroupListWidget;
 
       void initZeqSession( );
-      void receivedSyncGroup( zeroeq::gmrv::ConstSyncGroupPtr o );
-      void receivedChangeNameGroup( zeroeq::gmrv::ConstChangeNameGroupPtr o );
-      void receivedChangeColorGroup( zeroeq::gmrv::ConstChangeColorGroupPtr o );
-      void receivedDestroyGroup( zeroeq::gmrv::ConstDestroyGroupPtr o );
+      void receivedSyncGroup( vishnulex::ConstSyncGroupPtr o );
+      void receivedChangeNameGroup( vishnulex::ConstChangeNameGroupPtr o );
+      void receivedChangeColorGroup( vishnulex::ConstChangeColorGroupPtr o );
+      void receivedDestroyGroup( vishnulex::ConstDestroyGroupPtr o );
 
       void loadApps( void );
       void setBlurred( const bool& state );

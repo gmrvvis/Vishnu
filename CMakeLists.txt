@@ -1,7 +1,7 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
 #   Vishnu
-#   2017-2018 (c) GMRV/URJC
+#   2017-2019 (c) GMRV/URJC
 #   Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
 #   http://gmrv.es/gmrvvis/
 #
@@ -40,7 +40,7 @@ include( GitExternal )
 
 set( VISHNU_DESCRIPTION "Vishnu" )
 set( VISHNU_MAINTAINER "Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>")
-set( VISHNU_LICENSE "" )
+set( VISHNU_LICENSE "LGPLv3" )
 set( COMMON_PROJECT_DOMAIN gmrv.es )
 
 include( Common )
@@ -49,7 +49,7 @@ common_find_package( Qt5Gui SYSTEM REQUIRED )
 common_find_package( Qt5Widgets SYSTEM REQUIRED )
 common_find_package( Qt5Network SYSTEM REQUIRED )
 common_find_package( manco REQUIRED )
-common_find_package( sp1common REQUIRED )
+common_find_package( vishnucommon REQUIRED )
 common_find_package_post( )
 
 list( APPEND VISHNU_DEPENDENT_LIBRARIES 
@@ -58,7 +58,7 @@ list( APPEND VISHNU_DEPENDENT_LIBRARIES
   Qt5::Network 
   Qt5::Widgets
   manco
-  sp1common
+  vishnucommon
 )
 
 if( ${USE_ESPINA} )

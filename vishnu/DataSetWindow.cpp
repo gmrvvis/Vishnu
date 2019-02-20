@@ -1,10 +1,24 @@
-/**
- * Copyright (c) 2017-2018 GMRV/URJC.
+/*
+ * Copyright (c) 2017-2019 GMRV/URJC.
  *
  * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
  *
  * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
-*/
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
 
 #include "DataSetWindow.h"
 
@@ -96,7 +110,7 @@ namespace vishnu
   {
     DataSetWidgets dataSetWidgets =
       _dataSetListWidget->addDataSets( dropped );
-    sp1common::PropertyGroupsPtr propertyGroups =
+    vishnucommon::PropertyGroupsPtr propertyGroups =
       _dataSetListWidget->getPropertyGroups( );
 
     for ( const auto& dataSetWidget : dataSetWidgets )
@@ -148,14 +162,14 @@ namespace vishnu
     {
       if ( !qDir.mkpath( qPath ) )
       {
-        sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+        vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
           "Can't create " + path + " folder.", false );
         return;
       }
     }
     else
     {
-      if ( sp1common::Files::exist( csvPath ) )
+      if ( vishnucommon::Files::exist( csvPath ) )
       {
         QMessageBox::StandardButton overwriteCsv = QMessageBox::warning( this,
           "CSV File exists", QString::fromStdString( csvPath )
@@ -165,14 +179,14 @@ namespace vishnu
           {
             return;
           }
-          if ( sp1common::Files::remove( csvPath ) )
+          if ( vishnucommon::Files::remove( csvPath ) )
           {
-            sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+            vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
               "Can't remove existing CSV file (" + csvPath + ").", false );
             return;
           }
       }
-      if ( sp1common::Files::exist( jsonPath ) )
+      if ( vishnucommon::Files::exist( jsonPath ) )
       {
         QMessageBox::StandardButton overwriteJson = QMessageBox::warning( this,
           "JSON File exists", QString::fromStdString( jsonPath )
@@ -182,14 +196,14 @@ namespace vishnu
           {
             return;
           }
-          if ( sp1common::Files::remove( jsonPath ) )
+          if ( vishnucommon::Files::remove( jsonPath ) )
           {
-            sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+            vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
               "Can't remove existing JSON file (" + jsonPath + ").", false );
             return;
           }
       }
-      if ( sp1common::Files::exist( xmlPath ) )
+      if ( vishnucommon::Files::exist( xmlPath ) )
       {
         QMessageBox::StandardButton overwriteXml = QMessageBox::warning( this,
           "XML File exists", QString::fromStdString( xmlPath )
@@ -199,26 +213,26 @@ namespace vishnu
           {
             return;
           }
-          if ( sp1common::Files::remove( xmlPath ) )
+          if ( vishnucommon::Files::remove( xmlPath ) )
           {
-            sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+            vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
               "Can't remove existing XML file (" + xmlPath + ").", false );
             return;
           }
       }
     }
 
-    sp1common::DataSetsPtr resultDataSets =
+    vishnucommon::DataSetsPtr resultDataSets =
       _propertiesTableWidget->getDataSets( );
-    sp1common::DataSetPtr resultDataSet =
+    vishnucommon::DataSetPtr resultDataSet =
       resultDataSets->getDataSets( ).at( 0 );
-    sp1common::PropertyGroupsPtr propertyGroups =
+    vishnucommon::PropertyGroupsPtr propertyGroups =
       resultDataSets->getPropertyGroups( );
 
     //Create CSV
     if ( !createCSV( csvPath, propertyGroups ) )
     {
-      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+      vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
         "Can't create CSV file.", false );
       return;
     }
@@ -227,7 +241,7 @@ namespace vishnu
     resultDataSets->getDataSets( ).at( 0 )->setPath( csvPath );
     if ( !createJSON( jsonPath, resultDataSets ) )
     {
-      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+      vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
         "Can't create JSON file.", false );
       return;
     }
@@ -235,7 +249,7 @@ namespace vishnu
     //Create XML
     if ( !createXML( path, csvPath, xmlPath, resultDataSet, propertyGroups ) )
     {
-      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+      vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
         "Can't create XML file.", false );
       return;
     }
@@ -243,7 +257,7 @@ namespace vishnu
     //Create geometric data
     if ( !createGeometricData( path ) )
     {
-      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+      vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
         "Can't create geometric data.", false );
       return;
     }
@@ -259,7 +273,7 @@ namespace vishnu
   }
 
    bool DataSetWindow::createCSV( const std::string& csvPath,
-    const sp1common::PropertyGroupsPtr& propertyGroups )
+    const vishnucommon::PropertyGroupsPtr& propertyGroups )
   {
     bool result = false;
 
@@ -268,39 +282,39 @@ namespace vishnu
     size_t selectedHeadersSize = selectedHeaders.size( );
 
     //Write headers to csv
-    std::string joinedHeaders = sp1common::Strings::join(
+    std::string joinedHeaders = vishnucommon::Strings::join(
       selectedHeaders, std::string( "," ) );
-    result = sp1common::Files::writeLine( csvPath, joinedHeaders );
+    result = vishnucommon::Files::writeLine( csvPath, joinedHeaders );
 
     //Loop over files
-    sp1common::DataSetsPtr dataSets = _dataSetListWidget->getDataSets( );
+    vishnucommon::DataSetsPtr dataSets = _dataSetListWidget->getDataSets( );
     for ( const auto& dataSet : dataSets->getDataSets( ) )
     {
-      sp1common::Matrix csvData =
-        sp1common::Files::readCsv( dataSet->getPath( ) );
+      vishnucommon::Matrix csvData =
+        vishnucommon::Files::readCsv( dataSet->getPath( ) );
 
       //Remove csv columns not used
       std::vector< std::string > oldCsvHeaders = dataSet->getPropertyNames( );
       for ( unsigned int i = 0; i < oldCsvHeaders.size( ); ++i )
       {
-        if ( sp1common::Vectors::find( selectedHeaders, oldCsvHeaders.at( i ) )
+        if ( vishnucommon::Vectors::find( selectedHeaders, oldCsvHeaders.at( i ) )
           == -1 )
         {
           unsigned int index = static_cast< unsigned int >(
-            sp1common::Vectors::find( csvData.at( 0 ),
+            vishnucommon::Vectors::find( csvData.at( 0 ),
             oldCsvHeaders.at( i ) ) );
-          sp1common::Matrices::removeColumn( csvData, index );
+          vishnucommon::Matrices::removeColumn( csvData, index );
         }
       }
 
       //Loop over global headers and map results
       std::map< size_t, std::string > csvHeadersMap;
-      std::vector< std::string > csvHeaders = sp1common::Strings::split(
-        sp1common::Strings::joinAndTrim( csvData.at( 0 ), "," ), ',');
+      std::vector< std::string > csvHeaders = vishnucommon::Strings::split(
+        vishnucommon::Strings::joinAndTrim( csvData.at( 0 ), "," ), ',');
       for ( size_t i = 0; i < selectedHeadersSize; ++i )
       {
         std::string header = selectedHeaders.at( i );
-        if ( sp1common::Vectors::find( csvHeaders, header ) != -1 )
+        if ( vishnucommon::Vectors::find( csvHeaders, header ) != -1 )
         {
           csvHeadersMap[ i ] = selectedHeaders.at( i );
         }
@@ -316,7 +330,7 @@ namespace vishnu
           {
             if ( csvHeadersMap.find( col ) != csvHeadersMap.end( ) )
             {
-              std::string field = sp1common::Strings::trim( csvRow.at( col ) );
+              std::string field = vishnucommon::Strings::trim( csvRow.at( col ) );
               line += ( line.empty( ) ) ? field
                 : std::string( "," ) + field;
             }
@@ -326,7 +340,7 @@ namespace vishnu
                 : std::string( "," ) + MISSING_DATA_FIELD;
             }
           }
-          result = sp1common::Files::writeLine( csvPath, line,
+          result = vishnucommon::Files::writeLine( csvPath, line,
             true );
       }
     }
@@ -335,33 +349,33 @@ namespace vishnu
 
   bool DataSetWindow::createXML( const std::string& path,
     const std::string& csvPath, const std::string& xmlPath,
-    const sp1common::DataSetPtr& resultDataSet,
-    const sp1common::PropertyGroupsPtr& propertyGroups )
+    const vishnucommon::DataSetPtr& resultDataSet,
+    const vishnucommon::PropertyGroupsPtr& propertyGroups )
   {
     bool result = false;
 
-    sp1common::Properties properties = resultDataSet->getProperties( );
+    vishnucommon::Properties properties = resultDataSet->getProperties( );
 
     //Features
     std::string geometryColumn;
 
-    sp1common::FeaturesVector featuresVector;
+    vishnucommon::FeaturesVector featuresVector;
     for ( unsigned int i = 0; i < properties.size( ); ++i )
     {
-      sp1common::PropertyPtr property = properties.at( i );
+      vishnucommon::PropertyPtr property = properties.at( i );
       std::string name = property->getName( );
-      sp1common::DataCategory dataCategory = property->getDataCategory( );
+      vishnucommon::DataCategory dataCategory = property->getDataCategory( );
 
       //if PK do not include as pyramidal feature
-      if ( sp1common::Vectors::find( propertyGroups->getUsedPrimaryKeys( ),
+      if ( vishnucommon::Vectors::find( propertyGroups->getUsedPrimaryKeys( ),
         name ) == -1 )
       {
         //if axes (geometric points xyz) do not include as pyramidal feature
-        if ( sp1common::Vectors::find( propertyGroups->getAxes( ), name )
+        if ( vishnucommon::Vectors::find( propertyGroups->getAxes( ), name )
           == -1 )
         {
-          featuresVector.emplace_back( sp1common::FeaturePtr(
-            new sp1common::Feature(
+          featuresVector.emplace_back( vishnucommon::FeaturePtr(
+            new vishnucommon::Feature(
             name,
             name,
             "mV",
@@ -370,61 +384,61 @@ namespace vishnu
         }
       }
 
-      if ( dataCategory == sp1common::DataCategory::Geometric )
+      if ( dataCategory == vishnucommon::DataCategory::Geometric )
       {
         geometryColumn = name;
       }
     }
 
-    sp1common::FeaturesPtr features( new sp1common::Features(
+    vishnucommon::FeaturesPtr features( new vishnucommon::Features(
       propertyGroups->getUsedPrimaryKeys( ), propertyGroups->getAxes( ),
       geometryColumn, featuresVector ) );
 
     //Set
-    sp1common::Sets sets;
-    sets.emplace_back( sp1common::SetPtr( new sp1common::Set( csvPath,
+    vishnucommon::Sets sets;
+    sets.emplace_back( vishnucommon::SetPtr( new vishnucommon::Set( csvPath,
       path + std::string( "/" ) + GEOMETRY_DATA_FOLDER ) ) );
 
     //Data
-    sp1common::DataPtr dataPtr( new sp1common::Data( "customDataSet", "",
+    vishnucommon::DataPtr dataPtr( new vishnucommon::Data( "customDataSet", "",
       features, sets ) );
 
     //Colors
-    sp1common::Vec3Ptr additionalMeshesColor(
-      new sp1common::Vec3( "60", "60", "60" ) );
-    sp1common::Vec3Ptr backgroundColor(
-      new sp1common::Vec3( "0", "0", "0" ) );
-    sp1common::ColorsPtr colors(
-      new sp1common::Colors( additionalMeshesColor, backgroundColor ) );
+    vishnucommon::Vec3Ptr additionalMeshesColor(
+      new vishnucommon::Vec3( "60", "60", "60" ) );
+    vishnucommon::Vec3Ptr backgroundColor(
+      new vishnucommon::Vec3( "0", "0", "0" ) );
+    vishnucommon::ColorsPtr colors(
+      new vishnucommon::Colors( additionalMeshesColor, backgroundColor ) );
 
     //Camera
-    sp1common::Vec3Ptr eye(
-      new sp1common::Vec3( "577.183", "1106.67", "290.011" ) );
-    sp1common::Vec3Ptr center(
-      new sp1common::Vec3( "479.859", "-26.1715", "670.239" ) );
-    sp1common::Vec3Ptr up(
-      new sp1common::Vec3( "0.0183558", "-0.319558", "-0.947389" ) );
-    sp1common::CameraPtr camera( new sp1common::Camera( eye, center, up ) );
+    vishnucommon::Vec3Ptr eye(
+      new vishnucommon::Vec3( "577.183", "1106.67", "290.011" ) );
+    vishnucommon::Vec3Ptr center(
+      new vishnucommon::Vec3( "479.859", "-26.1715", "670.239" ) );
+    vishnucommon::Vec3Ptr up(
+      new vishnucommon::Vec3( "0.0183558", "-0.319558", "-0.947389" ) );
+    vishnucommon::CameraPtr camera( new vishnucommon::Camera( eye, center, up ) );
 
     //Configuration
-    sp1common::ConfigurationPtr configuration( new sp1common::Configuration(
+    vishnucommon::ConfigurationPtr configuration( new vishnucommon::Configuration(
       "PyramidalExplorer", "0.2.0", "data", dataPtr, colors, camera ) );
 
     //PyramidalXML
     std::string dtd =
       "<!DOCTYPE configuration SYSTEM \"http://gmrv.es/pyramidalexplorer/PyramidalExplorerData-0.2.0.dtd\">";
-    sp1common::PyramidalXMLPtr pyramidalXML(
-      new sp1common::PyramidalXML( dtd, configuration ) );
+    vishnucommon::PyramidalXMLPtr pyramidalXML(
+      new vishnucommon::PyramidalXML( dtd, configuration ) );
 
-    result = sp1common::XML::serialize( xmlPath, pyramidalXML );
+    result = vishnucommon::XML::serialize( xmlPath, pyramidalXML );
 
     return result;
   }
 
   bool DataSetWindow::createJSON( const std::string& jsonPath,
-    sp1common::DataSetsPtr& dataSets )
+    vishnucommon::DataSetsPtr& dataSets )
   {
-    return sp1common::JSON::serialize( jsonPath, dataSets );
+    return vishnucommon::JSON::serialize( jsonPath, dataSets );
   }
 
   bool DataSetWindow::createGeometricData( const std::string& path )
@@ -435,7 +449,7 @@ namespace vishnu
     QDir qGeometryFolder( QString::fromStdString( geometryFolder ) );
     if ( !qGeometryFolder.mkpath( QString::fromStdString( geometryFolder ) ) )
     {
-      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+      vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
         "Can't create " + geometryFolder + " folder.", false );
       return false;
     }
@@ -464,7 +478,7 @@ namespace vishnu
         {
           if ( !QFile::copy( srcFilePath, dstFilePath ) )
           {
-            sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+            vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
               "Can't copy " + info.fileName( ).toStdString( )
               + " file.", false );
             return false;

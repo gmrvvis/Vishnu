@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2017-2019 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
+
 #include <QApplication>
 #include <QCoreApplication>
 #include <QIcon>
@@ -5,7 +27,7 @@
 
 #include <string>
 
-#include <sp1common/sp1common.h>
+#include <vishnucommon/vishnucommon.h>
 
 #include "../vishnu/Definitions.hpp"
 #include "../vishnu/model/UserPreferences.h"
@@ -34,7 +56,7 @@ int main( int argc, char* argv[] )
   userPreferences->addUserPreference( "workingDirectory", "" );
 
   //Create User Preferences file
-  if ( sp1common::JSON::serialize( userPreferencesFile, userPreferences ) )
+  if ( vishnucommon::JSON::serialize( userPreferencesFile, userPreferences ) )
   {
     std::cout << "User Preferences file created sucessfully." << std::endl;
   }
@@ -45,7 +67,7 @@ int main( int argc, char* argv[] )
 
   //Read User Preferences file
   UserPreferencesPtr readedPreferencesFile
-    = sp1common::JSON::deserialize< UserPreferences >( userPreferencesFile );
+    = vishnucommon::JSON::deserialize< UserPreferences >( userPreferencesFile );
 
   return 0;
 }

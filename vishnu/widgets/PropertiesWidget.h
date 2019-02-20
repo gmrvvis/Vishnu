@@ -1,10 +1,24 @@
-/**
- * Copyright (c) 2017-2018 GMRV/URJC.
+/*
+ * Copyright (c) 2017-2019 GMRV/URJC.
  *
  * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
  *
  * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
-*/
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
 
 #ifndef VISHNU_PROPERTIESWIDGET_H
 #define VISHNU_PROPERTIESWIDGET_H
@@ -14,7 +28,7 @@
 #include <QLabel>
 #include <QCheckBox>
 #include <QComboBox>
-#include <sp1common/sp1common.h>
+#include <vishnucommon/vishnucommon.h>
 
 namespace vishnu
 {
@@ -27,8 +41,8 @@ namespace vishnu
   public:
 
     explicit PropertiesWidget( const std::string& name, const bool& use,
-      const bool& primaryKey, const sp1common::DataCategory& dataCategory,
-      const sp1common::AxisType& axisType, QWidget* parent = Q_NULLPTR );
+      const bool& primaryKey, const vishnucommon::DataCategory& dataCategory,
+      const vishnucommon::AxisType& axisType, QWidget* parent = Q_NULLPTR );
 
     std::string getName( void ) const;
     void setName( const std::string& name );
@@ -40,12 +54,12 @@ namespace vishnu
     void setPrimaryKey( const bool& primaryKey );
 
     void fillDataCategories( void );
-    sp1common::DataCategory getDataCategory( void ) const;
-    void setDataCategory( const sp1common::DataCategory& dataCategory );
+    vishnucommon::DataCategory getDataCategory( void ) const;
+    void setDataCategory( const vishnucommon::DataCategory& dataCategory );
 
     void fillAxisTypes( void );
-    sp1common::AxisType getAxisType( void ) const;
-    void setAxisType( const sp1common::AxisType& axisType );
+    vishnucommon::AxisType getAxisType( void ) const;
+    void setAxisType( const vishnucommon::AxisType& axisType );
 
     QWidget* getWidget( const int& index );
 

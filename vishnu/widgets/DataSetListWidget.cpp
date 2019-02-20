@@ -1,10 +1,24 @@
-/**
- * Copyright (c) 2017-2018 GMRV/URJC.
+/*
+ * Copyright (c) 2017-2019 GMRV/URJC.
  *
  * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
  *
  * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
-*/
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
 
 #include "DataSetListWidget.h"
 
@@ -40,7 +54,7 @@ namespace vishnu
       "QListWidget::item:hover{background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #BBBBFF, stop: 0.5 #FFFFFF, stop: 1 #BBBBFF );}"
     );
 
-     _propertyGroups.reset( new sp1common::PropertyGroups( ) );
+     _propertyGroups.reset( new vishnucommon::PropertyGroups( ) );
   }
 
 // -----------------------------------------------------------------------------
@@ -180,7 +194,7 @@ namespace vishnu
       generateSegmentationMeshes( segmentationMeshesRoot, segmentationList );
 
       QString segmentationJSONSchema = createJsonSchema( segmentationCSV );
-      sp1common::Properties segmentationProperties =
+      vishnucommon::Properties segmentationProperties =
         segsJsonSchemaToSP1Properties( segmentationJSONSchema );
 
       createDataSetFromCSV( dataSetWidgets, segmentationCSVPath, segmentationProperties );
@@ -1068,9 +1082,9 @@ namespace vishnu
     return attributeObject;
   }
 
-  sp1common::Properties DataSetListWidget::segsJsonSchemaToSP1Properties( QString jsonSchema )
+  vishnucommon::Properties DataSetListWidget::segsJsonSchemaToSP1Properties( QString jsonSchema )
   {
-    sp1common::Properties properties = std::vector< sp1common::PropertyPtr >( );
+    vishnucommon::Properties properties = std::vector< vishnucommon::PropertyPtr >( );
 
     QJsonDocument jsonSchemaDocument = QJsonDocument::fromJson( jsonSchema.toUtf8( ) );
 
@@ -1092,7 +1106,7 @@ namespace vishnu
 
     QJsonObject attributes = jsonSchemaObject[ "attributes" ].toObject( );
 
-    sp1common::PropertyPtr property;
+    vishnucommon::PropertyPtr property;
     foreach( const QString& key, attributes.keys( ) )
     {
       std::string attributeName = key.toStdString( );
@@ -1106,17 +1120,17 @@ namespace vishnu
         attributeProperties[ "data_type" ].toString( );
       // Feedback.
       //std::cout << "Attr. data type: " << attributeDataType.toStdString() << std::endl;
-      sp1common::DataCategory dataCategory =
-        sp1common::toDataCategory( attributeDataType.toStdString( ) );
+      vishnucommon::DataCategory dataCategory =
+        vishnucommon::toDataCategory( attributeDataType.toStdString( ) );
 
       QString attributeDataStructureType =
         attributeProperties[ "data_structure_type" ].toString( );
       // Feedback.
       //std::cout << "Attr. data structure type: " << attributeDataStructureType.toStdString() << std::endl;
-      sp1common::DataStructureType dataStructureType =
-        sp1common::toDataStructureType( attributeDataStructureType.toStdString( ) );
+      vishnucommon::DataStructureType dataStructureType =
+        vishnucommon::toDataStructureType( attributeDataStructureType.toStdString( ) );
 
-      property = std::make_shared< sp1common::Property >(
+      property = std::make_shared< vishnucommon::Property >(
         attributeName, dataCategory, dataStructureType );
 
       properties.push_back( property );
@@ -1133,8 +1147,8 @@ namespace vishnu
   void DataSetListWidget::createDataSetsFromJSON(
     DataSetWidgets& dataSetWidgets, const std::string& path )
   {
-    sp1common::DataSetsPtr dataSets =
-      sp1common::JSON::deserialize< sp1common::DataSets >( path );
+    vishnucommon::DataSetsPtr dataSets =
+      vishnucommon::JSON::deserialize< vishnucommon::DataSets >( path );
 
     for ( const auto& dataSet : dataSets->getDataSets( ) )
     {
@@ -1147,7 +1161,7 @@ namespace vishnu
   }
 
   void DataSetListWidget::createDataSetFromCSV( DataSetWidgets& dataSetWidgets,
-     const std::string& path, const sp1common::Properties& properties )
+     const std::string& path, const vishnucommon::Properties& properties )
   {
     bool notUsedPath = true;
     for ( int i = 0; i < count( ); ++i )
@@ -1165,18 +1179,18 @@ namespace vishnu
 
     if ( notUsedPath )
     {
-      sp1common::DataSetPtr dataSet( new sp1common::DataSet( path ) );
+      vishnucommon::DataSetPtr dataSet( new vishnucommon::DataSet( path ) );
 
       if ( properties.size( ) == 0 ) //CSV
       {
         std::vector< std::string > headers =
-          sp1common::Files::readCsvHeaders( path );
+          vishnucommon::Files::readCsvHeaders( path );
 
         for ( const auto& header : headers )
         {
-          dataSet->addProperty( sp1common::PropertyPtr(
-            new sp1common::Property( header, sp1common::DataCategory::Undefined,
-            sp1common::DataStructureType::None ) ) );
+          dataSet->addProperty( vishnucommon::PropertyPtr(
+            new vishnucommon::Property( header, vishnucommon::DataCategory::Undefined,
+            vishnucommon::DataStructureType::None ) ) );
         }
       }
       else //JSON or SEG
@@ -1232,7 +1246,7 @@ namespace vishnu
       QString qFilePath = filePaths.at( i );
       std::string filepath = qFilePath.toStdString( );
 
-      std::string extension = sp1common::Strings::lower(
+      std::string extension = vishnucommon::Strings::lower(
         QFileInfo( qFilePath ).completeSuffix( ).toStdString( ) );
 
       if ( extension == STR_EXT_SEG )
@@ -1289,16 +1303,16 @@ namespace vishnu
     takeItem( row( currentItem( ) ) );
   }
 
-  sp1common::DataSetsPtr DataSetListWidget::getDataSets( void ) const
+  vishnucommon::DataSetsPtr DataSetListWidget::getDataSets( void ) const
   {
-    sp1common::DataSetsPtr dataSets( new sp1common::DataSets( ) );
+    vishnucommon::DataSetsPtr dataSets( new vishnucommon::DataSets( ) );
 
     for( int row = 0; row < count( ); ++row )
     {
       DataSetWidgetPtr dsw = static_cast< DataSetWidgetPtr >(
         itemWidget( item( row ) ) );
 
-      sp1common::DataSetPtr dataSet( new sp1common::DataSet( dsw->getPath( ) ) );
+      vishnucommon::DataSetPtr dataSet( new vishnucommon::DataSet( dsw->getPath( ) ) );
       dataSet->setProperties( dsw->getDataSet( )->getProperties( ) );
       dataSets->addDataSet( dataSet );
     }
@@ -1306,14 +1320,14 @@ namespace vishnu
     return dataSets;
   }
 
-  sp1common::PropertyGroupsPtr DataSetListWidget::getPropertyGroups(
+  vishnucommon::PropertyGroupsPtr DataSetListWidget::getPropertyGroups(
     void ) const
   {
     return _propertyGroups;
   }
 
   void DataSetListWidget::setPropertyGroups(
-    const sp1common::PropertyGroupsPtr& propertyGroups )
+    const vishnucommon::PropertyGroupsPtr& propertyGroups )
   {
     _propertyGroups = propertyGroups;
   }
@@ -1327,7 +1341,7 @@ namespace vishnu
 
       if ( !commonProperties.empty( ) )
       {
-        commonProperties = sp1common::Vectors::intersect( commonProperties,
+        commonProperties = vishnucommon::Vectors::intersect( commonProperties,
           dataSetHeaders );
       }
       else
@@ -1364,10 +1378,10 @@ namespace vishnu
     {
       QString filePath = url.toLocalFile();
 
-      std::string extension = sp1common::Strings::lower(
+      std::string extension = vishnucommon::Strings::lower(
         QFileInfo( filePath ).completeSuffix( ).toStdString( ) );
 
-      if ( sp1common::Vectors::find( { STR_EXT_CSV, STR_EXT_JSON, STR_EXT_SEG },
+      if ( vishnucommon::Vectors::find( { STR_EXT_CSV, STR_EXT_JSON, STR_EXT_SEG },
         extension ) != -1 )
       {
         files.emplace_back( filePath.toStdString( ) );
@@ -1375,7 +1389,7 @@ namespace vishnu
     }
     if ( !files.empty( ) )
     {
-      sp1common::Debug::consoleMessage( "Dropped files" );
+      vishnucommon::Debug::consoleMessage( "Dropped files" );
       emit signalAddFiles( files );
     }
   }

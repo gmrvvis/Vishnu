@@ -1,10 +1,24 @@
-/**
- * Copyright (c) 2017-2018 GMRV/URJC.
+/*
+ * Copyright (c) 2017-2019 GMRV/URJC.
  *
  * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
  *
  * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
-*/
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
 
 #include "Application.h"
 
@@ -15,9 +29,9 @@ namespace vishnu
 
   }
 
-  Application::Application( const sp1common::ApplicationType& applicationType,
+  Application::Application( const vishnucommon::ApplicationType& applicationType,
     const std::string& displayName, const std::string& shellCommand,
-    const sp1common::Args& args, const std::string& workingDirectory,
+    const vishnucommon::Args& args, const std::string& workingDirectory,
     const std::string& iconPath )
       : _applicationType( applicationType )
       , _displayName( displayName )
@@ -34,12 +48,12 @@ namespace vishnu
 
   }
 
-  sp1common::ApplicationType Application::getApplicationType( void ) const
+  vishnucommon::ApplicationType Application::getApplicationType( void ) const
   {
     return _applicationType;
   }
 
-  void Application::setApplicationType( const sp1common::ApplicationType& applicationType )
+  void Application::setApplicationType( const vishnucommon::ApplicationType& applicationType )
   {
     _applicationType = applicationType;
   }
@@ -64,12 +78,12 @@ namespace vishnu
     _shellCommand = shellCommand;
   }
 
-  sp1common::Args Application::getArgs( void ) const
+  vishnucommon::Args Application::getArgs( void ) const
   {
     return _args;
   }
 
-  void Application::setArgs( const sp1common::Args& args )
+  void Application::setArgs( const vishnucommon::Args& args )
   {
     _args = args;
   }
@@ -96,7 +110,7 @@ namespace vishnu
 
   void Application::deserialize( const QJsonObject &jsonObject )
   {
-    _applicationType = sp1common::toApplicationType(
+    _applicationType = vishnucommon::toApplicationType(
       jsonObject[ "applicationType" ].toString( ).toStdString( ) );
     _displayName = jsonObject[ "displayName" ].toString( ).toStdString( );
     _shellCommand = jsonObject[ "shellCommand" ].toString( ).toStdString( );

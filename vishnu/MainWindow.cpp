@@ -1,10 +1,24 @@
-/**
- * Copyright (c) 2017-2018 GMRV/URJC.
+/*
+ * Copyright (c) 2017-2019 GMRV/URJC.
  *
  * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
  *
  * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
-*/
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
 
 #include "MainWindow.h"
 
@@ -39,7 +53,7 @@
 
 namespace vishnu
 {
-  MainWindow::MainWindow( sp1common::Args args,
+  MainWindow::MainWindow( vishnucommon::Args args,
     QWidget *parent )
     : QMainWindow( parent )
   {
@@ -57,7 +71,7 @@ namespace vishnu
     std::string userPreferencesFile = userDataFolder + FILE_USER_PREFERENCES;
 
     _userPreferences =
-      sp1common::JSON::deserialize< UserPreferences >( userPreferencesFile );
+      vishnucommon::JSON::deserialize< UserPreferences >( userPreferencesFile );
 
     if ( args.has( "-wd" ) )
     {
@@ -255,10 +269,10 @@ namespace vishnu
       qApp->applicationDirPath( ).toStdString( ) + std::string( "/" )
       + USER_DATA_FOLDER + std::string( "/" ) + FILE_DATASETS;
 
-    if ( sp1common::Files::exist( userDataSetsFilename ) )
+    if ( vishnucommon::Files::exist( userDataSetsFilename ) )
     {
       UserDataSetsPtr userDataSets =
-        sp1common::JSON::deserialize< UserDataSets >( userDataSetsFilename );
+        vishnucommon::JSON::deserialize< UserDataSets >( userDataSetsFilename );
 
       _userDataSetListWidget->clearDataSets( );
 
@@ -399,17 +413,17 @@ namespace vishnu
     QProcess* qProcess = qobject_cast< QProcess* >( sender( ) );
     if ( exitStatus == QProcess::CrashExit )
     {
-      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+      vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
         qProcess->program( ).toStdString( ) + " crashed!", false );
     }
     else if ( exitCode != 0 )
     {
-      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+      vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
         qProcess->program( ).toStdString( ) + " failed!", false );
     }
     else
     {
-      sp1common::Debug::consoleMessage( qProcess->program( ).toStdString( )
+      vishnucommon::Debug::consoleMessage( qProcess->program( ).toStdString( )
         + " closed successfully." );
     }
 
@@ -445,19 +459,19 @@ namespace vishnu
     QDir qDir( qUserDataFolder );
     if ( !qDir.exists( ) )
     {
-      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+      vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
         "User Data folder doesn't exist.", true );
     }
 
     std::string appsConfigFile = userDataFolder + FILE_APPS_CONFIG;
-    if ( !sp1common::Files::exist( appsConfigFile ) )
+    if ( !vishnucommon::Files::exist( appsConfigFile ) )
     {
-      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+      vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
         "Apps Config file doesn't exist.", true );
     }
 
     AppsConfigPtr appsConfig
-      = sp1common::JSON::deserialize< AppsConfig >( appsConfigFile );
+      = vishnucommon::JSON::deserialize< AppsConfig >( appsConfigFile );
 
     //Not const in order to add (or overwrite) other arguments
     for ( auto& application : appsConfig->getApplications( ) )
@@ -465,7 +479,7 @@ namespace vishnu
       application->getArgs( ).set( "-z",
         _userPreferences->getUserPreference( "zeqSession" ) );
 
-      std::string instanceId = sp1common::Strings::generateRandom( 5 );
+      std::string instanceId = vishnucommon::Strings::generateRandom( 5 );
       application->getArgs( ).set( "-id", instanceId );
 
       application->setWorkingDirectory(
@@ -476,7 +490,7 @@ namespace vishnu
         application->getShellCommand( ), application->getArgs( ),
         application->getWorkingDirectory( ), application->getIconPath( ) ) );
 
-      std::string owner = sp1common::toString(
+      std::string owner = vishnucommon::toString(
         application->getApplicationType( ) ) + instanceId;
 
       _applications[ owner ] = appProcess;
@@ -490,7 +504,7 @@ namespace vishnu
     QPushButton* appButton = qobject_cast< QPushButton* >( sender( ) );
     if ( !appButton )
     {
-      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+      vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
        "Application not found!", true );
       return;
     }
@@ -499,7 +513,7 @@ namespace vishnu
     {
       if ( it.second->getPushButton( ) == appButton )
       {
-        sp1common::Debug::consoleMessage( "Opening "
+        vishnucommon::Debug::consoleMessage( "Opening "
           + it.second->getDisplayName( ) );
 
         it.second->getPushButton( )->setEnabled( false );
@@ -542,19 +556,19 @@ namespace vishnu
           {
               switch( it.second->getApplicationType( ) )
               {
-                case sp1common::ApplicationType::CLINT:
+                case vishnucommon::ApplicationType::CLINT:
                   arguments << QString::fromStdString( "-f" );
                   arguments << QString::fromStdString(
                   dataSet.second->getPath( ) + "/"
                     + dataSet.second->getCsvFilename( ) );
                   break;
-                case sp1common::ApplicationType::DCEXPLORER:
+                case vishnucommon::ApplicationType::DCEXPLORER:
                   arguments << QString::fromStdString( "-f" );
                   arguments << QString::fromStdString(
                   dataSet.second->getPath( ) + "/"
                     + dataSet.second->getCsvFilename( ) );
                   break;
-                case sp1common::ApplicationType::PYRAMIDAL:
+                case vishnucommon::ApplicationType::PYRAMIDAL:
                   arguments << QString::fromStdString( "-f" );
                   arguments << QString::fromStdString(
                   dataSet.second->getPath( ) + "/"
@@ -566,13 +580,13 @@ namespace vishnu
         }
 
         std::string application = it.second->getShellCommand( );
-        if ( !sp1common::Files::exist( application ) )
+        if ( !vishnucommon::Files::exist( application ) )
         {
           QMessageBox::information( this, QString( APPLICATION_NAME ),
             QString( "Can't find " ) + QString::fromStdString( application )
             + QString( " application." ), QMessageBox::Ok );
 
-          sp1common::Error::throwError( sp1common::Error::ErrorType::Warning,
+          vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Warning,
             "Can't find " + application + " application.", false );
 
           it.second->getPushButton( )->setEnabled( true );
@@ -613,7 +627,7 @@ namespace vishnu
       std::placeholders::_1 ) );
   }
 
-  void MainWindow::receivedSyncGroup( zeroeq::gmrv::ConstSyncGroupPtr o )
+  void MainWindow::receivedSyncGroup( vishnulex::ConstSyncGroupPtr o )
   {
     std::vector<unsigned int> color = o->getColorVector( );
     std::vector< std::string > vectorIds = manco::ZeqManager::split(
@@ -629,7 +643,7 @@ namespace vishnu
       << color[1] << ", "
       << color[2] << ")"
       << "\n\tids: (... commented ...)";
-    sp1common::Debug::consoleMessage( message.str( ) );
+    vishnucommon::Debug::consoleMessage( message.str( ) );
 
     emit signalSyncGroup(
       QString::fromStdString( o->getKeyString( ) ),
@@ -642,14 +656,14 @@ namespace vishnu
   }
 
   void MainWindow::receivedChangeNameGroup(
-    zeroeq::gmrv::ConstChangeNameGroupPtr o )
+    vishnulex::ConstChangeNameGroupPtr o )
   {
     emit signalChangeGroupName( QString::fromStdString( o->getKeyString( ) ),
       QString::fromStdString( o->getNameString( ) ) );
   }
 
   void MainWindow::receivedChangeColorGroup(
-    zeroeq::gmrv::ConstChangeColorGroupPtr o )
+    vishnulex::ConstChangeColorGroupPtr o )
   {
     std::vector<unsigned int> color = o->getColorVector( );
     emit signalChangeGroupColor( QString::fromStdString( o->getKeyString( ) ),
@@ -657,7 +671,7 @@ namespace vishnu
         static_cast<int>(color[2]) ) );
   }
 
-  void MainWindow::receivedDestroyGroup( zeroeq::gmrv::ConstDestroyGroupPtr o )
+  void MainWindow::receivedDestroyGroup( vishnulex::ConstDestroyGroupPtr o )
   {
     emit signalDestroyGroup( QString::fromStdString( o->getKeyString( ) ) );
   }
@@ -708,10 +722,10 @@ namespace vishnu
         + std::string( "/" ) + USER_DATA_FOLDER + std::string( "/" );
     std::string userDataSetsFilename = userDataFolder + FILE_DATASETS;
     UserDataSetsPtr userDataSets( new UserDataSets( ) );
-    if ( sp1common::Files::exist( userDataSetsFilename ) )
+    if ( vishnucommon::Files::exist( userDataSetsFilename ) )
     {
       userDataSets =
-        sp1common::JSON::deserialize< UserDataSets >( userDataSetsFilename);
+        vishnucommon::JSON::deserialize< UserDataSets >( userDataSetsFilename);
     }
     return userDataSets;
   }
@@ -726,15 +740,15 @@ namespace vishnu
     {
       if ( !qUserDataFolder.mkpath( QString::fromStdString( userDataFolder ) ) )
       {
-        sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+        vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
           "Can't create " + userDataFolder + " folder.", false );
         return;
       }
     }
 
-    if ( !sp1common::JSON::serialize( userDataSetsFilename, userDataSets ) )
+    if ( !vishnucommon::JSON::serialize( userDataSetsFilename, userDataSets ) )
     {
-      sp1common::Error::throwError( sp1common::Error::ErrorType::Error,
+      vishnucommon::Error::throwError( vishnucommon::Error::ErrorType::Error,
         "Can't create user datasets file.", false );
       return;
     }

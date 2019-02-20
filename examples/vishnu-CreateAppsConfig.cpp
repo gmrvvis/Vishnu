@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2017-2019 GMRV/URJC.
+ *
+ * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
+ *
+ * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
+
 #include <QApplication>
 #include <QCoreApplication>
 #include <QIcon>
@@ -5,7 +27,7 @@
 
 #include <string>
 
-#include <sp1common/sp1common.h>
+#include <vishnucommon/vishnucommon.h>
 
 #include "../vishnu/Definitions.hpp"
 #include "../vishnu/model/AppsConfig.h"
@@ -30,7 +52,7 @@ int main( int argc, char* argv[] )
 
   AppsConfigPtr appsConfig( new AppsConfig( ) );
 
-  sp1common::Args clintArgs;
+  vishnucommon::Args clintArgs;
   clintArgs.set( "-z", "hbp://" );
   clintArgs.set( "-sp", 31400 );
   clintArgs.set( "-ce" );
@@ -38,12 +60,12 @@ int main( int argc, char* argv[] )
   clintArgs.set( "-cp", 8765 );
 
   ApplicationPtr clintApp( new Application(
-    sp1common::ApplicationType::CLINT, "Clint", "ClintExplorer", clintArgs,
+    vishnucommon::ApplicationType::CLINT, "Clint", "ClintExplorer", clintArgs,
     "", ":/icons/logoClint.png" ) );
 
   appsConfig->addApplication( clintApp );
 
-  sp1common::Args dcExplorerArgs;
+  vishnucommon::Args dcExplorerArgs;
   dcExplorerArgs.set( "-z", "hbp://" );
   dcExplorerArgs.set( "-p", 12345 );
   dcExplorerArgs.set( "-u", "http://localhost:8888" );
@@ -51,22 +73,22 @@ int main( int argc, char* argv[] )
   dcExplorerArgs.set( "-dcn", "apicolat" );
 
   ApplicationPtr dcExplorerApp( new Application(
-    sp1common::ApplicationType::DCEXPLORER, "DCExplorer", "WeCo",
+    vishnucommon::ApplicationType::DCEXPLORER, "DCExplorer", "WeCo",
     dcExplorerArgs, "", ":/icons/logoDCExplorer.png" ) );
 
   appsConfig->addApplication( dcExplorerApp );
 
-  sp1common::Args pyramidalArgs;
+  vishnucommon::Args pyramidalArgs;
   pyramidalArgs.set( "-z", "hbp://" );
 
   ApplicationPtr pyramidalApp( new Application(
-    sp1common::ApplicationType::PYRAMIDAL, "Pyramidal", "CellExplorer",
+    vishnucommon::ApplicationType::PYRAMIDAL, "Pyramidal", "CellExplorer",
     pyramidalArgs, "", ":/icons/logoPyramidal.png" ) );
 
   appsConfig->addApplication( pyramidalApp );
 
   //Create Apps Config file
-  if ( sp1common::JSON::serialize( appsConfigFile, appsConfig ) )
+  if ( vishnucommon::JSON::serialize( appsConfigFile, appsConfig ) )
   {
     std::cout << "Apps Config file created sucessfully." << std::endl;
   }
@@ -77,7 +99,7 @@ int main( int argc, char* argv[] )
 
   //Read Apps Config file
   AppsConfigPtr readedAppsConfigFile
-    = sp1common::JSON::deserialize< AppsConfig >( appsConfigFile );
+    = vishnucommon::JSON::deserialize< AppsConfig >( appsConfigFile );
 
   return 0;
 }

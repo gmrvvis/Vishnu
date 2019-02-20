@@ -1,10 +1,24 @@
-/**
- * Copyright (c) 2017-2018 GMRV/URJC.
+/*
+ * Copyright (c) 2017-2019 GMRV/URJC.
  *
  * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
  *
  * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
-*/
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
 
 #include "ZEQGroupListWidget.h"
 
@@ -66,7 +80,7 @@ namespace vishnu
       zeqGroup->setOwner( owner );
       zeqGroup->setIds( ids );
       zeqGroup->setColor( color );
-      sp1common::Debug::consoleMessage("Group: '" + key +
+      vishnucommon::Debug::consoleMessage("Group: '" + key +
         "' updated successfully.");
     }
     else
@@ -80,7 +94,7 @@ namespace vishnu
       listWidgetItem->setSizeHint( zeqGroup->sizeHint ( ) );
       setItemWidget( listWidgetItem, zeqGroup );
 
-      sp1common::Debug::consoleMessage("Group: '" + key +
+      vishnucommon::Debug::consoleMessage("Group: '" + key +
         "' created successfully.");
     }
 
@@ -135,7 +149,7 @@ namespace vishnu
       std::string oldName = zeqGroup->getName( ).toStdString( );
       zeqGroup->setName( name );
 
-      sp1common::Debug::consoleMessage( "Group: '" + key
+      vishnucommon::Debug::consoleMessage( "Group: '" + key
         + "' - Group name changed sucessfully ('" + oldName + "' -> '"
         + name.toStdString( ) + "')." );
     }
@@ -152,7 +166,7 @@ namespace vishnu
       QColor oldColor = zeqGroup->getColor( );
       zeqGroup->setColor( color );
 
-      sp1common::Debug::consoleMessage( "Group: '" + key
+      vishnucommon::Debug::consoleMessage( "Group: '" + key
         + "' - Group color changed sucessfully ('"
         + oldColor.name( ).toStdString( ) + "' -> '"
         + color.name( ).toStdString( ) + "')." );
@@ -168,7 +182,7 @@ namespace vishnu
 
     takeItem( row( listWidgetItem ) );
 
-    sp1common::Debug::consoleMessage("Group: '" + key
+    vishnucommon::Debug::consoleMessage("Group: '" + key
       + "' removed successfully.");
   }
 
@@ -183,7 +197,7 @@ namespace vishnu
       {
         takeItem( row );
 
-        sp1common::Debug::consoleMessage("Group: '" + key
+        vishnucommon::Debug::consoleMessage("Group: '" + key
           + "' removed successfully.");
       }
     }

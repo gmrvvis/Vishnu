@@ -1,10 +1,24 @@
-/**
- * Copyright (c) 2017-2018 GMRV/URJC.
+/*
+ * Copyright (c) 2017-2019 GMRV/URJC.
  *
  * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
  *
  * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
-*/
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
 
 #ifndef VISHNU_DATASETLISTWIDGET_H
 #define VISHNU_DATASETLISTWIDGET_H
@@ -22,8 +36,8 @@
 #include <QComboBox>
 #include <QListWidget>
 
-// sp1common.
-#include <sp1common/sp1common.h>
+// vishnucommon.
+#include <vishnucommon/vishnucommon.h>
 
 #ifdef USE_ESPINA
 
@@ -96,12 +110,12 @@ namespace vishnu
 
       std::vector< std::string > getCommonProperties( void );
 
-      sp1common::DataSetsPtr getDataSets( void ) const;
+      vishnucommon::DataSetsPtr getDataSets( void ) const;
 
-      sp1common::PropertyGroupsPtr getPropertyGroups( void ) const;
+      vishnucommon::PropertyGroupsPtr getPropertyGroups( void ) const;
 
       void setPropertyGroups(
-        const sp1common::PropertyGroupsPtr& propertyGroups );
+        const vishnucommon::PropertyGroupsPtr& propertyGroups );
 
     protected:
 
@@ -157,7 +171,7 @@ namespace vishnu
       QJsonObject createAttributeObjectDEN( QString actualAttributeName );
 
       // Segmentations JSON schema -> SP1 Properties.
-      sp1common::Properties segsJsonSchemaToSP1Properties( QString jsonSchema );
+      vishnucommon::Properties segsJsonSchemaToSP1Properties( QString jsonSchema );
 
       /** END EspINA methods. **/
 #endif
@@ -166,9 +180,9 @@ namespace vishnu
 
       void createDataSetFromCSV( DataSetWidgets& dataSetWidgets,
         const std::string& path,
-        const sp1common::Properties& properties = sp1common::Properties( ) );
+        const vishnucommon::Properties& properties = vishnucommon::Properties( ) );
 
-      sp1common::PropertyGroupsPtr _propertyGroups;
+      vishnucommon::PropertyGroupsPtr _propertyGroups;
 
   };
 

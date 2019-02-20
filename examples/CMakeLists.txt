@@ -1,7 +1,7 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
 #   Vishnu
-#   2017-2018 (c) GMRV/URJC
+#   2017-2019 (c) GMRV/URJC
 #   Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
 #   http://gmrv.es/gmrvvis/
 #
@@ -27,7 +27,7 @@ set( VISHNU-CREATEAPPSCONFIG_HEADERS
 set( VISHNU-CREATEAPPSCONFIG_LINK_LIBRARIES
   Qt5::Core
   Qt5::Widgets
-  sp1common
+  vishnucommon
 )
 
 common_application( vishnu-CreateAppsConfig )
@@ -44,7 +44,7 @@ set( VISHNU-CREATEUSERPREFERENCES_HEADERS
 set( VISHNU-CREATEUSERPREFERENCES_LINK_LIBRARIES
   Qt5::Core
   Qt5::Widgets
-  sp1common
+  vishnucommon
 )
 
 common_application( vishnu-CreateUserPreferences )

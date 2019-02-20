@@ -75,7 +75,7 @@ set( VISHNU_LINK_LIBRARIES
   Qt5::Network
   Qt5::Widgets
   manco
-  sp1common
+  vishnucommon
 )
 
 #include_directories( ${CMAKE_SOURCE_DIR} )

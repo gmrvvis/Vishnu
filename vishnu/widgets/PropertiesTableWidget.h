@@ -1,10 +1,24 @@
-/**
- * Copyright (c) 2017-2018 GMRV/URJC.
+/*
+ * Copyright (c) 2017-2019 GMRV/URJC.
  *
  * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
  *
  * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
-*/
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
 
 #ifndef VISHNU_PROPERTIESTABLEWIDGET_H
 #define VISHNU_PROPERTIESTABLEWIDGET_H
@@ -21,7 +35,7 @@
 #include <QComboBox>
 #include <QTableWidget>
 
-#include <sp1common/sp1common.h>
+#include <vishnucommon/vishnucommon.h>
 #include "PropertiesWidget.h"
 
 namespace vishnu
@@ -41,12 +55,12 @@ namespace vishnu
 
     void checkPrimaryKeys( const std::vector< std::string >& commonProperties );
 
-    void addProperties( const sp1common::Properties& properties,
-      const sp1common::PropertyGroupsPtr& propertyGroups );
+    void addProperties( const vishnucommon::Properties& properties,
+      const vishnucommon::PropertyGroupsPtr& propertyGroups );
 
     void removeProperties( const std::vector< std::string >& properties );
 
-    sp1common::DataSetsPtr getDataSets( void );
+    vishnucommon::DataSetsPtr getDataSets( void );
 
   protected:
 
@@ -69,14 +83,14 @@ namespace vishnu
       bool _checkingProperty;
 
       void refillAxisTypeComboBox( QComboBox* combo,
-        const sp1common::AxisType& axisType,
-        const std::vector< sp1common::AxisType >& toExclude );
+        const vishnucommon::AxisType& axisType,
+        const std::vector< vishnucommon::AxisType >& toExclude );
 
       void changeToNoneOrXOrYOrZ(
-        const std::vector< sp1common::AxisType >& selectedAxis );
+        const std::vector< vishnucommon::AxisType >& selectedAxis );
 
       void changeToXYZ(
-        const std::vector< sp1common::AxisType >& selectedAxis );
+        const std::vector< vishnucommon::AxisType >& selectedAxis );
 
       PropertiesWidget* getRow( const int& index );
 
