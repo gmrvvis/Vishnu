@@ -22,8 +22,8 @@ namespace vishnu
 {
 
   class Application;
-  typedef std::shared_ptr< Application > ApplicationPtr;
-  typedef std::vector< ApplicationPtr > Applications;
+  using ApplicationPtr = std::shared_ptr< Application >;
+  using Applications = std::vector< ApplicationPtr >;
 
   class Application
   {

@@ -58,12 +58,14 @@ namespace vishnu
                                                                              { "Equivalent Ellipsoid Diameter Y",                "" },
                                                                              { "Equivalent Ellipsoid Diameter Z",                "" },
                                                                              { "Surface Area",                                   "MPHSurfaceArea" },
-                                                                             { "dummy1",                                         "MPHVolumePath"} ,
-                                                                             { "dummy2",                                         "MPHMeshPath"}, };
+                                                                             { "dummy1",                                         "MPHVolumePath"},
+                                                                             { "dummy2",                                         "MPHMeshPath"},
+                                                                             { "dummy3",                                         "MPHMeshName"} };
   std::map<const QString, const QString> AppositionSurfaceTranslations   = { { "Area",                                           "SASArea" },
                                                                              { "Perimeter",                                      "SASPerimeter" },
                                                                              { "Area Ratio",                                     "SASAreaRatio" },
                                                                              { "Synapse",                                        "SASSynapse" },
+                                                                             { "Shape",                                          "SASShape" },
                                                                              { "Mean Gauss Curvature",                           "SASMean_GaussCurvature" },
                                                                              { "Std Deviation Gauss Curvature",                  "SASStdDev_GaussCurvature" },
                                                                              { "Mean Mean Curvature",                            "SASMean_MeanCurvature" },
@@ -146,7 +148,7 @@ namespace vishnu
         auto iKey_ = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey_))
         {
-          result_ += segmentation->information(iKey_).toString();
+          result_ += segmentation->information(iKey_).toString().simplified();
 
           if(key != keys_.last()) result_ += concatenator;
         }
@@ -203,7 +205,7 @@ namespace vishnu
           else
           {
             auto iKeyAux = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
-            result += segmentation->information(iKeyAux).toString();
+            result += segmentation->information(iKeyAux).toString().simplified();
           }
         }
 
@@ -221,8 +223,28 @@ namespace vishnu
       }
 
       // add non standard keys MPHVolumePath & MPHMeshPath
-      auto segName = segmentation->name().replace(' ','_');
-      result += QString("/geometricData/%1-volume.json").arg(segName) + separator + QString("/geometricData/%1-mesh.obj").arg(segName);
+      QString segmentationName = segmentation->name().simplified();
+      QString segmentationAlias = segmentation->alias().simplified();
+      if( segmentationName.isEmpty() && segmentationAlias.isEmpty() )
+      {
+        // Highly unlikely.
+        segmentationName = QString( "UnknownName" );
+        segmentationAlias = QString( "UnknownAlias" );
+      }
+      else if( segmentationName.isEmpty() && !segmentationAlias.isEmpty() )
+      {
+        segmentationName = segmentationAlias;
+      }
+      else if( !segmentationName.isEmpty() && segmentationAlias.isEmpty() )
+      {
+        segmentationAlias = segmentationName;
+      }
+
+      auto segNameUScore = segmentationName.replace(' ','_');
+      auto segAliasUScore = segmentationAlias.replace(' ','_');
+      result += QString("/geometricData/%1-%2-volume.json").arg( segNameUScore ).arg( segAliasUScore ) + separator +
+                QString("/geometricData/%1-%2-mesh.obj").arg( segNameUScore ).arg( segAliasUScore ) + separator +
+                QString("%1-%2-mesh").arg( segNameUScore ).arg( segAliasUScore );
 
       return result;
     }
@@ -233,9 +255,18 @@ namespace vishnu
       for(auto key: keys)
       {
         auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
+
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
         {
-          result += segmentation->information(iKey).toString();
+          auto keyInformation = segmentation->information(iKey);
+          if( keyInformation.isValid( ) )
+          {
+            result += keyInformation.toString().simplified();
+          }
+          else
+          {
+            std::cout << "The key " << iKey.value().toStdString() << " has no value." << std::endl;
+          }
         }
 
         // Feedback.
@@ -243,7 +274,7 @@ namespace vishnu
         else
         {
           std::cout << "Segmentation (" << segmentation->name().toStdString()
-                    << ") has NOT (Others) this information: "
+                    << ") has NOT (EdgeDistancesType) this information: "
                     << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
         }
         **/
@@ -262,7 +293,7 @@ namespace vishnu
         auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
         {
-          result += segmentation->information(iKey).toString();
+          result += segmentation->information(iKey).toString().simplified();
         }
 
         // Feedback.
@@ -270,7 +301,7 @@ namespace vishnu
         else
         {
           std::cout << "Segmentation (" << segmentation->name().toStdString()
-                    << ") has NOT (Others) this information: "
+                    << ") has NOT (SegmentationNotesType) this information: "
                     << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
         }
         **/
@@ -289,7 +320,7 @@ namespace vishnu
         auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
         {
-          result += segmentation->information(iKey).toString();
+          result += segmentation->information(iKey).toString().simplified();
         }
 
         // Feedback.
@@ -297,7 +328,7 @@ namespace vishnu
         else
         {
           std::cout << "Segmentation (" << segmentation->name().toStdString()
-                    << ") has NOT (Others) this information: "
+                    << ") has NOT (SegmentationTagsType) this information: "
                     << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
         }
         **/
@@ -316,7 +347,7 @@ namespace vishnu
         auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
         {
-          result += segmentation->information(iKey).toString();
+          result += segmentation->information(iKey).toString().simplified();
         }
 
         // Feedback.
@@ -324,7 +355,7 @@ namespace vishnu
         else
         {
           std::cout << "Segmentation (" << segmentation->name().toStdString()
-                    << ") has NOT (Others) this information: "
+                    << ") has NOT (AppositionSurfaceType) this information: "
                     << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
         }
         **/
@@ -382,7 +413,7 @@ namespace vishnu
         auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
         {
-          result += segmentation->information(iKey).toString();
+          result += segmentation->information(iKey).toString().simplified();
         }
 
         // Feedback.
@@ -390,7 +421,7 @@ namespace vishnu
         else
         {
           std::cout << "Segmentation (" << segmentation->name().toStdString()
-                    << ") has NOT (Others) this information: "
+                    << ") has NOT (SynapseConnectionType) this information: "
                     << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
         }
         **/
@@ -409,7 +440,7 @@ namespace vishnu
         auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
         {
-          result += segmentation->information(iKey).toString();
+          result += segmentation->information(iKey).toString().simplified();
         }
 
         // Feedback.
@@ -417,7 +448,7 @@ namespace vishnu
         else
         {
           std::cout << "Segmentation (" << segmentation->name().toStdString()
-                    << ") has NOT (Others) this information: "
+                    << ") has NOT (AxonInformationType) this information: "
                     << type.toStdString() << " > " << key.toStdString( ) << "." << std::endl;
         }
         **/
@@ -437,7 +468,7 @@ namespace vishnu
         auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
         if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
         {
-          result += segmentation->information(iKey).toString();
+          result += segmentation->information(iKey).toString().simplified();
           anyInformation = true;
         }
 
@@ -466,12 +497,16 @@ namespace vishnu
         // Temporary solution.
         if( extension == nullptr )
         {
+          std::cout << "DendriteSkeletonInformation NOT available." << std::endl;
+
           result += separator + separator + separator + separator + separator +
             separator + separator + separator + separator + separator +
             separator + separator + separator;
         }
         else
         {
+          std::cout << "DendriteSkeletonInformation available." << std::endl;
+
           auto table = extension->spinesInformation();
 
           QStringList nameList, completeList, branchedList, lengthList, numSynapsesList, numAsymmetricList, numAsymmetricHeadList,
@@ -480,7 +515,7 @@ namespace vishnu
 
           for(auto data: table)
           {
-            nameList               << data.name;
+            nameList               << data.name.simplified();
             completeList           << (data.complete ? "true" : "false");
             branchedList           << (data.branched ? "yes" : "no");
             lengthList             << QString::number(data.length);
@@ -529,7 +564,7 @@ namespace vishnu
       auto iKey = ESPINA::Core::SegmentationExtension::InformationKey{type, key};
       if(segmentation->readOnlyExtensions()->availableInformation().contains(iKey))
       {
-        result += segmentation->information(iKey).toString();
+        result += segmentation->information(iKey).toString().simplified();
       }
 
       // Feedback.
@@ -574,7 +609,9 @@ namespace vishnu
         result += value + separator;
       }
 
-      result += MorphologicalTranslations.at("dummy1") + separator + MorphologicalTranslations.at("dummy2");
+      result += MorphologicalTranslations.at("dummy1") + separator +
+                MorphologicalTranslations.at("dummy2") + separator +
+                MorphologicalTranslations.at("dummy3");
 
       return result;
     }

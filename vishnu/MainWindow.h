@@ -36,10 +36,10 @@
 
 namespace vishnu
 {
-  typedef std::shared_ptr< AppProcess > AppProcessPtr;
-  typedef std::map< std::string, AppProcessPtr > AppProcessMap;
-  typedef std::shared_ptr< UserDataSetListWidget > UserDataSetListWidgetPtr;
-  typedef std::shared_ptr< ZEQGroupListWidget > ZEQGroupListWidgetPtr;
+  using AppProcessPtr = std::shared_ptr< AppProcess >;
+  using AppProcessMap = std::map< std::string, AppProcessPtr >;
+  using UserDataSetListWidgetPtr = std::shared_ptr< UserDataSetListWidget >;
+  using ZEQGroupListWidgetPtr = std::shared_ptr< ZEQGroupListWidget >;
 
   class MainWindow : public QMainWindow
   {
@@ -100,9 +100,13 @@ namespace vishnu
       void loadApps( void );
       void setBlurred( const bool& state );
 
+      void addUserDataSet( const UserDataSetPtr& userDataSet );
+      void removeUserDataSet( const UserDataSetPtr& userDataSet );
+      UserDataSetsPtr readUserDataSets( void );
+      void writeUserDataSets( const UserDataSetsPtr& userDataSets );
+
   };
 
 }
 
 #endif
-

@@ -86,8 +86,12 @@ include_directories( ${EspinaCore_INCLUDE_DIRS} )
 if( ${USE_ESPINA} )
 
   #Append EspINA headers, sources and link libraries
-  list( APPEND VISHNU_HEADERS espinaExtensions/ExtensionInformationDump.h )
-  list( APPEND VISHNU_SOURCES espinaExtensions/ExtensionInformationDump.cpp )
+  list( APPEND VISHNU_HEADERS 
+  	espinaExtensions/ExtensionInformationDump.h 
+  )
+  list( APPEND VISHNU_SOURCES 
+  	espinaExtensions/ExtensionInformationDump.cpp 
+  )
   list( APPEND VISHNU_LINK_LIBRARIES
     Qt5::Test
     ${QUAZIP_LIBRARIES}

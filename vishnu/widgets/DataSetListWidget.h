@@ -26,12 +26,20 @@
 #include <sp1common/sp1common.h>
 
 #ifdef USE_ESPINA
+
+// VTK
+#include <vtkCellArray.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
+#include <vtkSmartPointer.h>
+
 // EspINA.
 #include <EspinaCore/Analysis/Analysis.h>
 #include <EspinaCore/Analysis/Extensions.h>
 #include <EspinaCore/Analysis/ItemExtension.hxx>
 #include <EspinaCore/Analysis/Segmentation.h>
 #include <EspinaCore/Analysis/Channel.h>
+#include <EspinaCore/Analysis/Data/MeshData.h>
 #include <EspinaCore/Analysis/Data/VolumetricData.hxx>
 #include <EspinaCore/Analysis/Filters/VolumetricStreamReader.h>
 #include <EspinaCore/Analysis/Sample.h>
@@ -41,8 +49,13 @@
 #include <EspinaCore/Factory/FilterFactory.h>
 #include <EspinaCore/IO/DataFactory/RawDataFactory.h>
 #include <EspinaCore/IO/SegFile.h>
+#include <EspinaCore/IO/ErrorHandler.h>
+#include <EspinaCore/MultiTasking/Scheduler.h>
+#include <EspinaCore/Readers/ChannelReader.h>
 #include <EspinaCore/Utils/ListUtils.hxx>
+#include <EspinaCore/Plugin.h>
 #include <EspinaCore/Types.h>
+#include <EspinaExtensions/LibraryExtensionFactory.h>
 #endif
 
 // Qt.
@@ -63,7 +76,7 @@ namespace vishnu
 {
 
   class DataSetListWidget;
-  typedef std::shared_ptr< DataSetListWidget > DataSetListWidgetPtr;
+  using DataSetListWidgetPtr = std::shared_ptr< DataSetListWidget >;
 
   class DataSetListWidget : public QListWidget
   {
@@ -115,6 +128,12 @@ namespace vishnu
       // EspINA segmentations -> Segmentations CSV.
       QString getCSVFromSegmentations( ESPINA::AnalysisPtr analysis,
                                        ESPINA::SegmentationList segmentations );
+
+      // EspINA segmentations -> Meshes (OBJ).
+      void generateSegmentationMeshes( const std::string& segmentationMeshesRoot_, ESPINA::SegmentationList segmentations_ );
+
+      // vtkPolyData -> OBJ.
+      std::string vtkPolyDataToOBJ( vtkSmartPointer< vtkPolyData > polyData );
 
       // Based on ESPINA::GUI::availableInformation.
       QMap< QString, QStringList > segmentationsAvailableInformation( ESPINA::SegmentationList segmentations );

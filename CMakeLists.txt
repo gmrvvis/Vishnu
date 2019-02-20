@@ -95,6 +95,7 @@ if( ${USE_ESPINA} )
   if( UNIX )
     list( APPEND VISHNU_DEPENDENT_LIBRARIES Qt5::X11Extras )
 	add_definitions( -Wno-attributes )
+	add_definitions( -fpermissive )
   endif( UNIX )  
 endif( )
 
