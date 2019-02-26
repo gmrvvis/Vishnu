@@ -74,8 +74,8 @@ set( VISHNU_LINK_LIBRARIES
   Qt5::Gui
   Qt5::Network
   Qt5::Widgets
-  manco
-  vishnucommon
+  ManCo
+  VishnuCommon
 )
 
 #include_directories( ${CMAKE_SOURCE_DIR} )
@@ -120,4 +120,4 @@ if( MSVC )
   add_definitions( -DVISHNU_STATIC )
 endif( )
 
-common_application( vishnu )
+common_application( Vishnu )

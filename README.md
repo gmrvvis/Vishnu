@@ -1,9 +1,12 @@
-# Vishnu - Integrated Framework
-(c) 2017-2019 Gonzalo Bayo
+# Vishnu
+Copyright (c) 2017-2019 GMRV/URJC.
 
 ## Introduction
 
-Vishnu is an integrated framework for preprocessing multiple datasets an managing applications.
+[DC Explorer](http://cajalbbp.es/dcexplorer_web/ "DC Explorer"), [Pyramidal Explorer](http://gmrv.es/gmrvvis/pyramidalexplorer/ "Pyramidal Explorer") and [ClInt Explorer](http://gmrv.es/gmrvvis/clintexplorer/ "ClInt Explorer") are the core of an application suite 
+designed to help scientists to explore their data. Vishnu is a communication 
+framework that allows them to interchange information and cooperate in 
+real-time.
 
 ## Dependencies
 
@@ -20,9 +23,9 @@ The following steps are for build:
 ```bash
 $ git clone git@gitlab.gmrv.es:cbbsp1/vishnu.git
 $ mkdir vishnu/build && cd vishnu/build
-$ cmake ..
+$ cmake .. [-DCLONE_SUBPROJECTS=ON]
 ```
 
 ## License
 
-GNU LESSER GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007

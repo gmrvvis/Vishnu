@@ -14,7 +14,7 @@ include_directories(
 )
   
 set( VISHNU-CREATEAPPSCONFIG_SOURCES
-  vishnu-CreateAppsConfig.cpp
+  Vishnu-CreateAppsConfig.cpp
   ../vishnu/model/Application.cpp
   ../vishnu/model/AppsConfig.cpp
 )
@@ -27,13 +27,13 @@ set( VISHNU-CREATEAPPSCONFIG_HEADERS
 set( VISHNU-CREATEAPPSCONFIG_LINK_LIBRARIES
   Qt5::Core
   Qt5::Widgets
-  vishnucommon
+  VishnuCommon
 )
 
-common_application( vishnu-CreateAppsConfig )
+common_application( Vishnu-CreateAppsConfig )
 
 set( VISHNU-CREATEUSERPREFERENCES_SOURCES
-  vishnu-CreateUserPreferences.cpp
+  Vishnu-CreateUserPreferences.cpp
   ../vishnu/model/UserPreferences.cpp
 )
 
@@ -44,7 +44,7 @@ set( VISHNU-CREATEUSERPREFERENCES_HEADERS
 set( VISHNU-CREATEUSERPREFERENCES_LINK_LIBRARIES
   Qt5::Core
   Qt5::Widgets
-  vishnucommon
+  VishnuCommon
 )
 
-common_application( vishnu-CreateUserPreferences )
+common_application( Vishnu-CreateUserPreferences )

@@ -12,8 +12,8 @@ set( PROJECT_VERSION_MAJOR "0" )
 set( PROJECT_VERSION_MINOR "3" )
 set( PROJECT_VERSION_PATCH "1" )
 set( PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH} )
-project( vishnu VERSION ${PROJECT_VERSION} )
-set( vishnu_VERSION_ABI 5 )
+project( Vishnu VERSION ${PROJECT_VERSION} )
+set( Vishnu_VERSION_ABI 5 )
 
 set( USE_ESPINA OFF )
 
@@ -40,7 +40,7 @@ include( GitExternal )
 
 set( VISHNU_DESCRIPTION "Vishnu" )
 set( VISHNU_MAINTAINER "Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>")
-set( VISHNU_LICENSE "LGPLv3" )
+set( VISHNU_LICENSE "GPLv3" )
 set( COMMON_PROJECT_DOMAIN gmrv.es )
 
 include( Common )
@@ -48,8 +48,8 @@ common_find_package( Qt5Core SYSTEM REQUIRED )
 common_find_package( Qt5Gui SYSTEM REQUIRED )
 common_find_package( Qt5Widgets SYSTEM REQUIRED )
 common_find_package( Qt5Network SYSTEM REQUIRED )
-common_find_package( manco REQUIRED )
-common_find_package( vishnucommon REQUIRED )
+common_find_package( ManCo REQUIRED )
+common_find_package( VishnuCommon REQUIRED )
 common_find_package_post( )
 
 list( APPEND VISHNU_DEPENDENT_LIBRARIES 
@@ -57,8 +57,8 @@ list( APPEND VISHNU_DEPENDENT_LIBRARIES
   Qt5::Gui
   Qt5::Network 
   Qt5::Widgets
-  manco
-  vishnucommon
+  ManCo
+  VishnuCommon
 )
 
 if( ${USE_ESPINA} )
@@ -104,9 +104,8 @@ add_subdirectory( examples )
 
 if( MSVC )  
   if( CMAKE_VERSION VERSION_GREATER 3.6 )
-    set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT vishnu )
+    set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Vishnu )
   endif( )
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")  
 endif( )
 
 set( DOXYGEN_MAINPAGE_MD README.md )
