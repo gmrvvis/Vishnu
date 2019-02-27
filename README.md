@@ -21,8 +21,8 @@ Vishnu has been successfully built and tested on Ubuntu 18.04/Windows 10.
 The following steps are for build:
 
 ```bash
-$ git clone git@gitlab.gmrv.es:cbbsp1/vishnu.git
-$ mkdir vishnu/build && cd vishnu/build
+$ git clone https://github.com/gmrvvis/Vishnu.git
+$ mkdir Vishnu/build && cd Vishnu/build
 $ cmake .. [-DCLONE_SUBPROJECTS=ON]
 ```
 
