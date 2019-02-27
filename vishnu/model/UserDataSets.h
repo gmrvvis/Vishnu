@@ -4,8 +4,6 @@
  *
  * Authors: Gonzalo Bayo Martinez <gonzalo.bayo@urjc.es>
  *
- * This file is part of Vishnu <https://gitlab.gmrv.es/cbbsp1/vishnu>
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
